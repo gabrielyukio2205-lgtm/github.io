@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.D.E. - Portfólio Interativo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+
+        :root {
+            --background: #0d1117;
+            --surface: #161b22;
+            --primary: #58a6ff;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border: #30363d;
+        }
+
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        #chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            text-align: center;
+        }
+
+        #chat-header span {
+            color: var(--primary);
+        }
+
+        #chatbox {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sender {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .sender.user {
+             color: var(--primary);
+             align-self: flex-end;
+        }
+
+        .text {
+            background-color: var(--background);
+            padding: 0.75rem;
+            border-radius: 6px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .user .text {
+            background-color: #212c42;
+            align-self: flex-end;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        #userInput {
+            flex-grow: 1;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        #userInput:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-header">J.A.D.E. <span>//</span> Ativa</div>
+        <div id="chatbox">
+            <div class="message bot">
+                <div class="sender">J.A.D.E.</div>
+                <div class="text">Sistema online. Aguardando seu comando.</div>
+            </div>
+        </div>
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="Digite sua mensagem aqui..." autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('userInput');
+
+        // ==============================================================================
+        // 🚨 ATENÇÃO AQUI, GABRIEL. COLOQUE A URL DO SEU HF SPACE AQUI DENTRO. 🚨
+        // ==============================================================================
+        const JADE_API_URL = 'https://huggingface.co/spaces/Madras1/jade_port'; // <-- SUBSTITUA PELA SUA URL!
+
+        // Função para adicionar mensagem na tela
+        function appendMessage(sender, text) {
+            const senderClass = sender === 'Você' ? 'user' : 'bot';
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${senderClass}`;
+            messageDiv.innerHTML = `<div class="sender ${senderClass}">${sender}</div><div class="text">${text}</div>`;
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        // Função para enviar mensagem para a API
+        async function sendMessage(message) {
+            appendMessage('Você', message);
+            userInput.value = '';
+            
+            try {
+                const response = await fetch(JADE_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        // A API do Gradio espera os dados no formato de um array na chave 'data'.
+                        // Os parâmetros devem estar na mesma ordem da função no app.py:
+                        // [text_input, audio_file, image_file, chat_history]
+                        "data": [
+                            message,
+                            null, // Sem arquivo de áudio neste frontend
+                            null, // Sem arquivo de imagem neste frontend
+                            []    // Histórico de chat (pode ser enviado vazio ou gerenciado aqui)
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro de rede: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // A resposta do Gradio vem dentro de result.data.
+                // O primeiro elemento (índice 0) é o histórico do chat.
+                const history = result.data[0];
+                // A última mensagem no histórico é a resposta do bot.
+                const botMessage = history[history.length - 1][1];
+
+                appendMessage('J.A.D.E.', botMessage);
+
+            } catch (error) {
+                console.error('Erro ao chamar a API da J.A.D.E.:', error);
+                appendMessage('Erro do Sistema', 'Não foi possível conectar ao cérebro da J.A.D.E. O backend pode estar offline.');
+            }
+        }
+
+        // Event listener para a tecla "Enter"
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                const message = userInput.value.trim();
+                if (message) {
+                    sendMessage(message);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
