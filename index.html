@@ -1,125 +1,190 @@
-<script>
-const chatbox = document.getElementById('chatbox');
-const userInput = document.getElementById('userInput');
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>J.A.D.E. - Portfólio Interativo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+    :root{
+      --background:#0d1117;--surface:#161b22;--primary:#58a6ff;
+      --text-primary:#c9d1d9;--text-secondary:#8b949e;--border:#30363d;
+    }
+    body{font-family:'Fira Code',monospace;background:var(--background);color:var(--text-primary);margin:0;display:flex;justify-content:center;align-items:center;height:100vh}
+    #chat-container{width:90%;max-width:720px;height:80vh;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+    #chat-header{padding:1rem;border-bottom:1px solid var(--border);font-weight:700;text-align:center}
+    #chatbox{flex:1;padding:1rem;overflow-y:auto}
+    .message{margin-bottom:1rem;display:flex;flex-direction:column}
+    .sender{font-size:.78rem;color:var(--text-secondary);margin-bottom:.25rem}
+    .sender.user{color:var(--primary);align-self:flex-end}
+    .text{background:var(--background);padding:.75rem;border-radius:6px;max-width:80%;word-wrap:break-word}
+    .user .text{background:#212c42;align-self:flex-end}
+    #input-area{display:flex;padding:1rem;border-top:1px solid var(--border)}
+    #userInput{flex:1;background:var(--background);border:1px solid var(--border);border-radius:6px;padding:.75rem;color:var(--text-primary);font-family:inherit}
+    #sendBtn{margin-left:.5rem;padding:.6rem 1rem;border-radius:6px;border:none;background:var(--primary);color:#042033;cursor:pointer}
+    #sendBtn:disabled{opacity:.5;cursor:default}
+    .system { color: #f87171; } /* para erros */
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-header">J.A.D.E. <span>//</span> Ativa</div>
+    <div id="chatbox">
+      <div class="message bot">
+        <div class="sender">J.A.D.E.</div>
+        <div class="text">Sistema online. Aguardando seu comando.</div>
+      </div>
+    </div>
+    <div id="input-area">
+      <input id="userInput" placeholder="Digite sua mensagem aqui..." autocomplete="off" />
+      <button id="sendBtn">Enviar</button>
+    </div>
+  </div>
 
-// endpoint corrigido
-const JADE_API_URL = 'https://madras1-jade-port.hf.space/run/predict';
+  <script>
+    /********* CONFIG *********/
+    // Endpoint direto do Space (o correto é /run/predict)
+    const JADE_API_URL = 'https://madras1-jade-port.hf.space/run/predict';
+    // Se tu usar proxy (recomendado se der CORS), coloca o URL do proxy aqui e comente JADE_API_URL
+    // const PROXY_URL = 'https://seu-proxy.vercel.app/api/predict';
+    const PROXY_URL = null; // deixar null pra usar JADE_API_URL direto
 
-// ajuste aqui se souber que o fn_index é outro
-const FN_INDEX = 0;
+    // Ajusta se souber qual fn_index o seu Space usa (0 é o mais comum)
+    const FN_INDEX = 0;
 
-// adiciona mensagem na UI
-function appendMessage(sender, text) {
-  const senderClass = sender === 'Você' ? 'user' : 'bot';
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `message ${senderClass}`;
-  messageDiv.innerHTML = `<div class="sender ${senderClass}">${sender}</div><div class="text">${text}</div>`;
-  chatbox.appendChild(messageDiv);
-  chatbox.scrollTop = chatbox.scrollHeight;
-}
+    /********* UI ELEMENTS *********/
+    const chatbox = document.getElementById('chatbox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-// função fetch com retries simples
-async function postPredict(payload, retries = 3) {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const resp = await fetch(JADE_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+    function appendMessage(sender, text, extraClass='') {
+      const senderClass = sender === 'Você' ? 'user' : 'bot';
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${senderClass} ${extraClass}`.trim();
+      messageDiv.innerHTML = `<div class="sender ${senderClass}">${sender}</div><div class="text">${escapeHtml(String(text))}</div>`;
+      chatbox.appendChild(messageDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
 
-      // se receber 503 (cold start), espera e tenta de novo
-      if (resp.status === 503 && i < retries) {
-        console.warn(`503 recebido — retry ${i+1}/${retries}`);
-        await new Promise(r => setTimeout(r, 1000*(i+1)));
-        continue;
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s]));
+    }
+
+    /********* NETWORK HELPERS *********/
+    async function postPredictTo(url, payload, retries=3) {
+      for (let i=0;i<=retries;i++){
+        try {
+          const resp = await fetch(url, {
+            method:'POST',
+            headers:{ 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          // cold start handling
+          if (resp.status === 503 && i < retries) {
+            console.warn(`503 do servidor — retry ${i+1}/${retries}`);
+            await new Promise(r => setTimeout(r, 1000*(i+1)));
+            continue;
+          }
+
+          const text = await resp.text();
+          let body;
+          try { body = JSON.parse(text); } catch(e) { body = text; }
+
+          return { ok: resp.ok, status: resp.status, body };
+        } catch (err) {
+          console.error('Erro de fetch:', err);
+          if (i < retries) await new Promise(r => setTimeout(r, 1000*(i+1)));
+          else throw err;
+        }
       }
-
-      const text = await resp.text(); // pega raw primeiro
-      // tenta parsear JSON, se não for JSON devolve raw
-      let json;
-      try { json = JSON.parse(text); } catch(e) { json = text; }
-
-      return { ok: resp.ok, status: resp.status, body: json };
-    } catch (err) {
-      console.error('Erro fetch (possível CORS ou rede):', err);
-      if (i < retries) await new Promise(r => setTimeout(r, 1000*(i+1)));
-      else throw err;
-    }
-  }
-  throw new Error('Falha completa ao chamar predict');
-}
-
-// função principal de envio (usa postPredict)
-async function sendMessage(message) {
-  appendMessage('Você', message);
-  userInput.value = '';
-
-  // payload com fn_index (muito importante)
-  const payload = {
-    data: [
-      message, // texto
-      null,    // audio (se houver)
-      null,    // imagem (se houver)
-      []       // chat history — ajuste se quiser manter contexto
-    ],
-    fn_index: FN_INDEX
-  };
-
-  try {
-    const resp = await postPredict(payload, 3);
-
-    if (!resp.ok) {
-      console.error('Resposta não OK:', resp.status, resp.body);
-      appendMessage('Erro do Sistema', `Não foi possível conectar ao cérebro da J.A.D.E. (HTTP ${resp.status})`);
-      return;
+      throw new Error('Falha completa no postPredictTo');
     }
 
-    // log para você inspecionar a estrutura exata do retorno
-    console.log('Resposta completa do Space:', resp.body);
+    async function callPredict(payload) {
+      const url = PROXY_URL || JADE_API_URL;
+      return await postPredictTo(url, payload, 3);
+    }
 
-    // tentativa resiliente de extrair a mensagem do bot
-    let botMessage = null;
+    /********* MAIN SEND FUNCTION *********/
+    async function sendMessage(message) {
+      appendMessage('Você', message);
+      userInput.value = '';
+      sendBtn.disabled = true;
 
-    // caso comum: result.data é um array e o primeiro item é o histórico
-    if (Array.isArray(resp.body?.data) && resp.body.data.length > 0) {
-      const first = resp.body.data[0];
-      // se first for um array de pares [user, bot]
-      if (Array.isArray(first) && first.length > 0) {
-        const last = first[first.length - 1];
-        if (Array.isArray(last) && last.length > 1) botMessage = last[1];
+      // Construção do payload conforme Gradio/Spaces
+      const payload = {
+        data: [
+          message,
+          null, // audio placeholder
+          null, // image placeholder
+          []    // chat history (vazio por padrão)
+        ],
+        fn_index: FN_INDEX
+      };
+
+      try {
+        const resp = await callPredict(payload);
+
+        if (!resp.ok) {
+          console.error('Resposta não OK:', resp.status, resp.body);
+          appendMessage('Erro do Sistema', `Não foi possível conectar ao cérebro da J.A.D.E. (HTTP ${resp.status})`, 'system');
+          sendBtn.disabled = false;
+          return;
+        }
+
+        console.log('Resposta completa do Space:', resp.body);
+
+        // Extrair mensagem do bot de forma resiliente
+        let botMessage = null;
+
+        // Caso típico Gradio: resp.body.data[0] é um array de pares [user, bot]
+        if (resp.body && Array.isArray(resp.body.data) && resp.body.data.length > 0) {
+          const maybeHist = resp.body.data[0];
+          if (Array.isArray(maybeHist) && maybeHist.length > 0) {
+            const lastPair = maybeHist[maybeHist.length - 1];
+            if (Array.isArray(lastPair) && lastPair.length > 1) botMessage = lastPair[1];
+          } else if (typeof maybeHist === 'string') {
+            botMessage = maybeHist;
+          }
+        }
+
+        // Fallbacks comuns
+        if (!botMessage) {
+          if (typeof resp.body === 'string') botMessage = resp.body;
+          else if (resp.body?.output?.text) botMessage = resp.body.output.text;
+          else if (resp.body?.data && typeof resp.body.data === 'string') botMessage = resp.body.data;
+        }
+
+        if (!botMessage) {
+          botMessage = '[Resposta em formato inesperado — veja console]';
+          console.warn('Não consegui extrair a mensagem do bot automaticamente. Inspecione resp.body no console.');
+        }
+
+        appendMessage('J.A.D.E.', botMessage);
+
+      } catch (error) {
+        console.error('Erro ao chamar a API da J.A.D.E.:', error);
+        appendMessage('Erro do Sistema', 'Não foi possível conectar ao cérebro da J.A.D.E. O backend pode estar offline ou bloqueando requisições.', 'system');
+      } finally {
+        sendBtn.disabled = false;
       }
-      // se first for string (alguns apps retornam string direta)
-      else if (typeof first === 'string') {
-        botMessage = first;
+    }
+
+    /********* EVENT LISTENERS *********/
+    userInput.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        const m = userInput.value.trim();
+        if (m) sendMessage(m);
       }
-    }
+    });
+    sendBtn.addEventListener('click', () => {
+      const m = userInput.value.trim();
+      if (m) sendMessage(m);
+    });
 
-    // fallbacks: algumas impls retornam text direto, ou body.output_text
-    if (!botMessage) {
-      if (typeof resp.body === 'string') botMessage = resp.body;
-      else if (resp.body?.output?.text) botMessage = resp.body.output.text;
-      else if (resp.body?.data && typeof resp.body.data === 'string') botMessage = resp.body.data;
-    }
-
-    if (!botMessage) {
-      botMessage = '[Resposta em formato inesperado — veja console]';
-      console.warn('Não consegui extrair a mensagem do bot automaticamente. Inspecione resp.body no console.');
-    }
-
-    appendMessage('J.A.D.E.', botMessage);
-
-  } catch (error) {
-    console.error('Erro ao chamar a API da J.A.D.E.:', error);
-    appendMessage('Erro do Sistema', 'Não foi possível conectar ao cérebro da J.A.D.E. O backend pode estar offline ou bloqueando requisições.');
-  }
-}
-
-// Enter para enviar
-userInput.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    const message = userInput.value.trim();
-    if (message) sendMessage(message);
-  }
-});
-</script>
+    /********* DEBUG INFO (opcional) *********/
+    console.log('Frontend JADE carregado. Endpoint usado:', PROXY_URL || JADE_API_URL, 'fn_index:', FN_INDEX);
+  </script>
+</body>
+</html>
