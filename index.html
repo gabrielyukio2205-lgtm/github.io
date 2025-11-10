@@ -1,193 +1,125 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J.A.D.E. - Portfólio Interativo</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+<script>
+const chatbox = document.getElementById('chatbox');
+const userInput = document.getElementById('userInput');
 
-        :root {
-            --background: #0d1117;
-            --surface: #161b22;
-            --primary: #58a6ff;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
-            --border: #30363d;
-        }
+// endpoint corrigido
+const JADE_API_URL = 'https://madras1-jade-port.hf.space/run/predict';
 
-        body {
-            font-family: 'Fira Code', monospace;
-            background-color: var(--background);
-            color: var(--text-primary);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+// ajuste aqui se souber que o fn_index é outro
+const FN_INDEX = 0;
 
-        #chat-container {
-            width: 90%;
-            max-width: 600px;
-            height: 80vh;
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
+// adiciona mensagem na UI
+function appendMessage(sender, text) {
+  const senderClass = sender === 'Você' ? 'user' : 'bot';
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${senderClass}`;
+  messageDiv.innerHTML = `<div class="sender ${senderClass}">${sender}</div><div class="text">${text}</div>`;
+  chatbox.appendChild(messageDiv);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
 
-        #chat-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            font-weight: 700;
-            text-align: center;
-        }
+// função fetch com retries simples
+async function postPredict(payload, retries = 3) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const resp = await fetch(JADE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-        #chat-header span {
-            color: var(--primary);
-        }
+      // se receber 503 (cold start), espera e tenta de novo
+      if (resp.status === 503 && i < retries) {
+        console.warn(`503 recebido — retry ${i+1}/${retries}`);
+        await new Promise(r => setTimeout(r, 1000*(i+1)));
+        continue;
+      }
 
-        #chatbox {
-            flex-grow: 1;
-            padding: 1rem;
-            overflow-y: auto;
-        }
+      const text = await resp.text(); // pega raw primeiro
+      // tenta parsear JSON, se não for JSON devolve raw
+      let json;
+      try { json = JSON.parse(text); } catch(e) { json = text; }
 
-        .message {
-            margin-bottom: 1rem;
-            display: flex;
-            flex-direction: column;
-        }
+      return { ok: resp.ok, status: resp.status, body: json };
+    } catch (err) {
+      console.error('Erro fetch (possível CORS ou rede):', err);
+      if (i < retries) await new Promise(r => setTimeout(r, 1000*(i+1)));
+      else throw err;
+    }
+  }
+  throw new Error('Falha completa ao chamar predict');
+}
 
-        .sender {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .sender.user {
-             color: var(--primary);
-             align-self: flex-end;
-        }
+// função principal de envio (usa postPredict)
+async function sendMessage(message) {
+  appendMessage('Você', message);
+  userInput.value = '';
 
-        .text {
-            background-color: var(--background);
-            padding: 0.75rem;
-            border-radius: 6px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        
-        .user .text {
-            background-color: #212c42;
-            align-self: flex-end;
-        }
+  // payload com fn_index (muito importante)
+  const payload = {
+    data: [
+      message, // texto
+      null,    // audio (se houver)
+      null,    // imagem (se houver)
+      []       // chat history — ajuste se quiser manter contexto
+    ],
+    fn_index: FN_INDEX
+  };
 
-        #input-area {
-            display: flex;
-            padding: 1rem;
-            border-top: 1px solid var(--border);
-        }
+  try {
+    const resp = await postPredict(payload, 3);
 
-        #userInput {
-            flex-grow: 1;
-            background-color: var(--background);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 0.75rem;
-            color: var(--text-primary);
-            font-family: inherit;
-        }
+    if (!resp.ok) {
+      console.error('Resposta não OK:', resp.status, resp.body);
+      appendMessage('Erro do Sistema', `Não foi possível conectar ao cérebro da J.A.D.E. (HTTP ${resp.status})`);
+      return;
+    }
 
-        #userInput:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-    </style>
-</head>
-<body>
-    <div id="chat-container">
-        <div id="chat-header">J.A.D.E. <span>//</span> Ativa</div>
-        <div id="chatbox">
-            <div class="message bot">
-                <div class="sender">J.A.D.E.</div>
-                <div class="text">Sistema online. Aguardando seu comando.</div>
-            </div>
-        </div>
-        <div id="input-area">
-            <input type="text" id="userInput" placeholder="Digite sua mensagem aqui..." autocomplete="off">
-        </div>
-    </div>
+    // log para você inspecionar a estrutura exata do retorno
+    console.log('Resposta completa do Space:', resp.body);
 
-    <script>
-        const chatbox = document.getElementById('chatbox');
-        const userInput = document.getElementById('userInput');
-        const JADE_API_URL = 'https://madras1-jade-port.hf.space/run/predict'; // 
+    // tentativa resiliente de extrair a mensagem do bot
+    let botMessage = null;
 
-        // Função para adicionar mensagem na tela
-        function appendMessage(sender, text) {
-            const senderClass = sender === 'Você' ? 'user' : 'bot';
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${senderClass}`;
-            messageDiv.innerHTML = `<div class="sender ${senderClass}">${sender}</div><div class="text">${text}</div>`;
-            chatbox.appendChild(messageDiv);
-            chatbox.scrollTop = chatbox.scrollHeight;
-        }
+    // caso comum: result.data é um array e o primeiro item é o histórico
+    if (Array.isArray(resp.body?.data) && resp.body.data.length > 0) {
+      const first = resp.body.data[0];
+      // se first for um array de pares [user, bot]
+      if (Array.isArray(first) && first.length > 0) {
+        const last = first[first.length - 1];
+        if (Array.isArray(last) && last.length > 1) botMessage = last[1];
+      }
+      // se first for string (alguns apps retornam string direta)
+      else if (typeof first === 'string') {
+        botMessage = first;
+      }
+    }
 
-        // Função para enviar mensagem para a API
-        async function sendMessage(message) {
-            appendMessage('Você', message);
-            userInput.value = '';
-            
-            try {
-                const response = await fetch(JADE_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        // A API do Gradio espera os dados no formato de um array na chave 'data'.
-                        // Os parâmetros devem estar na mesma ordem da função no app.py:
-                        // [text_input, audio_file, image_file, chat_history]
-                        "data": [
-                            message,
-                            null, // Sem arquivo de áudio neste frontend
-                            null, // Sem arquivo de imagem neste frontend
-                            []    // Histórico de chat (pode ser enviado vazio ou gerenciado aqui)
-                        ]
-                    })
-                });
+    // fallbacks: algumas impls retornam text direto, ou body.output_text
+    if (!botMessage) {
+      if (typeof resp.body === 'string') botMessage = resp.body;
+      else if (resp.body?.output?.text) botMessage = resp.body.output.text;
+      else if (resp.body?.data && typeof resp.body.data === 'string') botMessage = resp.body.data;
+    }
 
-                if (!response.ok) {
-                    throw new Error(`Erro de rede: ${response.status}`);
-                }
+    if (!botMessage) {
+      botMessage = '[Resposta em formato inesperado — veja console]';
+      console.warn('Não consegui extrair a mensagem do bot automaticamente. Inspecione resp.body no console.');
+    }
 
-                const result = await response.json();
-                
-                // A resposta do Gradio vem dentro de result.data.
-                // O primeiro elemento (índice 0) é o histórico do chat.
-                const history = result.data[0];
-                // A última mensagem no histórico é a resposta do bot.
-                const botMessage = history[history.length - 1][1];
+    appendMessage('J.A.D.E.', botMessage);
 
-                appendMessage('J.A.D.E.', botMessage);
+  } catch (error) {
+    console.error('Erro ao chamar a API da J.A.D.E.:', error);
+    appendMessage('Erro do Sistema', 'Não foi possível conectar ao cérebro da J.A.D.E. O backend pode estar offline ou bloqueando requisições.');
+  }
+}
 
-            } catch (error) {
-                console.error('Erro ao chamar a API da J.A.D.E.:', error);
-                appendMessage('Erro do Sistema', 'Não foi possível conectar ao cérebro da J.A.D.E. O backend pode estar offline.');
-            }
-        }
-
-        // Event listener para a tecla "Enter"
-        userInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                const message = userInput.value.trim();
-                if (message) {
-                    sendMessage(message);
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+// Enter para enviar
+userInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    const message = userInput.value.trim();
+    if (message) sendMessage(message);
+  }
+});
+</script>
