@@ -1,190 +1,51 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>J.A.D.E. - Portfólio Interativo</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
-    :root{
-      --background:#0d1117;--surface:#161b22;--primary:#58a6ff;
-      --text-primary:#c9d1d9;--text-secondary:#8b949e;--border:#30363d;
+    :root {
+      --background: #0d1117;
+      --surface: #161b22;
+      --primary: #58a6ff;
+      --text-primary: #c9d1d9;
+      --border: #30363d;
     }
-    body{font-family:'Fira Code',monospace;background:var(--background);color:var(--text-primary);margin:0;display:flex;justify-content:center;align-items:center;height:100vh}
-    #chat-container{width:90%;max-width:720px;height:80vh;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.45)}
-    #chat-header{padding:1rem;border-bottom:1px solid var(--border);font-weight:700;text-align:center}
-    #chatbox{flex:1;padding:1rem;overflow-y:auto}
-    .message{margin-bottom:1rem;display:flex;flex-direction:column}
-    .sender{font-size:.78rem;color:var(--text-secondary);margin-bottom:.25rem}
-    .sender.user{color:var(--primary);align-self:flex-end}
-    .text{background:var(--background);padding:.75rem;border-radius:6px;max-width:80%;word-wrap:break-word}
-    .user .text{background:#212c42;align-self:flex-end}
-    #input-area{display:flex;padding:1rem;border-top:1px solid var(--border)}
-    #userInput{flex:1;background:var(--background);border:1px solid var(--border);border-radius:6px;padding:.75rem;color:var(--text-primary);font-family:inherit}
-    #sendBtn{margin-left:.5rem;padding:.6rem 1rem;border-radius:6px;border:none;background:var(--primary);color:#042033;cursor:pointer}
-    #sendBtn:disabled{opacity:.5;cursor:default}
-    .system { color: #f87171; } /* para erros */
+    body {
+      font-family: 'Fira Code', monospace;
+      background-color: var(--background);
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 1rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: var(--surface);
+    }
+    footer {
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #8b949e;
+      border-top: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
-  <div id="chat-container">
-    <div id="chat-header">J.A.D.E. <span>//</span> Ativa</div>
-    <div id="chatbox">
-      <div class="message bot">
-        <div class="sender">J.A.D.E.</div>
-        <div class="text">Sistema online. Aguardando seu comando.</div>
-      </div>
-    </div>
-    <div id="input-area">
-      <input id="userInput" placeholder="Digite sua mensagem aqui..." autocomplete="off" />
-      <button id="sendBtn">Enviar</button>
-    </div>
-  </div>
-
-  <script>
-    /********* CONFIG *********/
-    // Endpoint direto do Space (o correto é /run/predict)
-    const JADE_API_URL = 'https://madras1-jade-port.hf.space/run/predict';
-    // Se tu usar proxy (recomendado se der CORS), coloca o URL do proxy aqui e comente JADE_API_URL
-    // const PROXY_URL = 'https://seu-proxy.vercel.app/api/predict';
-    const PROXY_URL = null; // deixar null pra usar JADE_API_URL direto
-
-    // Ajusta se souber qual fn_index o seu Space usa (0 é o mais comum)
-    const FN_INDEX = 0;
-
-    /********* UI ELEMENTS *********/
-    const chatbox = document.getElementById('chatbox');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-
-    function appendMessage(sender, text, extraClass='') {
-      const senderClass = sender === 'Você' ? 'user' : 'bot';
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${senderClass} ${extraClass}`.trim();
-      messageDiv.innerHTML = `<div class="sender ${senderClass}">${sender}</div><div class="text">${escapeHtml(String(text))}</div>`;
-      chatbox.appendChild(messageDiv);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
-
-    function escapeHtml(str){
-      return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s]));
-    }
-
-    /********* NETWORK HELPERS *********/
-    async function postPredictTo(url, payload, retries=3) {
-      for (let i=0;i<=retries;i++){
-        try {
-          const resp = await fetch(url, {
-            method:'POST',
-            headers:{ 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          // cold start handling
-          if (resp.status === 503 && i < retries) {
-            console.warn(`503 do servidor — retry ${i+1}/${retries}`);
-            await new Promise(r => setTimeout(r, 1000*(i+1)));
-            continue;
-          }
-
-          const text = await resp.text();
-          let body;
-          try { body = JSON.parse(text); } catch(e) { body = text; }
-
-          return { ok: resp.ok, status: resp.status, body };
-        } catch (err) {
-          console.error('Erro de fetch:', err);
-          if (i < retries) await new Promise(r => setTimeout(r, 1000*(i+1)));
-          else throw err;
-        }
-      }
-      throw new Error('Falha completa no postPredictTo');
-    }
-
-    async function callPredict(payload) {
-      const url = PROXY_URL || JADE_API_URL;
-      return await postPredictTo(url, payload, 3);
-    }
-
-    /********* MAIN SEND FUNCTION *********/
-    async function sendMessage(message) {
-      appendMessage('Você', message);
-      userInput.value = '';
-      sendBtn.disabled = true;
-
-      // Construção do payload conforme Gradio/Spaces
-      const payload = {
-        data: [
-          message,
-          null, // audio placeholder
-          null, // image placeholder
-          []    // chat history (vazio por padrão)
-        ],
-        fn_index: FN_INDEX
-      };
-
-      try {
-        const resp = await callPredict(payload);
-
-        if (!resp.ok) {
-          console.error('Resposta não OK:', resp.status, resp.body);
-          appendMessage('Erro do Sistema', `Não foi possível conectar ao cérebro da J.A.D.E. (HTTP ${resp.status})`, 'system');
-          sendBtn.disabled = false;
-          return;
-        }
-
-        console.log('Resposta completa do Space:', resp.body);
-
-        // Extrair mensagem do bot de forma resiliente
-        let botMessage = null;
-
-        // Caso típico Gradio: resp.body.data[0] é um array de pares [user, bot]
-        if (resp.body && Array.isArray(resp.body.data) && resp.body.data.length > 0) {
-          const maybeHist = resp.body.data[0];
-          if (Array.isArray(maybeHist) && maybeHist.length > 0) {
-            const lastPair = maybeHist[maybeHist.length - 1];
-            if (Array.isArray(lastPair) && lastPair.length > 1) botMessage = lastPair[1];
-          } else if (typeof maybeHist === 'string') {
-            botMessage = maybeHist;
-          }
-        }
-
-        // Fallbacks comuns
-        if (!botMessage) {
-          if (typeof resp.body === 'string') botMessage = resp.body;
-          else if (resp.body?.output?.text) botMessage = resp.body.output.text;
-          else if (resp.body?.data && typeof resp.body.data === 'string') botMessage = resp.body.data;
-        }
-
-        if (!botMessage) {
-          botMessage = '[Resposta em formato inesperado — veja console]';
-          console.warn('Não consegui extrair a mensagem do bot automaticamente. Inspecione resp.body no console.');
-        }
-
-        appendMessage('J.A.D.E.', botMessage);
-
-      } catch (error) {
-        console.error('Erro ao chamar a API da J.A.D.E.:', error);
-        appendMessage('Erro do Sistema', 'Não foi possível conectar ao cérebro da J.A.D.E. O backend pode estar offline ou bloqueando requisições.', 'system');
-      } finally {
-        sendBtn.disabled = false;
-      }
-    }
-
-    /********* EVENT LISTENERS *********/
-    userInput.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        const m = userInput.value.trim();
-        if (m) sendMessage(m);
-      }
-    });
-    sendBtn.addEventListener('click', () => {
-      const m = userInput.value.trim();
-      if (m) sendMessage(m);
-    });
-
-    /********* DEBUG INFO (opcional) *********/
-    console.log('Frontend JADE carregado. Endpoint usado:', PROXY_URL || JADE_API_URL, 'fn_index:', FN_INDEX);
-  </script>
+  <header>J.A.D.E. <span style="color:var(--primary)"> // </span> Ativa</header>
+  <iframe src="https://madras1-jade-port.hf.space/" title="J.A.D.E. Chat"></iframe>
+  <footer>Powered by Hugging Face Spaces</footer>
 </body>
 </html>
