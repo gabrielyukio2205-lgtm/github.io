@@ -116,7 +116,8 @@ body {
   padding: 0.8rem 1rem; color: var(--text); font-family: var(--font-body); font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-#userInput:focus {
+#userInput:focus,
+button:focus {
   outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
 }
 
@@ -134,4 +135,13 @@ button:hover {
 }
 #sendBtn:hover {
   background-color: var(--primary-hover); border-color: var(--primary-hover);
+}
+
+.hidden { display: none; }
+code {
+  background-color: var(--bg);
+  color: var(--primary);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
 }
