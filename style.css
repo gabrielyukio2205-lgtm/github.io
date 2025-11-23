@@ -149,8 +149,16 @@ body {
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
     z-index: 30;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Desktop Collapse State */
+@media (min-width: 769px) {
+    #sidebar.collapsed {
+        margin-left: -280px;
+    }
 }
 
 .sidebar-header {
@@ -315,7 +323,13 @@ body {
     gap: 1rem;
 }
 #mobile-menu-btn {
-    display: none; /* Hidden on desktop */
+    display: none; /* Hidden on desktop by default, unless sidebar is collapsed */
+}
+
+@media (min-width: 769px) {
+    body.sidebar-closed #mobile-menu-btn {
+        display: flex;
+    }
 }
 
 .brand {
@@ -670,6 +684,7 @@ pre code {
         height: 100%;
         transform: translateX(-100%);
         box-shadow: var(--shadow-lg);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     #sidebar.open {

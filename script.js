@@ -54,8 +54,8 @@
         removeImageBtn.addEventListener('click', clearImagePreview);
         
         // Sidebar Events
-        toggleSidebarBtn.addEventListener('click', () => sidebar.classList.remove('open'));
-        mobileMenuBtn.addEventListener('click', () => sidebar.classList.add('open'));
+        toggleSidebarBtn.addEventListener('click', toggleSidebar);
+        mobileMenuBtn.addEventListener('click', toggleSidebar);
         newChatBtn.addEventListener('click', startNewChat);
 
         // Theme Event
@@ -109,6 +109,19 @@
             startNewChat();
         }
         renderHistoryList();
+        
+        // Check window width for initial sidebar state (optional, but good for persistence)
+        // Currently relying on CSS defaults (Desktop: Open, Mobile: Closed)
+    }
+    
+    function toggleSidebar() {
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            sidebar.classList.toggle('open');
+        } else {
+            sidebar.classList.toggle('collapsed');
+            document.body.classList.toggle('sidebar-closed');
+        }
     }
 
     function loadConversations() {
@@ -391,6 +404,27 @@
         }
     }
 
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            // Cancel any current speech
+            window.speechSynthesis.cancel();
+            
+            // Strip markdown for speech
+            // Simple strip: remove ** * ` [ ] ( )
+            const plainText = text.replace(/[#*`\[\]]/g, ''); 
+            
+            const utterance = new SpeechSynthesisUtterance(plainText);
+            utterance.lang = 'pt-BR'; // Portuguese Brazil
+            
+            // Try to select a female voice if available to match "Jade"
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
+            if (preferredVoice) utterance.voice = preferredVoice;
+            
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
     async function sendMessage() {
         const message = userInput.value.trim();
         let image_base64 = null;
@@ -427,6 +461,9 @@
                 if (json.audio_base64) {
                     audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
                     audioPlayer.play();
+                } else {
+                    // Fallback to TTS if audio is missing but user expects sound
+                    speakText(botResponse);
                 }
             } else {
                 botResponse = `[Erro: ${json.error || 'Desconhecido'}]`;
