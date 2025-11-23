@@ -1,5 +1,5 @@
 :root {
-  /* Modern Dark Palette */
+  /* Modern Dark Palette (Default) */
   --bg-color: #050505;
   --sidebar-bg: #101012;
   --surface-color: rgba(22, 22, 24, 0.7);
@@ -7,7 +7,7 @@
   --border-color: rgba(255, 255, 255, 0.08);
   --border-active: rgba(255, 255, 255, 0.2);
   
-  --primary-color: #3b82f6; /* Electric Blue */
+  --primary-color: #3b82f6;
   --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   --secondary-color: #10b981;
   
@@ -24,6 +24,37 @@
   
   --radius-lg: 1rem;
   --radius-full: 9999px;
+
+  /* Specific Colors */
+  --icon-btn-hover-bg: rgba(255, 255, 255, 0.1);
+  --user-msg-bg: #27272a;
+  --user-msg-text: white;
+  --code-bg: #1e1e1e;
+  --orb-opacity: 0.4;
+  --delete-btn-hover: rgba(239, 68, 68, 0.15);
+  --delete-btn-color: #ef4444;
+}
+
+/* Light Mode Palette */
+[data-theme="light"] {
+  --bg-color: #ffffff;
+  --sidebar-bg: #f8f9fa;
+  --surface-color: rgba(255, 255, 255, 0.8);
+  --surface-hover: rgba(240, 240, 240, 0.8);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(0, 0, 0, 0.2);
+  
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --glow: 0 0 20px rgba(59, 130, 246, 0.1);
+  
+  --icon-btn-hover-bg: rgba(0, 0, 0, 0.05);
+  --user-msg-bg: #e5e7eb;
+  --user-msg-text: #1f2937;
+  --code-bg: #f3f4f6;
+  --orb-opacity: 0.2;
 }
 
 * {
@@ -41,6 +72,7 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Background Effects */
@@ -73,7 +105,7 @@ body {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.4;
+  opacity: var(--orb-opacity);
   animation: float 20s infinite ease-in-out;
 }
 
@@ -117,7 +149,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
     z-index: 30;
 }
 
@@ -127,7 +159,7 @@ body {
     padding-bottom: 1rem;
 }
 
-#toggle-sidebar-btn, #mobile-menu-btn {
+#toggle-sidebar-btn, #mobile-menu-btn, #theme-toggle-btn {
     background: transparent;
     border: none;
     color: var(--text-secondary);
@@ -137,9 +169,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
 }
-#toggle-sidebar-btn:hover, #mobile-menu-btn:hover {
-    background: rgba(255,255,255,0.05);
+#toggle-sidebar-btn:hover, #mobile-menu-btn:hover, #theme-toggle-btn:hover {
+    background: var(--icon-btn-hover-bg);
     color: var(--text-primary);
 }
 
@@ -147,7 +180,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255,255,255,0.05);
+    background: var(--surface-color);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     padding: 10px 16px;
@@ -159,7 +192,7 @@ body {
     transition: background 0.2s;
 }
 #new-chat-btn:hover {
-    background: rgba(255,255,255,0.1);
+    background: var(--surface-hover);
 }
 
 .history-section {
@@ -185,23 +218,46 @@ body {
 .history-item {
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Important for spacing delete btn */
     padding: 10px 12px;
     border-radius: 8px;
     color: var(--text-primary);
     cursor: pointer;
     font-size: 0.9rem;
     transition: background 0.2s;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 .history-item:hover {
-    background: rgba(255,255,255,0.05);
+    background: var(--icon-btn-hover-bg);
 }
 .history-item.active {
     background: rgba(59, 130, 246, 0.15);
     color: #60a5fa;
 }
+
+/* Delete Button Styles */
+.delete-chat-btn {
+    opacity: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.history-item:hover .delete-chat-btn {
+    opacity: 1;
+}
+.delete-chat-btn:hover {
+    background: var(--delete-btn-hover);
+    color: var(--delete-btn-color);
+}
+/* On mobile, always show delete button if needed, or stick to hover behavior */
 
 .sidebar-footer {
     margin-top: auto;
@@ -226,6 +282,7 @@ body {
     justify-content: center;
     font-weight: 700;
     font-size: 0.8rem;
+    color: white;
 }
 
 /* App Container */
@@ -246,9 +303,10 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(5, 5, 5, 0.6);
+  background: var(--surface-color);
   backdrop-filter: blur(12px);
   z-index: 10;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .header-left {
@@ -270,7 +328,7 @@ body {
   width: 32px;
   height: 32px;
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--icon-btn-hover-bg);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -318,11 +376,11 @@ body {
   background: transparent;
 }
 #chatbox::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-active);
   border-radius: 3px;
 }
 #chatbox::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--text-secondary);
 }
 
 /* Messages */
@@ -356,9 +414,12 @@ body {
 .bot .avatar svg { width: 20px; height: 20px; }
 
 .user .avatar {
-  background: #27272a;
-  color: #d4d4d8;
+  background: var(--user-msg-bg);
+  color: var(--text-secondary);
   border: 1px solid var(--border-color);
+}
+[data-theme="light"] .user .avatar {
+    color: var(--user-msg-text);
 }
 
 .content {
@@ -396,8 +457,8 @@ body {
 }
 
 .user .text {
-  background: #27272a; /* Neutral dark gray for user */
-  color: white;
+  background: var(--user-msg-bg); 
+  color: var(--user-msg-text);
   border-top-right-radius: 4px;
 }
 
@@ -428,15 +489,52 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Code Blocks */
+/* Code Blocks & Markdown */
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-  background: rgba(0, 0, 0, 0.3);
   padding: 0.2em 0.4em;
   border-radius: 4px;
-  color: #a5b4fc;
 }
+/* Inline code */
+:not(pre) > code {
+   background: var(--code-bg);
+   color: var(--primary-color);
+}
+
+/* Pre block (multiline code) */
+pre {
+    background: var(--code-bg) !important; /* Override highlight.js bg if needed to match theme */
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+    border: 1px solid var(--border-color);
+}
+pre code {
+    background: transparent !important;
+    padding: 0;
+    color: inherit;
+    font-size: 0.9rem;
+}
+
+/* Markdown Elements */
+.text p { margin-bottom: 0.8rem; }
+.text p:last-child { margin-bottom: 0; }
+.text ul, .text ol { margin-left: 1.5rem; margin-bottom: 0.8rem; }
+.text li { margin-bottom: 0.4rem; }
+.text h1, .text h2, .text h3 { margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 600; }
+.text h1 { font-size: 1.4rem; }
+.text h2 { font-size: 1.2rem; }
+.text h3 { font-size: 1.1rem; }
+.text blockquote { 
+    border-left: 3px solid var(--primary-color); 
+    padding-left: 1rem; 
+    margin: 0.8rem 0; 
+    font-style: italic; 
+    opacity: 0.8; 
+}
+
 
 /* Input Area */
 #input-container {
@@ -459,7 +557,7 @@ code {
   align-items: flex-end;
   gap: 0.5rem;
   box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,0.1);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s;
   backdrop-filter: blur(16px);
 }
 
@@ -475,11 +573,13 @@ code {
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 1rem;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   min-height: 44px;
-  max-height: 120px;
+  max-height: 200px;
   resize: none;
   outline: none;
+  line-height: 1.5;
+  overflow-y: auto;
 }
 
 #userInput::placeholder {
@@ -501,7 +601,7 @@ code {
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--icon-btn-hover-bg);
   color: var(--text-primary);
 }
 
