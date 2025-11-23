@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>J.A.D.E. | AI Assistant</title>
+  <title>J.A.D.E. | Unified AI Platform</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Highlight.js Theme -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Highlight.js -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 </head>
 <body>
@@ -19,23 +19,45 @@
   </div>
 
   <div id="layout-container">
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <aside id="sidebar">
         <div class="sidebar-header">
+            <div class="brand-mini">
+                <div class="logo-icon-sm">J</div>
+                <span class="brand-text">J.A.D.E.</span>
+            </div>
             <button id="toggle-sidebar-btn" aria-label="Fechar menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
         </div>
         
+        <!-- Module Navigation -->
+        <nav class="module-nav">
+            <button class="nav-item active" data-module="chat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Chat Assistant</span>
+            </button>
+            <button class="nav-item" data-module="code">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <span>Jade Code</span>
+            </button>
+            <button class="nav-item" data-module="scholar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <span>Scholar Graph</span>
+            </button>
+        </nav>
+
+        <div class="divider"></div>
+
         <button id="new-chat-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Nova conversa
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Nova Sessão
         </button>
 
         <div class="history-section">
-            <h3>Recentes</h3>
+            <h3>Histórico</h3>
             <div id="chat-history-list">
-                <!-- History items will be injected here -->
+                <!-- Items injected via JS -->
             </div>
         </div>
 
@@ -47,77 +69,123 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Main Application Area -->
     <div id="app-container">
-      <header id="chat-header">
+      <header id="main-header">
         <div class="header-left">
             <button id="mobile-menu-btn" aria-label="Abrir menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
-            <div class="brand">
-              <div class="logo-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M2 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <h1>J.A.D.E.</h1>
-              <span class="status-badge">Beta</span>
+            <div class="active-module-title">
+                <span id="module-title-text">Assistant</span>
+                <span class="status-badge">Beta</span>
             </div>
         </div>
         <div class="controls">
-        <button id="theme-toggle-btn" aria-label="Alternar tema">
-          <!-- Sun Icon (for Dark Mode) -->
-          <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-          <!-- Moon Icon (for Light Mode, initially hidden) -->
-          <svg id="moon-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-        </button>
+            <button id="theme-toggle-btn" aria-label="Alternar tema">
+                <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg id="moon-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
         </div>
       </header>
 
-      <main id="chatbox" role="log" aria-live="polite">
-        <div class="message bot welcome-message">
-          <div class="avatar">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
-          </div>
-          <div class="content">
-            <div class="sender-name">J.A.D.E.</div>
-            <div class="text">Olá. Eu sou J.A.D.E., sua assistente de inteligência artificial avançada. Como posso ajudar você hoje?</div>
-          </div>
-        </div>
-      </main>
-
-      <div id="input-container">
-          <div id="image-preview-container" class="hidden">
-              <div class="preview-wrapper">
-                  <img id="image-preview" src="#" alt="Preview"/>
-                  <button id="remove-image-btn" aria-label="Remover imagem">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-              </div>
-          </div>
+      <!-- Modules Container -->
+      <main id="modules-container">
           
-          <div class="input-wrapper">
-              <button id="imageBtn" class="icon-btn" title="Adicionar Imagem" aria-label="Adicionar Imagem">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-              </button>
-              
-              <input type="file" id="imageInput" accept="image/*" class="hidden">
-              
-              <textarea id="userInput" placeholder="Envie uma mensagem para J.A.D.E..." autocomplete="off" aria-label="Mensagem" rows="1"></textarea>
-              
-              <button id="sendBtn" class="send-btn" title="Enviar" aria-label="Enviar">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-              </button>
-          </div>
-          <div class="disclaimer">J.A.D.E. pode cometer erros. Verifique informações importantes.</div>
-      </div>
+          <!-- Module 1: Chat Assistant (Default) -->
+          <section id="module-chat" class="module-view active">
+              <div class="chat-viewport" id="chatbox-chat">
+                <!-- Messages -->
+              </div>
+              <div class="input-area">
+                <div id="image-preview-container" class="hidden">
+                    <div class="preview-wrapper">
+                        <img id="image-preview" src="#" alt="Preview"/>
+                        <button id="remove-image-btn">×</button>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <button id="imageBtn" class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></button>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    <textarea id="userInput-chat" placeholder="Converse com J.A.D.E..." rows="1"></textarea>
+                    <button id="sendBtn-chat" class="send-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+                </div>
+              </div>
+          </section>
+
+          <!-- Module 2: Jade Code (Cursor-like) -->
+          <section id="module-code" class="module-view">
+              <div class="code-workspace">
+                  <div class="chat-viewport code-chat" id="chatbox-code">
+                      <div class="message bot welcome-message">
+                          <div class="content">
+                              <div class="text">Olá. Eu sou o <b>Jade Code</b>. Posso ajudar a escrever, refatorar e analisar código.</div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="input-area code-input-area">
+                      <div class="input-wrapper">
+                          <textarea id="userInput-code" placeholder="Instruções de código..." rows="1"></textarea>
+                          <button id="sendBtn-code" class="send-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></button>
+                      </div>
+                  </div>
+              </div>
+          </section>
+
+          <!-- Module 3: Scholar Graph -->
+          <section id="module-scholar" class="module-view">
+              <div class="scholar-layout">
+                  <div class="scholar-ingest">
+                      <h2>Ingestão de Conteúdo</h2>
+                      <div class="ingest-box">
+                          <input type="text" id="scholar-input" placeholder="Cole uma URL, Link do YouTube ou Tópico...">
+                          <button id="scholar-ingest-btn" class="primary-btn">Processar</button>
+                      </div>
+                      <div id="scholar-status" class="status-msg"></div>
+                  </div>
+                  
+                  <div class="scholar-tools hidden" id="scholar-tools-panel">
+                      <div class="tools-grid">
+                          <button class="tool-card" data-action="summary">
+                              <div class="icon">📝</div>
+                              <span>Resumo</span>
+                          </button>
+                          <button class="tool-card" data-action="mindmap">
+                              <div class="icon">🗺️</div>
+                              <span>Mapa Mental</span>
+                          </button>
+                          <button class="tool-card" data-action="podcast">
+                              <div class="icon">🎧</div>
+                              <span>Podcast Aula</span>
+                          </button>
+                          <button class="tool-card" data-action="quiz">
+                              <div class="icon">🎮</div>
+                              <span>Quiz</span>
+                          </button>
+                          <button class="tool-card" data-action="flashcards">
+                              <div class="icon">🃏</div>
+                              <span>Flashcards</span>
+                          </button>
+                          <button class="tool-card" data-action="handout">
+                              <div class="icon">📚</div>
+                              <span>Apostila PDF</span>
+                          </button>
+                      </div>
+                  </div>
+
+                  <div class="scholar-results" id="scholar-results-area">
+                      <!-- Results will appear here -->
+                  </div>
+              </div>
+          </section>
+
+      </main>
     </div>
   </div>
+  
   <audio id="audioPlayer" class="hidden"></audio>
 
-<!-- External Libraries -->
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="script.js"></script>
