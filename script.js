@@ -45,26 +45,47 @@
 
     function renderMarkdown(text) {
         let html = escapeHtml(text);
-        html = html.replace(/\*(.*?)\*/g, '<b>$1</b>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'); // Bold with **
+        html = html.replace(/\*(.*?)\*/g, '<b>$1</b>'); // Bold with *
         html = html.replace(/_(.*?)_/g, '<i>$1</i>');
         html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+        html = html.replace(/\n/g, '<br>');
         return html;
     }
 
-    function appendMessage(sender, textContent, isTyping = false) {
-        const senderClass = sender === 'Você' ? 'user' : 'bot';
+    function createMessageElement(sender, content, isTyping = false) {
+        const isUser = sender === 'Você';
+        const senderClass = isUser ? 'user' : 'bot';
+        
         const el = document.createElement('div');
-        el.className = `message ${senderClass} new-message`;
+        el.className = `message ${senderClass}`;
         
-        let innerHTML = isTyping
-            ? `<div class="sender">${sender}</div><div class="text"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`
-            : `<div class="sender ${senderClass}">${sender}</div><div class="text">${renderMarkdown(textContent)}</div>`;
+        const avatarHTML = isUser 
+            ? `<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`
+            : `<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></div>`;
+
+        let textHTML;
+        if (isTyping) {
+            textHTML = `<div class="text"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+        } else {
+            textHTML = `<div class="text">${renderMarkdown(content)}</div>`;
+        }
         
-        el.innerHTML = innerHTML;
+        const contentHTML = `
+            <div class="content">
+                <div class="sender-name">${sender}</div>
+                ${textHTML}
+            </div>
+        `;
+        
+        el.innerHTML = isUser ? (contentHTML + avatarHTML) : (avatarHTML + contentHTML);
+        return el;
+    }
+
+    function appendMessage(sender, textContent, isTyping = false) {
+        const el = createMessageElement(sender, textContent, isTyping);
         chatbox.appendChild(el);
         chatbox.scrollTop = chatbox.scrollHeight;
-        
-        setTimeout(() => el.classList.remove('new-message'), 400);
         return el;
     }
 
@@ -83,11 +104,19 @@
         });
     }
 
+    function updateBotMessage(messageEl, text) {
+        const textEl = messageEl.querySelector('.text');
+        if (textEl) {
+            textEl.innerHTML = renderMarkdown(text);
+        }
+    }
+
     async function sendMessage() {
         const message = userInput.value.trim();
         let image_base64 = null;
         if (!message && imageInput.files.length === 0) return;
 
+        // User message
         if (imageInput.files.length > 0) {
             appendMessage('Você', `${message || ''} [Imagem Anexada]`);
             image_base64 = await fileToBase64(imageInput.files[0]);
@@ -97,6 +126,7 @@
         }
         userInput.value = '';
 
+        // Bot typing
         const jadeTypingMessage = appendMessage('J.A.D.E.', '', true);
 
         try {
@@ -125,13 +155,12 @@
                 botResponse = "[Erro de comunicação: O texto da resposta não foi encontrado.]";
             }
 
-            jadeTypingMessage.innerHTML = `<div class="sender">J.A.D.E.</div><div class="text">${renderMarkdown(botResponse)}</div>`;
+            updateBotMessage(jadeTypingMessage, botResponse);
+            chatbox.scrollTop = chatbox.scrollHeight;
+
         } catch (err) {
             console.error(err);
-            const thinkingMsg = Array.from(chatbox.querySelectorAll('.message.bot')).pop();
-            if (thinkingMsg && thinkingMsg.querySelector('.typing-indicator')) {
-                thinkingMsg.innerHTML = `<div class="sender">Erro do Sistema</div><div class="text">Falha ao conectar com J.A.D.E. (${err.message})</div>`;
-            }
+            updateBotMessage(jadeTypingMessage, `Falha ao conectar com J.A.D.E. (${err.message})`);
         }
     }
 
