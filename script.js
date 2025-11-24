@@ -336,6 +336,15 @@
             
             let text = json.success ? json.response : `Erro: ${json.error}`;
             updateBotMessage(typingMsg, text);
+
+            // Renderiza imagem se houver
+            if (json.success && json.image_base64) {
+                const imgDiv = document.createElement('div');
+                imgDiv.innerHTML = `<br><img src="data:image/png;base64,${json.image_base64}" style="max-width:100%; border-radius:8px; margin-top:10px;">`;
+                typingMsg.querySelector('.content').appendChild(imgDiv);
+                chatboxCode.scrollTop = chatboxCode.scrollHeight;
+            }
+
         } catch (e) {
             updateBotMessage(typingMsg, "Erro de conexão.");
         }
@@ -411,17 +420,19 @@
                 html += '</div>';
                 scholarResultsArea.innerHTML = html;
             } else if (action === 'flashcards' || action === 'handout') {
-                const b64 = action === 'flashcards' ? json.file_base64 : json.file_base64 || json.image_base64; // Handout is usually file
-                // Usually handout endpoint wasn't fully b64 implemented in previous step, let's assume it returns file path or similar.
-                // Re-checking backend: generate_handout returns path. Need to read it.
-                // Wait, I implemented `generate_handout` returning filename, but didn't implement the FILE READING in `app.py` for handout.
-                // Let me fix app.py later. Assuming it returns download link or similar?
-                // Actually, I can't fix app.py now without context switch. 
-                // For now, let's assume backend might fail or returns message.
-                
-                // Oops, I didn't implement file return for handout in app.py properly (it returns path string).
-                // Frontend will just show message for now.
-                scholarResultsArea.innerHTML = `<div class="info-box">Arquivo gerado no servidor: ${json.filename || 'Verifique o backend'}</div>`;
+                if (json.filename) {
+                    const cleanName = json.filename.split('/').pop();
+                    const downloadUrl = `${API_BASE}/download/${cleanName}`;
+                    scholarResultsArea.innerHTML = `
+                        <div class="info-box success">
+                            <p>✅ Arquivo gerado com sucesso!</p>
+                            <a href="${downloadUrl}" target="_blank" class="download-btn">
+                                📥 Baixar ${action === 'flashcards' ? 'Flashcards (.apkg)' : 'Apostila (PDF)'}
+                            </a>
+                        </div>`;
+                } else {
+                    scholarResultsArea.innerHTML = `<div class="error-box">Erro: Nome do arquivo não retornado.</div>`;
+                }
             }
 
         } catch (e) {
