@@ -399,7 +399,7 @@
             }
 
             if (action === 'summary') {
-                scholarResultsArea.innerHTML = `<div class="result-text">${renderMarkdown(json.summary)}</div>`;
+                scholarResultsArea.innerHTML = `<div class="summary-container">${renderMarkdown(json.summary)}</div>`;
             } else if (action === 'mindmap') {
                 scholarResultsArea.innerHTML = `<img src="data:image/png;base64,${json.image_base64}" class="result-img">`;
             } else if (action === 'podcast') {
@@ -411,17 +411,29 @@
             } else if (action === 'quiz') {
                 let html = '<div class="quiz-container">';
                 json.quiz.forEach((q, i) => {
-                    html += `<div class="quiz-item">
-                        <p><b>Q${i+1}:</b> ${q.question}</p>
-                        <ul>${q.options.map(o => `<li>${o}</li>`).join('')}</ul>
-                        <details><summary>Ver Resposta</summary><p>${q.explanation} (${q.correct_option})</p></details>
+                    html += `
+                    <div class="quiz-card">
+                        <div class="quiz-question">Q${i+1}: ${q.question}</div>
+                        <ul class="quiz-options">
+                            ${q.options.map(o => `<li>${o}</li>`).join('')}
+                        </ul>
+                        <div class="quiz-answer-section">
+                            <details class="quiz-details">
+                                <summary></summary>
+                                <div class="quiz-explanation">
+                                    <strong>Resposta: ${q.correct_option}</strong><br>
+                                    ${q.explanation}
+                                </div>
+                            </details>
+                        </div>
                     </div>`;
                 });
                 html += '</div>';
                 scholarResultsArea.innerHTML = html;
             } else if (action === 'flashcards' || action === 'handout') {
                 if (json.filename) {
-                    const cleanName = json.filename.split('/').pop();
+                    // Extract just the filename to avoid path issues
+                    const cleanName = json.filename.split(/[/\\]/).pop();
                     const downloadUrl = `${API_BASE}/download/${cleanName}`;
                     scholarResultsArea.innerHTML = `
                         <div class="info-box success">
