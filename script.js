@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    const API_URL = 'http://localhost:7860/chat';
+    const API_URL = 'https://jade-proxy.onrender.com/chat';
     
     // State Management
     let conversations = [];
