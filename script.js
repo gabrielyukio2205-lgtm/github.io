@@ -1,13 +1,12 @@
 (function() {
     'use strict';
 
-    const API_URL = 'https://jade-proxy.onrender.com'; // Base URL
+    const API_URL = 'https://jade-proxy.onrender.com/chat';
     
     // State Management
     let conversations = [];
     let currentChatId = null;
-    let currentMode = 'chat'; // 'chat' or 'code'
-
+    
     // Cache DOM elements
     const chatbox = document.getElementById('chatbox');
     const userInput = document.getElementById('userInput');
@@ -18,8 +17,6 @@
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
     const removeImageBtn = document.getElementById('remove-image-btn');
-    const modeChatBtn = document.getElementById('mode-chat');
-    const modeCodeBtn = document.getElementById('mode-code');
     
     // Sidebar Elements
     const sidebar = document.getElementById('sidebar');
@@ -63,25 +60,6 @@
 
         // Theme Event
         themeToggleBtn.addEventListener('click', toggleTheme);
-
-        // Mode Events
-        modeChatBtn.addEventListener('click', () => setMode('chat'));
-        modeCodeBtn.addEventListener('click', () => setMode('code'));
-    }
-
-    function setMode(mode) {
-        currentMode = mode;
-        if (mode === 'chat') {
-            modeChatBtn.classList.add('active');
-            modeCodeBtn.classList.remove('active');
-            userInput.placeholder = "Envie uma mensagem para J.A.D.E...";
-            imageBtn.classList.remove('hidden'); // Show image button in chat
-        } else {
-            modeCodeBtn.classList.add('active');
-            modeChatBtn.classList.remove('active');
-            userInput.placeholder = "CodeJade: Descreva sua tarefa de programação...";
-            imageBtn.classList.add('hidden'); // Hide image button in code mode
-        }
     }
 
     // --- Theme Management ---
@@ -418,30 +396,11 @@
         });
     }
 
-    function updateBotMessage(messageEl, text, images = []) {
+    function updateBotMessage(messageEl, text) {
         const textEl = messageEl.querySelector('.text');
         if (textEl) {
             // Use marked
-            let htmlContent = renderMarkdown(text);
-            
-            // Append images if available
-            if (images && images.length > 0) {
-                htmlContent += '<div class="generated-images-container">';
-                images.forEach(img => {
-                    // Assuming img has {filename, b64}
-                    htmlContent += `
-                        <div class="generated-image-wrapper">
-                            <img src="data:image/png;base64,${img.b64}" alt="${img.filename}" class="generated-image">
-                            <a href="${API_URL}/download/${img.filename}" target="_blank" class="download-link" download="${img.filename}">
-                                ⬇️ Baixar ${img.filename}
-                            </a>
-                        </div>
-                    `;
-                });
-                htmlContent += '</div>';
-            }
-            
-            textEl.innerHTML = htmlContent;
+            textEl.innerHTML = renderMarkdown(text);
         }
     }
 
@@ -473,7 +432,7 @@
 
         if (!currentChatId) startNewChat();
 
-        if (imageInput.files.length > 0 && currentMode === 'chat') {
+        if (imageInput.files.length > 0) {
             const msgText = `${message || ''} [Imagem Anexada]`;
             appendMessage('Você', msgText);
             image_base64 = await fileToBase64(imageInput.files[0]);
@@ -483,20 +442,13 @@
         }
         userInput.value = '';
 
-        const jadeTypingMessage = appendMessage(currentMode === 'chat' ? 'J.A.D.E.' : 'CodeJade', '', true, false);
+        const jadeTypingMessage = appendMessage('J.A.D.E.', '', true, false);
 
         try {
-            const endpoint = currentMode === 'chat' ? '/chat' : '/code/chat';
-            // Construct body
-            let bodyData = { user_input: message };
-            if (currentMode === 'chat') {
-                bodyData.image_base64 = image_base64;
-            }
-
-            const resp = await fetch(`${API_URL}${endpoint}`, {
+            const resp = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bodyData)
+                body: JSON.stringify({ user_input: message, image_base64: image_base64 })
             });
 
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -506,37 +458,30 @@
 
             if (json.success) {
                 botResponse = json.bot_response;
-                if (json.audio_base64 && currentMode === 'chat') {
+                if (json.audio_base64) {
                     audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
                     audioPlayer.play();
-                } else if (currentMode === 'chat') {
-                    // Fallback to TTS only for chat mode
+                } else {
+                    // Fallback to TTS if audio is missing but user expects sound
                     speakText(botResponse);
                 }
             } else {
                 botResponse = `[Erro: ${json.error || 'Desconhecido'}]`;
             }
             
-            // Handle empty response but with files
-            if (!botResponse && json.generated_images && json.generated_images.length > 0) {
-                botResponse = "Aqui estão os arquivos gerados:";
-            } else if (botResponse === undefined || botResponse === "") {
-                 if (currentMode === 'code') {
-                     botResponse = "Tarefa concluída (sem saída de texto).";
-                 } else {
-                     botResponse = "[Sem resposta]";
-                 }
+            if (botResponse === undefined) {
+                botResponse = "[Erro de comunicação]";
             }
 
-            updateBotMessage(jadeTypingMessage, botResponse, json.generated_images);
-            saveMessageToCurrentChat(currentMode === 'chat' ? 'J.A.D.E.' : 'CodeJade', botResponse);
+            updateBotMessage(jadeTypingMessage, botResponse);
+            saveMessageToCurrentChat('J.A.D.E.', botResponse);
             chatbox.scrollTop = chatbox.scrollHeight;
 
         } catch (err) {
             console.error(err);
             const errorText = `Falha ao conectar (${err.message})`;
             updateBotMessage(jadeTypingMessage, errorText);
-            saveMessageToCurrentChat('System', errorText);
+            saveMessageToCurrentChat('J.A.D.E.', errorText);
         }
     }
 
