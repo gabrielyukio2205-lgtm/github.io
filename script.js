@@ -1,15 +1,7 @@
 (function() {
     'use strict';
 
-    // Helper to get API URL
-    function getApiUrl() {
-        const stored = localStorage.getItem('jade_api_url');
-        if (stored) return stored.replace(/\/$/, ''); // Remove trailing slash
-        // Fallback to localhost for development, or the user's render URL if preferred default
-        return 'https://jade-proxy.onrender.com/chat'; 
-    }
-
-    const API_URL = getApiUrl();
+    const API_URL = 'https://jade-proxy.onrender.com'; // Base URL
     
     // State Management
     let conversations = [];
