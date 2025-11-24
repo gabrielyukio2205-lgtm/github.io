@@ -448,7 +448,11 @@
             const resp = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_input: message, image_base64: image_base64 })
+                body: JSON.stringify({ 
+                    user_input: message, 
+                    image_base64: image_base64,
+                    user_id: currentChatId
+                })
             });
 
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
