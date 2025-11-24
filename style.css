@@ -710,6 +710,48 @@ pre code {
   opacity: 0.7;
 }
 
+/* Generated Images & Files */
+.generated-images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.generated-image-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-color);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.generated-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.download-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.download-link:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
 /* Responsiveness */
 @media (max-width: 768px) {
     #sidebar {

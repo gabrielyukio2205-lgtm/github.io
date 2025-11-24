@@ -1,7 +1,15 @@
 (function() {
     'use strict';
 
-    const API_URL = 'https://jade-proxy.onrender.com'; // Base URL
+    // Helper to get API URL
+    function getApiUrl() {
+        const stored = localStorage.getItem('jade_api_url');
+        if (stored) return stored.replace(/\/$/, ''); // Remove trailing slash
+        // Fallback to localhost for development, or the user's render URL if preferred default
+        return 'http://localhost:7860'; 
+    }
+
+    const API_URL = getApiUrl();
     
     // State Management
     let conversations = [];
@@ -418,11 +426,30 @@
         });
     }
 
-    function updateBotMessage(messageEl, text) {
+    function updateBotMessage(messageEl, text, images = []) {
         const textEl = messageEl.querySelector('.text');
         if (textEl) {
             // Use marked
-            textEl.innerHTML = renderMarkdown(text);
+            let htmlContent = renderMarkdown(text);
+            
+            // Append images if available
+            if (images && images.length > 0) {
+                htmlContent += '<div class="generated-images-container">';
+                images.forEach(img => {
+                    // Assuming img has {filename, b64}
+                    htmlContent += `
+                        <div class="generated-image-wrapper">
+                            <img src="data:image/png;base64,${img.b64}" alt="${img.filename}" class="generated-image">
+                            <a href="${API_URL}/download/${img.filename}" target="_blank" class="download-link" download="${img.filename}">
+                                ⬇️ Baixar ${img.filename}
+                            </a>
+                        </div>
+                    `;
+                });
+                htmlContent += '</div>';
+            }
+            
+            textEl.innerHTML = htmlContent;
         }
     }
 
@@ -490,19 +517,26 @@
                 if (json.audio_base64 && currentMode === 'chat') {
                     audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
                     audioPlayer.play();
-                } else {
-                    // Fallback to TTS if audio is missing but user expects sound
+                } else if (currentMode === 'chat') {
+                    // Fallback to TTS only for chat mode
                     speakText(botResponse);
                 }
             } else {
                 botResponse = `[Erro: ${json.error || 'Desconhecido'}]`;
             }
             
-            if (botResponse === undefined) {
-                botResponse = "[Erro de comunicação]";
+            // Handle empty response but with files
+            if (!botResponse && json.generated_images && json.generated_images.length > 0) {
+                botResponse = "Aqui estão os arquivos gerados:";
+            } else if (botResponse === undefined || botResponse === "") {
+                 if (currentMode === 'code') {
+                     botResponse = "Tarefa concluída (sem saída de texto).";
+                 } else {
+                     botResponse = "[Sem resposta]";
+                 }
             }
 
-            updateBotMessage(jadeTypingMessage, botResponse);
+            updateBotMessage(jadeTypingMessage, botResponse, json.generated_images);
             saveMessageToCurrentChat(currentMode === 'chat' ? 'J.A.D.E.' : 'CodeJade', botResponse);
             chatbox.scrollTop = chatbox.scrollHeight;
 
