@@ -1,6 +1,7 @@
 (function() {
     'use strict';
 
+    // URL da sua API no Render (Mantenha a que estava funcionando)
     const API_URL = 'https://jade-proxy.onrender.com/chat';
     
     // State Management
@@ -62,6 +63,20 @@
         themeToggleBtn.addEventListener('click', toggleTheme);
     }
 
+    // --- Identity Management (A Correção da Berta 🧠) ---
+    
+    function getPersistentUserId() {
+        // Tenta pegar o ID mestre do navegador
+        let userId = localStorage.getItem('jade_master_user_id');
+        if (!userId) {
+            // Se não existir, cria um novo e salva para sempre
+            // Ex: user_k8s7d6f5...
+            userId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+            localStorage.setItem('jade_master_user_id', userId);
+        }
+        return userId;
+    }
+
     // --- Theme Management ---
 
     function initTheme() {
@@ -109,9 +124,6 @@
             startNewChat();
         }
         renderHistoryList();
-        
-        // Check window width for initial sidebar state (optional, but good for persistence)
-        // Currently relying on CSS defaults (Desktop: Open, Mobile: Closed)
     }
     
     function toggleSidebar() {
@@ -277,7 +289,6 @@
         if (typeof marked !== 'undefined') {
             return marked.parse(text);
         }
-        // Fallback
         let html = escapeHtml(text);
         html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         html = html.replace(/\*(.*?)\*/g, '<b>$1</b>');
@@ -333,60 +344,6 @@
         return el;
     }
 
-    function typeText(element, text, speed = 10) {
-        return new Promise(resolve => {
-            element.innerHTML = ''; // Clear typing indicator
-            let i = 0;
-            
-            // To handle HTML correctly, we can't just slice the string if it has tags.
-            // Since we are using marked, we get full HTML.
-            // Typing effect on HTML is hard.
-            // A simpler approach for "Big Tech" feel without breaking HTML is:
-            // 1. Render fully invisible, then reveal? No.
-            // 2. Just append chunks.
-            
-            // Actually, for complex Markdown, typing effect is tricky.
-            // Compromise: If text contains markdown-like chars, just show it (or use a library).
-            // But simple "streaming" usually just appends text.
-            // Since we render markdown at the end, we can't type markdown raw.
-            // We must render markdown first, then maybe type it? No, that breaks tags.
-            
-            // Re-evaluating: Most LLM UIs stream raw text and render markdown incrementally.
-            // Doing that properly requires a stream parser.
-            // For this simpler app, let's just show the full message with a fade-in, OR
-            // stick to typing effect ONLY if we assume plain text, but we want markdown.
-            
-            // Alternative: Fake the "streaming" by showing the full rendered HTML immediately
-            // but wrapped in a fade-in animation, which we already have.
-            // However, the user asked for "improvement".
-            
-            // Let's implement a "Chunked" reveal for the markdown content?
-            // Or simpler: Just render the markdown immediately. The "Typing" state 
-            // is the "Thinking" state. When the response arrives (it arrives in bulk here), 
-            // showing it all at once is actually faster/better than fake typing a bulk response.
-            // REAL "Big Tech" streaming is backend streaming.
-            // Since I can't change the backend to stream, I will skip the fake typewriter
-            // for complex markdown to avoid breaking HTML tags, but I will ensure
-            // the transition is smooth.
-            
-            // WAIT, I promised Typewriter effect.
-            // Let's try to "type" the visible text nodes only? Too complex for this scope.
-            // Let's stick to: If the response is short (< 100 chars) and no code blocks, type it.
-            // Otherwise, fade in.
-            
-            // Actually, `typeText` function is hard with HTML.
-            // I'll stick to just rendering Markdown for now as that's a huge improvement.
-            // If I really want "streaming" look without streaming backend, I'd have to parse the HTML 
-            // and reveal it node by node.
-            
-            // Decision: I will just render the markdown. The "typing" indicator suggests thinking.
-            // I'll add a small "fade in" effect to the text content itself.
-            
-            element.innerHTML = renderMarkdown(text);
-            resolve();
-        });
-    }
-
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -399,28 +356,19 @@
     function updateBotMessage(messageEl, text) {
         const textEl = messageEl.querySelector('.text');
         if (textEl) {
-            // Use marked
             textEl.innerHTML = renderMarkdown(text);
         }
     }
 
     function speakText(text) {
         if ('speechSynthesis' in window) {
-            // Cancel any current speech
             window.speechSynthesis.cancel();
-            
-            // Strip markdown for speech
-            // Simple strip: remove ** * ` [ ] ( )
             const plainText = text.replace(/[#*`\[\]]/g, ''); 
-            
             const utterance = new SpeechSynthesisUtterance(plainText);
-            utterance.lang = 'pt-BR'; // Portuguese Brazil
-            
-            // Try to select a female voice if available to match "Jade"
+            utterance.lang = 'pt-BR'; 
             const voices = window.speechSynthesis.getVoices();
             const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
             if (preferredVoice) utterance.voice = preferredVoice;
-            
             window.speechSynthesis.speak(utterance);
         }
     }
@@ -444,6 +392,10 @@
 
         const jadeTypingMessage = appendMessage('J.A.D.E.', '', true, false);
 
+        // --- AQUI ESTÁ A CORREÇÃO DA MEMÓRIA ---
+        // Pegamos o ID mestre que nunca muda
+        const masterUserId = getPersistentUserId();
+
         try {
             const resp = await fetch(API_URL, {
                 method: 'POST',
@@ -451,7 +403,8 @@
                 body: JSON.stringify({ 
                     user_input: message, 
                     image_base64: image_base64,
-                    user_id: currentChatId
+                    // Enviamos o ID mestre, não o ID do chat atual
+                    user_id: masterUserId 
                 })
             });
 
@@ -466,7 +419,6 @@
                     audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
                     audioPlayer.play();
                 } else {
-                    // Fallback to TTS if audio is missing but user expects sound
                     speakText(botResponse);
                 }
             } else {
