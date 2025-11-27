@@ -1,12 +1,14 @@
 (function() {
     'use strict';
 
-    // URL da sua API no Render (Mantenha a que estava funcionando)
-    const API_URL = 'https://jade-proxy.onrender.com/chat';
+    // Endpoints relativos para funcionar no ambiente atual e Docker
+    const CHAT_API_URL = '/chat';
+    const SCHOLAR_API_URL = '/scholar';
     
     // State Management
     let conversations = [];
     let currentChatId = null;
+    let mode = 'chat'; // 'chat' or 'scholar'
     
     // Cache DOM elements
     const chatbox = document.getElementById('chatbox');
@@ -31,6 +33,33 @@
     const sunIcon = document.getElementById('sun-icon');
     const moonIcon = document.getElementById('moon-icon');
 
+    // Scholar UI Elements (to be added dynamically or managed)
+    const modeSwitchBtn = document.createElement('button');
+    modeSwitchBtn.id = 'mode-switch-btn';
+    modeSwitchBtn.className = 'icon-btn';
+    modeSwitchBtn.innerHTML = '🎓';
+    modeSwitchBtn.title = 'Alternar para Modo Scholar';
+    // Insert mode switch next to new chat button in sidebar header
+    document.querySelector('.sidebar-header .actions').appendChild(modeSwitchBtn);
+
+    const scholarTools = document.createElement('div');
+    scholarTools.id = 'scholar-tools';
+    scholarTools.className = 'scholar-tools hidden';
+    scholarTools.innerHTML = `
+        <div class="scholar-actions">
+            <button data-action="ingest" class="scholar-btn">📥 Ingest</button>
+            <button data-action="summarize" class="scholar-btn">📝 Summarize</button>
+            <button data-action="mindmap" class="scholar-btn">🗺️ Mindmap</button>
+            <button data-action="podcast" class="scholar-btn">🎧 Podcast</button>
+            <button data-action="debate" class="scholar-btn">🔥 Debate</button>
+            <button data-action="quiz" class="scholar-btn">🎮 Quiz</button>
+            <button data-action="flashcards" class="scholar-btn">🃏 Flashcards</button>
+            <button data-action="handout" class="scholar-btn">📚 Handout</button>
+        </div>
+    `;
+    document.querySelector('.input-area').insertBefore(scholarTools, document.querySelector('.input-container'));
+
+
     // Init Marked & Highlight.js
     if (typeof marked !== 'undefined') {
         marked.setOptions({
@@ -43,11 +72,11 @@
     }
 
     function setupEventListeners() {
-        sendBtn.addEventListener('click', sendMessage);
+        sendBtn.addEventListener('click', handleSend);
         userInput.addEventListener('keydown', e => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                sendMessage();
+                handleSend();
             }
         });
         imageBtn.addEventListener('click', () => imageInput.click());
@@ -61,16 +90,40 @@
 
         // Theme Event
         themeToggleBtn.addEventListener('click', toggleTheme);
+
+        // Mode Switch
+        modeSwitchBtn.addEventListener('click', toggleMode);
+
+        // Scholar Actions
+        scholarTools.addEventListener('click', (e) => {
+            if (e.target.classList.contains('scholar-btn')) {
+                const action = e.target.getAttribute('data-action');
+                handleScholarAction(action);
+            }
+        });
     }
 
-    // --- Identity Management (A Correção da Berta 🧠) ---
+    function toggleMode() {
+        if (mode === 'chat') {
+            mode = 'scholar';
+            modeSwitchBtn.innerHTML = '💬';
+            modeSwitchBtn.title = 'Alternar para Modo Chat';
+            scholarTools.classList.remove('hidden');
+            appendMessage('System', '🎓 **Modo Scholar Ativado**. Digite um Tópico, URL ou envie um PDF para começar. Use os botões acima para ações.', false, false);
+        } else {
+            mode = 'chat';
+            modeSwitchBtn.innerHTML = '🎓';
+            modeSwitchBtn.title = 'Alternar para Modo Scholar';
+            scholarTools.classList.add('hidden');
+            appendMessage('System', '💬 **Modo Chat Ativado**.', false, false);
+        }
+    }
+
+    // --- Identity Management ---
     
     function getPersistentUserId() {
-        // Tenta pegar o ID mestre do navegador
         let userId = localStorage.getItem('jade_master_user_id');
         if (!userId) {
-            // Se não existir, cria um novo e salva para sempre
-            // Ex: user_k8s7d6f5...
             userId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             localStorage.setItem('jade_master_user_id', userId);
         }
@@ -373,8 +426,19 @@
         }
     }
 
-    async function sendMessage() {
+    function handleSend() {
         const message = userInput.value.trim();
+        if (mode === 'chat') {
+            sendMessage(message);
+        } else {
+            // In Scholar mode, default text input is considered 'ingest' action
+            if (message) {
+                 handleScholarAction('ingest', message);
+            }
+        }
+    }
+
+    async function sendMessage(message) {
         let image_base64 = null;
         if (!message && imageInput.files.length === 0) return;
 
@@ -391,19 +455,15 @@
         userInput.value = '';
 
         const jadeTypingMessage = appendMessage('J.A.D.E.', '', true, false);
-
-        // --- AQUI ESTÁ A CORREÇÃO DA MEMÓRIA ---
-        // Pegamos o ID mestre que nunca muda
         const masterUserId = getPersistentUserId();
 
         try {
-            const resp = await fetch(API_URL, {
+            const resp = await fetch(CHAT_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     user_input: message, 
                     image_base64: image_base64,
-                    // Enviamos o ID mestre, não o ID do chat atual
                     user_id: masterUserId 
                 })
             });
@@ -438,6 +498,76 @@
             const errorText = `Falha ao conectar (${err.message})`;
             updateBotMessage(jadeTypingMessage, errorText);
             saveMessageToCurrentChat('J.A.D.E.', errorText);
+        }
+    }
+
+    async function handleScholarAction(action, inputTarget = null) {
+        const masterUserId = getPersistentUserId();
+        
+        // Se for ingest, usa o target passado ou o valor do input
+        let target = inputTarget;
+        
+        // Feedback visual
+        appendMessage('Você', `[Scholar Action] ${action} ${target ? target : ''}`);
+        const scholarTypingMessage = appendMessage('Scholar', '', true, false);
+
+        if (action === 'ingest' && inputTarget) {
+            userInput.value = ''; // limpa input
+        }
+
+        try {
+            const resp = await fetch(SCHOLAR_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    user_id: masterUserId,
+                    action: action,
+                    target: target
+                })
+            });
+
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            
+            const json = await resp.json();
+            let botResponse = "";
+
+            if (json.success) {
+                botResponse = `**${json.message}**\n\n`;
+                
+                if (json.data && typeof json.data === 'string') {
+                    botResponse += json.data;
+                } else if (json.data && Array.isArray(json.data)) {
+                    // Formata Quiz ou Lista
+                    botResponse += "```json\n" + JSON.stringify(json.data, null, 2) + "\n```";
+                }
+
+                if (json.file_base64) {
+                    if (json.file_type.startsWith('image')) {
+                        botResponse += `\n\n![Mapa Mental](data:${json.file_type};base64,${json.file_base64})`;
+                    } else if (json.file_type.startsWith('audio')) {
+                         audioPlayer.src = `data:${json.file_type};base64,${json.file_base64}`;
+                         audioPlayer.play();
+                         botResponse += `\n\n🔊 Reproduzindo áudio...`;
+                    } else {
+                         // Download link
+                         const link = `<a href="data:${json.file_type};base64,${json.file_base64}" download="${json.filename || 'download'}">⬇️ Baixar Arquivo</a>`;
+                         botResponse += `\n\n${link}`;
+                    }
+                }
+
+            } else {
+                botResponse = `❌ [Erro Scholar: ${json.message}]`;
+            }
+
+            updateBotMessage(scholarTypingMessage, botResponse);
+            saveMessageToCurrentChat('Scholar', botResponse);
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+        } catch (err) {
+            console.error(err);
+            const errorText = `Falha ao conectar ao Scholar Agent (${err.message})`;
+            updateBotMessage(scholarTypingMessage, errorText);
+            saveMessageToCurrentChat('Scholar', errorText);
         }
     }
 
