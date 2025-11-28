@@ -1,8 +1,9 @@
 (function() {
     'use strict';
 
-    // URL da sua API no Render (Mantenha a que estava funcionando)
-    const API_URL = 'https://jade-proxy.onrender.com/chat';
+    // 1. URL DA API (O Proxy no Render)
+    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+    const API_URL = `${PROXY_BASE_URL}/chat`;
     
     // State Management
     let conversations = [];
@@ -62,93 +63,13 @@
 
         // Theme Event
         themeToggleBtn.addEventListener('click', toggleTheme);
-
-        // Custom Dropdown Logic
-        setupCustomDropdown();
     }
 
-    function setupCustomDropdown() {
-        const wrapper = document.querySelector('.custom-select-wrapper');
-        const customSelect = wrapper.querySelector('.custom-select');
-        const trigger = wrapper.querySelector('.custom-select__trigger');
-        const options = wrapper.querySelectorAll('.custom-option');
-        const nativeSelect = document.getElementById('agent-selector');
-
-        if (!wrapper || !customSelect || !trigger) return;
-
-        // Toggle dropdown
-        trigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            customSelect.classList.toggle('open');
-        });
-
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!customSelect.contains(e.target)) {
-                customSelect.classList.remove('open');
-            }
-        });
-
-        // Handle option selection
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                // Remove selected class from all
-                options.forEach(opt => opt.classList.remove('selected'));
-                // Add selected class to clicked
-                option.classList.add('selected');
-                
-                // Update trigger text
-                const textSpan = trigger.querySelector('.trigger-text');
-                const optionText = option.querySelector('span:last-child').textContent;
-                textSpan.textContent = optionText;
-
-                // Update native select value
-                const value = option.getAttribute('data-value');
-                nativeSelect.value = value;
-                nativeSelect.dispatchEvent(new Event('change'));
-
-                // Close dropdown
-                customSelect.classList.remove('open');
-            });
-        });
-
-        // Accessibility: Keyboard Navigation
-        customSelect.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                customSelect.classList.toggle('open');
-            } else if (e.key === 'Escape') {
-                customSelect.classList.remove('open');
-            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (!customSelect.classList.contains('open')) {
-                    customSelect.classList.add('open');
-                    return;
-                }
-                
-                const current = wrapper.querySelector('.custom-option.selected');
-                let next;
-                if (e.key === 'ArrowDown') {
-                    next = current ? current.nextElementSibling : options[0];
-                } else {
-                    next = current ? current.previousElementSibling : options[options.length - 1];
-                }
-
-                if (next) {
-                    next.click(); // Reuse click logic to select
-                }
-            }
-        });
-    }
-
-    // --- Identity Management (A Correção da Berta 🧠) ---
+    // --- Identity Management ---
     
     function getPersistentUserId() {
-        // Tenta pegar o ID mestre do navegador
         let userId = localStorage.getItem('jade_master_user_id');
         if (!userId) {
-            // Se não existir, cria um novo e salva para sempre
-            // Ex: user_k8s7d6f5...
             userId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             localStorage.setItem('jade_master_user_id', userId);
         }
@@ -310,14 +231,12 @@
             const div = document.createElement('div');
             div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
             
-            // Text container
             const span = document.createElement('span');
             span.textContent = chat.title;
             span.style.flex = '1';
             span.style.overflow = 'hidden';
             span.style.textOverflow = 'ellipsis';
             
-            // Delete Button
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-chat-btn';
             delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -363,15 +282,28 @@
         imagePreviewContainer.classList.add('hidden');
     }
 
+    // 🔴 FUNÇÃO CORRIGIDA PARA OS LINKS 🔴
     function renderMarkdown(text) {
+        let html;
         if (typeof marked !== 'undefined') {
-            return marked.parse(text);
+            html = marked.parse(text);
+        } else {
+            html = escapeHtml(text);
+            html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            html = html.replace(/\*(.*?)\*/g, '<b>$1</b>');
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            html = html.replace(/\n/g, '<br>');
         }
-        let html = escapeHtml(text);
-        html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-        html = html.replace(/\*(.*?)\*/g, '<b>$1</b>');
-        html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-        html = html.replace(/\n/g, '<br>');
+
+        // AQUI ESTÁ O FIX DO 404
+        // Substitui links relativos /generated/ por links absolutos do Render
+        const regex = /href="\/generated\/(.*?)"/g;
+        html = html.replace(regex, `target="_blank" href="${PROXY_BASE_URL}/generated/$1"`);
+        
+        // Garante que links normais abram em nova aba também
+        // (opcional, mas bom pra UX)
+        html = html.replace(/<a href="http/g, '<a target="_blank" href="http');
+
         return html;
     }
 
@@ -473,24 +405,26 @@
 
         const jadeTypingMessage = appendMessage(agentName, '', true, false);
 
-        // --- AQUI ESTÁ A CORREÇÃO DA MEMÓRIA ---
-        // Pegamos o ID mestre que nunca muda
         const masterUserId = getPersistentUserId();
 
         try {
+            console.log(`📡 Enviando para: ${API_URL}`);
+            
             const resp = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     user_input: message, 
                     image_base64: image_base64,
-                    // Enviamos o ID mestre, não o ID do chat atual
                     user_id: masterUserId,
                     agent_type: selectedAgent
                 })
             });
 
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            if (!resp.ok) {
+                 const errorText = await resp.text();
+                 throw new Error(`HTTP ${resp.status} - ${errorText.substring(0, 100)}`);
+            }
             
             const json = await resp.json();
             let botResponse;
@@ -517,7 +451,7 @@
 
         } catch (err) {
             console.error(err);
-            const errorText = `Falha ao conectar (${err.message})`;
+            const errorText = `Falha ao conectar (${err.message}).`;
             updateBotMessage(jadeTypingMessage, errorText);
             saveMessageToCurrentChat(agentName, errorText);
         }
