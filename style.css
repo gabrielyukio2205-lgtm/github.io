@@ -1,5 +1,5 @@
 :root {
-  /* Modern Dark Palette (Default) */
+  /* Paleta Dark Moderna (Padrão) */
   --bg-color: #050505;
   --sidebar-bg: #101012;
   --surface-color: rgba(22, 22, 24, 0.7);
@@ -25,7 +25,7 @@
   --radius-lg: 1rem;
   --radius-full: 9999px;
 
-  /* Specific Colors */
+  /* Cores Específicas */
   --icon-btn-hover-bg: rgba(255, 255, 255, 0.1);
   --user-msg-bg: #27272a;
   --user-msg-text: white;
@@ -35,7 +35,7 @@
   --delete-btn-color: #ef4444;
 }
 
-/* Light Mode Palette */
+/* Paleta Light Mode */
 [data-theme="light"] {
   --bg-color: #ffffff;
   --sidebar-bg: #f8f9fa;
@@ -75,7 +75,7 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Background Effects */
+/* Efeitos de Fundo */
 .background-effects {
   position: fixed;
   top: 0;
@@ -133,7 +133,7 @@ body {
   100% { transform: translate(0, 0) scale(1); }
 }
 
-/* Layout Container */
+/* Layout */
 #layout-container {
     display: flex;
     width: 100%;
@@ -151,10 +151,9 @@ body {
     padding: 1rem;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
     z-index: 30;
-    flex-shrink: 0; /* Prevent shrinking */
+    flex-shrink: 0;
 }
 
-/* Desktop Collapse State */
 @media (min-width: 769px) {
     #sidebar.collapsed {
         margin-left: -280px;
@@ -226,7 +225,7 @@ body {
 .history-item {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Important for spacing delete btn */
+    justify-content: space-between;
     padding: 10px 12px;
     border-radius: 8px;
     color: var(--text-primary);
@@ -243,7 +242,6 @@ body {
     color: #60a5fa;
 }
 
-/* Delete Button Styles */
 .delete-chat-btn {
     opacity: 0;
     background: transparent;
@@ -265,7 +263,6 @@ body {
     background: var(--delete-btn-hover);
     color: var(--delete-btn-color);
 }
-/* On mobile, always show delete button if needed, or stick to hover behavior */
 
 .sidebar-footer {
     margin-top: auto;
@@ -301,7 +298,7 @@ body {
   height: 100%;
   position: relative;
   backdrop-filter: blur(0px);
-  min-width: 0; /* Important for flex children truncation */
+  min-width: 0;
 }
 
 /* Header */
@@ -323,7 +320,7 @@ body {
     gap: 1rem;
 }
 #mobile-menu-btn {
-    display: none; /* Hidden on desktop by default, unless sidebar is collapsed */
+    display: none;
 }
 
 @media (min-width: 769px) {
@@ -440,7 +437,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  min-width: 0; /* Fix flex text overflow */
+  min-width: 0;
 }
 
 .sender-name {
@@ -503,22 +500,19 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Code Blocks & Markdown */
+/* Code Blocks */
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
   padding: 0.2em 0.4em;
   border-radius: 4px;
 }
-/* Inline code */
 :not(pre) > code {
    background: var(--code-bg);
    color: var(--primary-color);
 }
-
-/* Pre block (multiline code) */
 pre {
-    background: var(--code-bg) !important; /* Override highlight.js bg if needed to match theme */
+    background: var(--code-bg) !important;
     padding: 1rem;
     border-radius: 8px;
     overflow-x: auto;
@@ -701,121 +695,46 @@ pre code {
     }
 }
 
-/* Custom Dropdown Styling */
-.custom-select-wrapper {
-    position: relative;
-    user-select: none;
-    width: 160px; /* Adjust width as needed */
-}
-
-.custom-select {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-.custom-select__trigger {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    background: var(--surface-color); /* Matches theme button bg */
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.custom-select__trigger:hover {
-    background: var(--surface-hover);
-    border-color: var(--border-active);
-}
-
-.custom-select.open .custom-select__trigger {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-color: var(--primary-color);
-}
-
-.arrow {
-    transition: transform 0.2s;
-    opacity: 0.7;
-}
-
-.custom-select.open .arrow {
-    transform: rotate(180deg);
-}
-
-.custom-options {
-    position: absolute;
-    display: block;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-top: none;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    box-shadow: var(--shadow-lg);
-    z-index: 50;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-10px);
-    transition: all 0.2s;
-    overflow: hidden;
-}
-
-.custom-select.open .custom-options {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: all;
-    transform: translateY(0);
-}
-
-.custom-option {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.custom-option .icon {
-    font-size: 1.1em;
-}
-
-.custom-option:hover {
-    background: var(--icon-btn-hover-bg);
-    color: var(--text-primary);
-}
-
-.custom-option.selected {
-    color: var(--primary-color);
-    background: rgba(59, 130, 246, 0.1);
-    font-weight: 500;
-}
-
-/* Ensure controls are aligned */
+/* --- ESTILO DO SELETOR DE AGENTE (Beautification) --- */
 .controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Mobile responsiveness for dropdown */
-@media (max-width: 480px) {
-    .custom-select-wrapper {
-        width: 140px;
-    }
-    .custom-select__trigger span {
-        font-size: 0.85rem;
-    }
+#agent-selector {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 34px 8px 12px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+#agent-selector:hover {
+  background-color: var(--icon-btn-hover-bg);
+  border-color: var(--border-active);
+}
+
+#agent-selector:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+#agent-selector option {
+  background-color: var(--sidebar-bg);
+  color: var(--text-primary);
+  padding: 10px;
 }
