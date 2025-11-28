@@ -695,46 +695,61 @@ pre code {
     }
 }
 
-/* --- ESTILO DO SELETOR DE AGENTE (Beautification) --- */
+/* --- ESTILO DO SELETOR DE AGENTE (Sidebar) --- */
 .controls {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-#agent-selector {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-color: transparent;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  font-weight: 500;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px 34px 8px 12px;
+#agent-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 2rem;
+}
+
+.agent-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 10px 12px;
+  border-radius: 12px;
   cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
 }
 
-#agent-selector:hover {
-  background-color: var(--icon-btn-hover-bg);
-  border-color: var(--border-active);
-}
-
-#agent-selector:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-#agent-selector option {
-  background-color: var(--sidebar-bg);
+.agent-btn:hover {
+  background: var(--icon-btn-hover-bg);
   color: var(--text-primary);
-  padding: 10px;
+}
+
+.agent-btn.active {
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.agent-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.agent-btn.active .agent-icon {
+  color: var(--primary-color);
 }
