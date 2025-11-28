@@ -8,12 +8,12 @@
     // State Management
     let conversations = [];
     let currentChatId = null;
+    let currentAgent = 'jade'; // Default agent
     
     // Cache DOM elements
     const chatbox = document.getElementById('chatbox');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
-    const agentSelector = document.getElementById('agent-selector');
     const imageInput = document.getElementById('imageInput');
     const imageBtn = document.getElementById('imageBtn');
     const audioPlayer = document.getElementById('audioPlayer');
@@ -27,6 +27,10 @@
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const newChatBtn = document.getElementById('new-chat-btn');
     const chatHistoryList = document.getElementById('chat-history-list');
+    const agentSwitcher = document.getElementById('agent-switcher'); // New
+
+    // Header Elements
+    const headerTitle = document.getElementById('header-title');
 
     // Theme Elements
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -60,6 +64,17 @@
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
         mobileMenuBtn.addEventListener('click', toggleSidebar);
         newChatBtn.addEventListener('click', startNewChat);
+
+        // Agent Switcher Events
+        if (agentSwitcher) {
+            const buttons = agentSwitcher.querySelectorAll('.agent-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const agent = btn.getAttribute('data-agent');
+                    switchAgent(agent);
+                });
+            });
+        }
 
         // Theme Event
         themeToggleBtn.addEventListener('click', toggleTheme);
@@ -112,13 +127,69 @@
         }
     }
 
+    // --- Agent Management ---
+
+    function switchAgent(agent) {
+        if (currentAgent === agent) return;
+        currentAgent = agent;
+
+        // Update UI
+        updateAgentUI();
+
+        // Reload history and start new chat or load latest
+        renderHistoryList();
+
+        // Try to find the most recent chat for this agent
+        const lastChat = conversations.find(c => (c.agent || 'jade') === currentAgent);
+        if (lastChat) {
+            loadChat(lastChat.id);
+        } else {
+            startNewChat();
+        }
+
+        // Close sidebar on mobile if open
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('open');
+        }
+    }
+
+    function updateAgentUI() {
+        // Update Sidebar Buttons
+        const buttons = agentSwitcher.querySelectorAll('.agent-btn');
+        buttons.forEach(btn => {
+            if (btn.getAttribute('data-agent') === currentAgent) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Update Header Title and Input Placeholder
+        if (currentAgent === 'scholar') {
+            headerTitle.textContent = 'Scholar Graph';
+            userInput.placeholder = 'Envie uma mensagem para Scholar Graph...';
+        } else {
+            headerTitle.textContent = 'J.A.D.E.';
+            userInput.placeholder = 'Envie uma mensagem para J.A.D.E...';
+        }
+    }
+
     // --- State & Storage ---
 
     function init() {
         initTheme();
         loadConversations();
-        if (conversations.length > 0) {
-            loadChat(conversations[0].id);
+
+        // Restore agent state if we want persistence (optional, sticking to default for now or infer from last chat)
+        // For now, let's stick to default 'jade' or maybe the last used?
+        // Let's keep it simple: Start with JADE.
+
+        updateAgentUI();
+
+        // Load initial chat
+        const lastChat = conversations.find(c => (c.agent || 'jade') === currentAgent);
+        if (lastChat) {
+            loadChat(lastChat.id);
         } else {
             startNewChat();
         }
@@ -162,7 +233,8 @@
             id: currentChatId,
             title: 'Nova conversa',
             messages: [],
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            agent: currentAgent // Save current agent to chat
         };
         conversations.unshift(newChat); // Add to top
         saveConversations();
@@ -177,6 +249,18 @@
         if (!chat) return;
 
         currentChatId = id;
+
+        // Ensure we switch the agent context if we load a chat from history (though UI hides others)
+        const chatAgent = chat.agent || 'jade';
+        if (chatAgent !== currentAgent) {
+             // This might happen if we click a link that was somehow visible,
+             // but our renderHistoryList filters them.
+             // Just in case, update state.
+             currentAgent = chatAgent;
+             updateAgentUI();
+             renderHistoryList(); // Re-render list to match new agent
+        }
+
         chatbox.innerHTML = '';
         
         if (chat.messages.length === 0) {
@@ -197,6 +281,9 @@
             const chat = conversations[chatIndex];
             chat.messages.push({ sender, text, timestamp: Date.now() });
             
+            // Ensure agent is set (for migration of old chats)
+            if (!chat.agent) chat.agent = 'jade';
+
             if (sender === 'Você' && chat.title === 'Nova conversa') {
                 chat.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
             }
@@ -213,9 +300,12 @@
         if (confirm('Tem certeza que deseja excluir esta conversa?')) {
             conversations = conversations.filter(c => c.id !== id);
             saveConversations();
+
             if (currentChatId === id) {
-                if (conversations.length > 0) {
-                    loadChat(conversations[0].id);
+                // Try to find another chat for current agent
+                const nextChat = conversations.find(c => (c.agent || 'jade') === currentAgent);
+                if (nextChat) {
+                    loadChat(nextChat.id);
                 } else {
                     startNewChat();
                 }
@@ -227,7 +317,10 @@
 
     function renderHistoryList() {
         chatHistoryList.innerHTML = '';
-        conversations.forEach(chat => {
+        // Filter conversations by current agent
+        const filteredConversations = conversations.filter(c => (c.agent || 'jade') === currentAgent);
+
+        filteredConversations.forEach(chat => {
             const div = document.createElement('div');
             div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
             
@@ -252,6 +345,11 @@
     }
 
     function appendWelcomeMessage() {
+        const agentName = currentAgent === 'scholar' ? 'Scholar Graph' : 'J.A.D.E.';
+        const welcomeText = currentAgent === 'scholar'
+            ? 'Olá. Eu sou Scholar Graph, seu assistente de pesquisa. Como posso ajudar em seus estudos?'
+            : 'Olá. Eu sou J.A.D.E., sua assistente de inteligência artificial avançada. Como posso ajudar você hoje?';
+
         const el = document.createElement('div');
         el.className = 'message bot welcome-message';
         el.innerHTML = `
@@ -259,8 +357,8 @@
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
             </div>
             <div class="content">
-            <div class="sender-name">J.A.D.E.</div>
-            <div class="text">Olá. Eu sou J.A.D.E., sua assistente de inteligência artificial avançada. Como posso ajudar você hoje?</div>
+            <div class="sender-name">${agentName}</div>
+            <div class="text">${welcomeText}</div>
             </div>
         `;
         chatbox.appendChild(el);
@@ -390,8 +488,8 @@
 
         if (!currentChatId) startNewChat();
 
-        const selectedAgent = agentSelector.value;
-        const agentName = selectedAgent === 'scholar' ? 'Scholar Graph' : 'J.A.D.E.';
+        // Use global currentAgent instead of selector
+        const agentName = currentAgent === 'scholar' ? 'Scholar Graph' : 'J.A.D.E.';
 
         if (imageInput.files.length > 0) {
             const msgText = `${message || ''} [Imagem Anexada]`;
@@ -417,7 +515,7 @@
                     user_input: message, 
                     image_base64: image_base64,
                     user_id: masterUserId,
-                    agent_type: selectedAgent
+                    agent_type: currentAgent // Use global currentAgent
                 })
             });
 
