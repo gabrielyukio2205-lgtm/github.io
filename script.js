@@ -2,10 +2,9 @@
     'use strict';
 
     // URL da sua API no Render (Mantenha a que estava funcionando)
-    // Se estiver rodando localmente, use http://localhost:7860/chat ou a porta que configurou
-    // Se estiver no Render, use a URL do Render.
-    // Para este ambiente de desenvolvimento, assumiremos relativo ou localhost se não definido.
-    const API_URL = '/chat'; 
+    // Para dev local use: const API_URL = 'http://localhost:7860/chat';
+    // Para produção relativa use: const API_URL = '/chat';
+    const API_URL = '/chat';
     
     // State Management
     let conversations = [];
@@ -15,6 +14,7 @@
     const chatbox = document.getElementById('chatbox');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const agentSelector = document.getElementById('agent-selector');
     const imageInput = document.getElementById('imageInput');
     const imageBtn = document.getElementById('imageBtn');
     const audioPlayer = document.getElementById('audioPlayer');
@@ -28,7 +28,6 @@
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const newChatBtn = document.getElementById('new-chat-btn');
     const chatHistoryList = document.getElementById('chat-history-list');
-    const agentSelector = document.getElementById('agent-selector');
 
     // Theme Elements
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -188,7 +187,7 @@
             appendWelcomeMessage();
         } else {
             chat.messages.forEach(msg => {
-                appendMessage(msg.sender, msg.text, false, false, msg.attachments);
+                appendMessage(msg.sender, msg.text, false, false);
             });
         }
         
@@ -196,11 +195,11 @@
         sidebar.classList.remove('open');
     }
 
-    function saveMessageToCurrentChat(sender, text, attachments = []) {
+    function saveMessageToCurrentChat(sender, text) {
         const chatIndex = conversations.findIndex(c => c.id === currentChatId);
         if (chatIndex !== -1) {
             const chat = conversations[chatIndex];
-            chat.messages.push({ sender, text, attachments, timestamp: Date.now() });
+            chat.messages.push({ sender, text, timestamp: Date.now() });
             
             if (sender === 'Você' && chat.title === 'Nova conversa') {
                 chat.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
@@ -290,7 +289,6 @@
     }
 
     function renderMarkdown(text) {
-        if (!text) return "";
         if (typeof marked !== 'undefined') {
             return marked.parse(text);
         }
@@ -308,7 +306,7 @@
         }[ch]));
     }
 
-    function createMessageElement(sender, content, isTyping = false, attachments = []) {
+    function createMessageElement(sender, content, isTyping = false) {
         const isUser = sender === 'Você';
         const senderClass = isUser ? 'user' : 'bot';
         
@@ -323,23 +321,7 @@
         if (isTyping) {
             textHTML = `<div class="text"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
         } else {
-            textHTML = `<div class="text">${renderMarkdown(content)}`;
-            
-            // Render attachments
-            if (attachments && attachments.length > 0) {
-                textHTML += `<div class="attachments">`;
-                attachments.forEach(att => {
-                    if (att.type === 'image') {
-                        textHTML += `<br><img src="${att.url}" alt="${att.title}" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">`;
-                    } else if (att.type === 'audio') {
-                        textHTML += `<br><audio controls src="${att.url}" style="margin-top: 10px; width: 100%;"></audio>`;
-                    } else if (att.type === 'file') {
-                        textHTML += `<br><a href="${att.url}" download class="download-link" style="display: inline-block; margin-top: 10px; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; text-decoration: none; color: inherit;">📎 ${att.title}</a>`;
-                    }
-                });
-                textHTML += `</div>`;
-            }
-            textHTML += `</div>`;
+            textHTML = `<div class="text">${renderMarkdown(content)}</div>`;
         }
         
         const contentHTML = `
@@ -353,13 +335,13 @@
         return el;
     }
 
-    function appendMessage(sender, textContent, isTyping = false, save = true, attachments = []) {
-        const el = createMessageElement(sender, textContent, isTyping, attachments);
+    function appendMessage(sender, textContent, isTyping = false, save = true) {
+        const el = createMessageElement(sender, textContent, isTyping);
         chatbox.appendChild(el);
         chatbox.scrollTop = chatbox.scrollHeight;
         
         if (save && !isTyping) {
-            saveMessageToCurrentChat(sender, textContent, attachments);
+            saveMessageToCurrentChat(sender, textContent);
         }
         
         return el;
@@ -374,25 +356,10 @@
         });
     }
 
-    function updateBotMessage(messageEl, text, attachments = []) {
+    function updateBotMessage(messageEl, text) {
         const textEl = messageEl.querySelector('.text');
         if (textEl) {
-            // Re-render entire text content including attachments
-            let html = renderMarkdown(text);
-            if (attachments && attachments.length > 0) {
-                html += `<div class="attachments">`;
-                attachments.forEach(att => {
-                     if (att.type === 'image') {
-                        html += `<br><img src="${att.url}" alt="${att.title}" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">`;
-                    } else if (att.type === 'audio') {
-                        html += `<br><audio controls src="${att.url}" style="margin-top: 10px; width: 100%;"></audio>`;
-                    } else if (att.type === 'file') {
-                        html += `<br><a href="${att.url}" download class="download-link" style="display: inline-block; margin-top: 10px; padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 4px; text-decoration: none; color: inherit;">📎 ${att.title}</a>`;
-                    }
-                });
-                html += `</div>`;
-            }
-            textEl.innerHTML = html;
+            textEl.innerHTML = renderMarkdown(text);
         }
     }
 
@@ -416,6 +383,9 @@
 
         if (!currentChatId) startNewChat();
 
+        const selectedAgent = agentSelector.value;
+        const agentName = selectedAgent === 'scholar' ? 'Scholar Graph' : 'J.A.D.E.';
+
         if (imageInput.files.length > 0) {
             const msgText = `${message || ''} [Imagem Anexada]`;
             appendMessage('Você', msgText);
@@ -426,14 +396,11 @@
         }
         userInput.value = '';
 
-        const jadeTypingMessage = appendMessage('J.A.D.E.', '', true, false);
+        const jadeTypingMessage = appendMessage(agentName, '', true, false);
 
         // --- AQUI ESTÁ A CORREÇÃO DA MEMÓRIA ---
         // Pegamos o ID mestre que nunca muda
         const masterUserId = getPersistentUserId();
-        
-        // Pegamos o modo do agente selecionado
-        const agentMode = agentSelector.value;
 
         try {
             const resp = await fetch(API_URL, {
@@ -444,7 +411,7 @@
                     image_base64: image_base64,
                     // Enviamos o ID mestre, não o ID do chat atual
                     user_id: masterUserId,
-                    agent_mode: agentMode
+                    agent_type: selectedAgent
                 })
             });
 
@@ -452,18 +419,13 @@
             
             const json = await resp.json();
             let botResponse;
-            let attachments = [];
 
             if (json.success) {
                 botResponse = json.bot_response;
-                attachments = json.attachments || [];
-                
                 if (json.audio_base64) {
                     audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
                     audioPlayer.play();
-                } else if (!json.attachments || !json.attachments.some(a => a.type === 'audio')) {
-                    // Only speak if no audio attachment is provided (which usually has its own controls)
-                    // and audio_base64 was not provided.
+                } else {
                     speakText(botResponse);
                 }
             } else {
@@ -474,15 +436,15 @@
                 botResponse = "[Erro de comunicação]";
             }
 
-            updateBotMessage(jadeTypingMessage, botResponse, attachments);
-            saveMessageToCurrentChat('J.A.D.E.', botResponse, attachments);
+            updateBotMessage(jadeTypingMessage, botResponse);
+            saveMessageToCurrentChat(agentName, botResponse);
             chatbox.scrollTop = chatbox.scrollHeight;
 
         } catch (err) {
             console.error(err);
             const errorText = `Falha ao conectar (${err.message})`;
             updateBotMessage(jadeTypingMessage, errorText);
-            saveMessageToCurrentChat('J.A.D.E.', errorText);
+            saveMessageToCurrentChat(agentName, errorText);
         }
     }
 
