@@ -62,6 +62,83 @@
 
         // Theme Event
         themeToggleBtn.addEventListener('click', toggleTheme);
+
+        // Custom Dropdown Logic
+        setupCustomDropdown();
+    }
+
+    function setupCustomDropdown() {
+        const wrapper = document.querySelector('.custom-select-wrapper');
+        const customSelect = wrapper.querySelector('.custom-select');
+        const trigger = wrapper.querySelector('.custom-select__trigger');
+        const options = wrapper.querySelectorAll('.custom-option');
+        const nativeSelect = document.getElementById('agent-selector');
+
+        if (!wrapper || !customSelect || !trigger) return;
+
+        // Toggle dropdown
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            customSelect.classList.toggle('open');
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!customSelect.contains(e.target)) {
+                customSelect.classList.remove('open');
+            }
+        });
+
+        // Handle option selection
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove selected class from all
+                options.forEach(opt => opt.classList.remove('selected'));
+                // Add selected class to clicked
+                option.classList.add('selected');
+
+                // Update trigger text
+                const textSpan = trigger.querySelector('.trigger-text');
+                const optionText = option.querySelector('span:last-child').textContent;
+                textSpan.textContent = optionText;
+
+                // Update native select value
+                const value = option.getAttribute('data-value');
+                nativeSelect.value = value;
+                nativeSelect.dispatchEvent(new Event('change'));
+
+                // Close dropdown
+                customSelect.classList.remove('open');
+            });
+        });
+
+        // Accessibility: Keyboard Navigation
+        customSelect.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                customSelect.classList.toggle('open');
+            } else if (e.key === 'Escape') {
+                customSelect.classList.remove('open');
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!customSelect.classList.contains('open')) {
+                    customSelect.classList.add('open');
+                    return;
+                }
+
+                const current = wrapper.querySelector('.custom-option.selected');
+                let next;
+                if (e.key === 'ArrowDown') {
+                    next = current ? current.nextElementSibling : options[0];
+                } else {
+                    next = current ? current.previousElementSibling : options[options.length - 1];
+                }
+
+                if (next) {
+                    next.click(); // Reuse click logic to select
+                }
+            }
+        });
     }
 
     // --- Identity Management (A Correção da Berta 🧠) ---

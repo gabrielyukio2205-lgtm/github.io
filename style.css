@@ -700,3 +700,122 @@ pre code {
         margin-left: auto;
     }
 }
+
+/* Custom Dropdown Styling */
+.custom-select-wrapper {
+    position: relative;
+    user-select: none;
+    width: 160px; /* Adjust width as needed */
+}
+
+.custom-select {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-select__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--surface-color); /* Matches theme button bg */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.custom-select__trigger:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-active);
+}
+
+.custom-select.open .custom-select__trigger {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: var(--primary-color);
+}
+
+.arrow {
+    transition: transform 0.2s;
+    opacity: 0.7;
+}
+
+.custom-select.open .arrow {
+    transform: rotate(180deg);
+}
+
+.custom-options {
+    position: absolute;
+    display: block;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.2s;
+    overflow: hidden;
+}
+
+.custom-select.open .custom-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+    transform: translateY(0);
+}
+
+.custom-option {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-option .icon {
+    font-size: 1.1em;
+}
+
+.custom-option:hover {
+    background: var(--icon-btn-hover-bg);
+    color: var(--text-primary);
+}
+
+.custom-option.selected {
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.1);
+    font-weight: 500;
+}
+
+/* Ensure controls are aligned */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Mobile responsiveness for dropdown */
+@media (max-width: 480px) {
+    .custom-select-wrapper {
+        width: 140px;
+    }
+    .custom-select__trigger span {
+        font-size: 0.85rem;
+    }
+}

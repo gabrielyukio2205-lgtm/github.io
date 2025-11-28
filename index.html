@@ -67,10 +67,32 @@
             </div>
         </div>
         <div class="controls">
-        <select id="agent-selector" title="Selecione o Agente">
-            <option value="jade">J.A.D.E.</option>
-            <option value="scholar">Scholar Graph</option>
-        </select>
+
+        <!-- Custom Dropdown -->
+        <div class="custom-select-wrapper">
+            <div class="custom-select" tabindex="0" role="listbox" aria-label="Selecionar Agente">
+                <div class="custom-select__trigger">
+                    <span class="trigger-text">J.A.D.E.</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="custom-options">
+                    <div class="custom-option selected" data-value="jade" role="option" aria-selected="true">
+                        <span class="icon">✨</span>
+                        <span>J.A.D.E.</span>
+                    </div>
+                    <div class="custom-option" data-value="scholar" role="option" aria-selected="false">
+                        <span class="icon">🎓</span>
+                        <span>Scholar Graph</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Hidden Native Select (Kept for compatibility) -->
+            <select id="agent-selector" style="display: none;" aria-hidden="true">
+                <option value="jade" selected>J.A.D.E.</option>
+                <option value="scholar">Scholar Graph</option>
+            </select>
+        </div>
+
         <button id="theme-toggle-btn" aria-label="Alternar tema">
           <!-- Sun Icon (for Dark Mode) -->
           <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
