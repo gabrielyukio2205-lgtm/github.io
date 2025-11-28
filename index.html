@@ -66,52 +66,25 @@
               <span class="status-badge">Beta</span>
             </div>
         </div>
-        <div class="controls">
         
-        <!-- Custom Dropdown -->
-        <div class="custom-select-wrapper">
-            <div class="custom-select" tabindex="0" role="listbox" aria-label="Selecionar Agente">
-                <div class="custom-select__trigger">
-                    <span class="trigger-text">J.A.D.E.</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-                <div class="custom-options">
-                    <div class="custom-option selected" data-value="jade" role="option" aria-selected="true">
-                        <span class="icon">✨</span>
-                        <span>J.A.D.E.</span>
-                    </div>
-                    <div class="custom-option" data-value="scholar" role="option" aria-selected="false">
-                        <span class="icon">🎓</span>
-                        <span>Scholar Graph</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Hidden Native Select (Kept for compatibility) -->
-            <select id="agent-selector" style="display: none;" aria-hidden="true">
-                <option value="jade" selected>J.A.D.E.</option>
+        <!-- AQUI ESTÁ O SELETOR QUE VOCÊ ACHOU QUE TINHA SUMIDO -->
+        <div class="controls">
+            <select id="agent-selector" title="Selecione o Agente">
+                <option value="jade">J.A.D.E.</option>
                 <option value="scholar">Scholar Graph</option>
             </select>
-        </div>
-
-        <button id="theme-toggle-btn" aria-label="Alternar tema">
-          <!-- Sun Icon (for Dark Mode) -->
-          <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-          <!-- Moon Icon (for Light Mode, initially hidden) -->
-          <svg id="moon-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-        </button>
+            
+            <button id="theme-toggle-btn" aria-label="Alternar tema">
+              <!-- Sun Icon (for Dark Mode) -->
+              <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <!-- Moon Icon (for Light Mode, initially hidden) -->
+              <svg id="moon-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
         </div>
       </header>
 
       <main id="chatbox" role="log" aria-live="polite">
-        <div class="message bot welcome-message">
-          <div class="avatar">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
-          </div>
-          <div class="content">
-            <div class="sender-name">J.A.D.E.</div>
-            <div class="text">Olá. Eu sou J.A.D.E., sua assistente de inteligência artificial avançada. Como posso ajudar você hoje?</div>
-          </div>
-        </div>
+        <!-- Messages go here -->
       </main>
 
       <div id="input-container">
