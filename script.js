@@ -20,6 +20,8 @@
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
     const removeImageBtn = document.getElementById('remove-image-btn');
+    const voiceBtn = document.getElementById('voiceBtn'); // New Voice Button
+    const audioVisualizer = document.getElementById('audio-visualizer'); // New Visualizer
     
     // Sidebar Elements
     const sidebar = document.getElementById('sidebar');
@@ -50,16 +52,34 @@
 
     function setupEventListeners() {
         sendBtn.addEventListener('click', sendMessage);
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.value === '') this.style.height = 'auto';
+        });
+
+        // Paste Image Support
+        userInput.addEventListener('paste', handlePaste);
+
         userInput.addEventListener('keydown', e => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+                // Reset height
+                userInput.style.height = 'auto';
             }
         });
         imageBtn.addEventListener('click', () => imageInput.click());
         imageInput.addEventListener('change', handleImageSelection);
         removeImageBtn.addEventListener('click', clearImagePreview);
         
+        // Voice Mode
+        if (voiceBtn) {
+            voiceBtn.addEventListener('click', toggleVoiceRecognition);
+        }
+
         // Sidebar Events
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
         mobileMenuBtn.addEventListener('click', toggleSidebar);
@@ -366,13 +386,39 @@
 
     function handleImageSelection() {
         if (imageInput.files && imageInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreviewContainer.classList.remove('hidden');
-            };
-            reader.readAsDataURL(imageInput.files[0]);
+            showImagePreview(imageInput.files[0]);
         }
+    }
+
+    function handlePaste(e) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.includes('image/')) {
+                const blob = item.getAsFile();
+                // Create a container for the file to mimic input selection if needed,
+                // or just use a separate state variable for the pasted image.
+                // For simplicity, let's assign it to our file input if possible or just handle it.
+                // Since we can't programmatically set file input value easily, we'll need a state variable.
+                // Let's reuse the existing logic but we need to support non-input files.
+
+                // Workaround: We will use DataTransfer to set the input files
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(blob);
+                imageInput.files = dataTransfer.files;
+
+                showImagePreview(blob);
+            }
+        }
+    }
+
+    function showImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreviewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
     }
 
     function clearImagePreview() {
@@ -465,20 +511,114 @@
         const textEl = messageEl.querySelector('.text');
         if (textEl) {
             textEl.innerHTML = renderMarkdown(text);
+            addCopyButtons(textEl);
         }
+    }
+
+    function addCopyButtons(container) {
+        if (!container) return;
+        const preBlocks = container.querySelectorAll('pre');
+
+        preBlocks.forEach(pre => {
+            if (pre.querySelector('.copy-btn')) return; // Already has button
+
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.textContent = 'Copiar';
+            btn.addEventListener('click', () => {
+                const code = pre.querySelector('code');
+                const text = code ? code.innerText : pre.innerText;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Falha ao copiar:', err);
+                });
+            });
+
+            pre.appendChild(btn);
+        });
     }
 
     function speakText(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            const plainText = text.replace(/[#*`\[\]]/g, ''); 
+
+            // Clean markdown for speech
+            const plainText = text.replace(/[#*`\[\]]/g, '').replace(/\(http.*?\)/g, '');
+
             const utterance = new SpeechSynthesisUtterance(plainText);
             utterance.lang = 'pt-BR'; 
             const voices = window.speechSynthesis.getVoices();
             const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
             if (preferredVoice) utterance.voice = preferredVoice;
+
+            // Visualizer Events
+            utterance.onstart = () => {
+                if(audioVisualizer) audioVisualizer.classList.remove('hidden');
+            };
+            utterance.onend = () => {
+                if(audioVisualizer) audioVisualizer.classList.add('hidden');
+            };
+            utterance.onerror = () => {
+                if(audioVisualizer) audioVisualizer.classList.add('hidden');
+            };
+
             window.speechSynthesis.speak(utterance);
         }
+    }
+
+    // --- Speech Recognition ---
+    let recognition = null;
+
+    function toggleVoiceRecognition() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert('Seu navegador não suporta reconhecimento de voz.');
+            return;
+        }
+
+        if (recognition && recognition.started) {
+            recognition.stop();
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            voiceBtn.classList.add('listening'); // Add CSS class for pulsing effect
+            voiceBtn.style.color = '#ef4444'; // Red to indicate recording
+            recognition.started = true;
+        };
+
+        recognition.onend = () => {
+            voiceBtn.classList.remove('listening');
+            voiceBtn.style.color = ''; // Reset color
+            recognition.started = false;
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            userInput.value += (userInput.value ? ' ' : '') + transcript;
+            userInput.focus();
+            // Trigger auto-resize
+            userInput.style.height = 'auto';
+            userInput.style.height = (userInput.scrollHeight) + 'px';
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error', event.error);
+            recognition.stop();
+        };
+
+        recognition.start();
     }
 
     async function sendMessage() {
