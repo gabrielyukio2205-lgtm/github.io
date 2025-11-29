@@ -115,11 +115,14 @@
 
     function initTheme() {
         const savedTheme = localStorage.getItem('jade_theme');
+        // Default to Dark if null
         if (savedTheme === 'light') {
             document.body.setAttribute('data-theme', 'light');
             updateThemeIcons(true);
         } else {
+            // Force dark as default
             document.body.removeAttribute('data-theme');
+            localStorage.setItem('jade_theme', 'dark'); // Ensure logic knows it's dark
             updateThemeIcons(false);
         }
     }
