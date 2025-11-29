@@ -607,6 +607,19 @@ code {
   align-items: center;
 }
 
+/* Speaking State (Pulse + Visualizer) */
+.input-wrapper.speaking {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px var(--accent-glow);
+    animation: pulseBorder 2s infinite ease-in-out;
+}
+
+@keyframes pulseBorder {
+    0% { box-shadow: 0 0 15px var(--accent-glow); }
+    50% { box-shadow: 0 0 25px var(--primary-color); }
+    100% { box-shadow: 0 0 15px var(--accent-glow); }
+}
+
 #audio-visualizer {
     display: flex;
     align-items: center;
@@ -621,6 +634,16 @@ code {
     border-radius: 2px;
     animation: visualize 1s ease-in-out infinite;
 }
+@keyframes visualize {
+    0%, 100% { height: 6px; }
+    50% { height: 16px; }
+}
+/* Individual bar delays for wave effect */
+.bar:nth-child(1) { animation-delay: 0s; }
+.bar:nth-child(2) { animation-delay: 0.1s; }
+.bar:nth-child(3) { animation-delay: 0.2s; }
+.bar:nth-child(4) { animation-delay: 0.3s; }
+.bar:nth-child(5) { animation-delay: 0.4s; }
 
 .input-wrapper {
   width: 100%;

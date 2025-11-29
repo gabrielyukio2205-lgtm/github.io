@@ -572,15 +572,19 @@
             const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            // Visualizer Events
+            // Visualizer & Pulse Events
+            const inputWrapper = document.querySelector('.input-wrapper');
             utterance.onstart = () => {
                 if(audioVisualizer) audioVisualizer.classList.remove('hidden');
+                if(inputWrapper) inputWrapper.classList.add('speaking');
             };
             utterance.onend = () => {
                 if(audioVisualizer) audioVisualizer.classList.add('hidden');
+                if(inputWrapper) inputWrapper.classList.remove('speaking');
             };
             utterance.onerror = () => {
                 if(audioVisualizer) audioVisualizer.classList.add('hidden');
+                if(inputWrapper) inputWrapper.classList.remove('speaking');
             };
 
             window.speechSynthesis.speak(utterance);
