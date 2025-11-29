@@ -68,6 +68,10 @@
   --user-msg-text: #0f172a;
   --bot-msg-bg: transparent;
 
+  /* Light Mode Code Colors */
+  --code-bg: #f3f4f6;       /* Gray 100 */
+  --code-header-bg: #e5e7eb; /* Gray 200 */
+
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --noise-opacity: 0;
 }
@@ -577,6 +581,13 @@ code {
    border: 1px solid rgba(255,255,255,0.05);
 }
 
+/* Inline Code Override for Light Mode */
+[data-theme="light"] :not(pre) > code {
+    background: rgba(0, 0, 0, 0.05);
+    color: #ef4444; /* Darker Red/Pink */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 .text h1, .text h2, .text h3 {
     margin-top: 1.5rem; margin-bottom: 0.5rem;
     font-weight: 600;
@@ -629,7 +640,10 @@ code {
 .input-wrapper:focus-within {
   border-color: var(--border-highlight);
   box-shadow: var(--shadow-lg), 0 0 0 1px var(--primary-glow);
-  background: rgba(15, 15, 18, 0.85);
+  /* Use variable to allow light mode override */
+  background: var(--input-bg);
+  /* Slight opacity bump on focus if desired, or keep uniform */
+  filter: brightness(1.05);
 }
 
 #userInput {

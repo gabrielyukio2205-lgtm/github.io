@@ -141,6 +141,18 @@
     }
 
     function updateThemeIcons(isLight) {
+        // Update highlight.js theme for code blocks
+        const hljsLink = document.getElementById('highlight-theme');
+        if (hljsLink) {
+            if (isLight) {
+                // Use a light theme (e.g., Atom One Light or similar)
+                hljsLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css';
+            } else {
+                // Revert to dark
+                hljsLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
+            }
+        }
+
         if (isLight) {
             sunIcon.classList.add('hidden');
             moonIcon.classList.remove('hidden');
