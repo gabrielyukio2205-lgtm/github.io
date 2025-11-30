@@ -20,9 +20,18 @@
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
     const removeImageBtn = document.getElementById('remove-image-btn');
-    const voiceBtn = document.getElementById('voiceBtn'); // New Voice Button
-    const audioVisualizer = document.getElementById('audio-visualizer'); // New Visualizer
+    const voiceBtn = document.getElementById('voiceBtn'); 
+    const audioVisualizer = document.getElementById('audio-visualizer'); 
     
+    // Audio Control Elements
+    const stopAudioBtn = document.getElementById('stop-audio-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const volOnIcon = document.getElementById('vol-on-icon');
+    const volOffIcon = document.getElementById('vol-off-icon');
+
+    // Audio State
+    let isMuted = false;
+
     // Sidebar Elements
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
@@ -79,6 +88,10 @@
         if (voiceBtn) {
             voiceBtn.addEventListener('click', toggleVoiceRecognition);
         }
+
+        // Audio Controls
+        if (stopAudioBtn) stopAudioBtn.addEventListener('click', stopSpeaking);
+        if (muteBtn) muteBtn.addEventListener('click', toggleMute);
 
         // Sidebar Events
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
@@ -559,14 +572,40 @@
         });
     }
 
+    function toggleMute() {
+        isMuted = !isMuted;
+        if (isMuted) {
+            volOnIcon.classList.add('hidden');
+            volOffIcon.classList.remove('hidden');
+            window.speechSynthesis.cancel(); // Stop current
+        } else {
+            volOnIcon.classList.remove('hidden');
+            volOffIcon.classList.add('hidden');
+        }
+    }
+
+    function stopSpeaking() {
+        window.speechSynthesis.cancel();
+        if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
+        
+        // Ensure visualizer stops
+        const inputWrapper = document.querySelector('.input-wrapper');
+        if(audioVisualizer) audioVisualizer.classList.add('hidden');
+        if(inputWrapper) inputWrapper.classList.remove('speaking');
+    }
+
     function speakText(text) {
-        if ('speechSynthesis' in window) {
+        if ('speechSynthesis' in window && !isMuted) {
             window.speechSynthesis.cancel();
 
-            // Clean markdown for speech
-            const plainText = text.replace(/[#*`\[\]]/g, '').replace(/\(http.*?\)/g, '');
+            // 1. Remove Code Blocks completely
+            // Remove content between ``` and ``` (multiline) and ` and ` (inline if desired, but mostly blocks are annoying)
+            let speechText = text.replace(/```[\s\S]*?```/g, ' [Código] ');
+            
+            // 2. Clean other markdown for speech
+            speechText = speechText.replace(/[#*`\[\]]/g, '').replace(/\(http.*?\)/g, '');
 
-            const utterance = new SpeechSynthesisUtterance(plainText);
+            const utterance = new SpeechSynthesisUtterance(speechText);
             utterance.lang = 'pt-BR'; 
             const voices = window.speechSynthesis.getVoices();
             const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
@@ -577,14 +616,17 @@
             utterance.onstart = () => {
                 if(audioVisualizer) audioVisualizer.classList.remove('hidden');
                 if(inputWrapper) inputWrapper.classList.add('speaking');
+                if(stopAudioBtn) stopAudioBtn.classList.remove('hidden');
             };
             utterance.onend = () => {
                 if(audioVisualizer) audioVisualizer.classList.add('hidden');
                 if(inputWrapper) inputWrapper.classList.remove('speaking');
+                if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
             };
             utterance.onerror = () => {
                 if(audioVisualizer) audioVisualizer.classList.add('hidden');
                 if(inputWrapper) inputWrapper.classList.remove('speaking');
+                if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
             };
 
             window.speechSynthesis.speak(utterance);
