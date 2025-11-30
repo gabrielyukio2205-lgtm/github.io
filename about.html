@@ -3,57 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Sobre J.A.D.E. | AI Assistant</title>
+  <title>Architecture | J.A.D.E. System</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Specific styles for About Page */
+    /* --- J.A.D.E. ARCHITECTURE STYLES --- */
+    
     #about-container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 4rem 2rem;
         color: var(--text-primary);
         font-family: var(--font-sans);
-        line-height: 1.8;
+        line-height: 1.7;
     }
+
+    /* Título com Efeito Glitch Cyberpunk */
     h1 {
+        font-family: 'Fira Code', monospace;
         font-size: 2.5rem;
-        margin-bottom: 2rem;
+        margin-bottom: 0.5rem;
         color: var(--primary-color);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 1rem;
+        letter-spacing: -0.05em;
+        position: relative;
+        display: inline-block;
     }
-    h2 {
-        font-size: 1.5rem;
-        margin-top: 3rem;
-        margin-bottom: 1.5rem;
+    
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 2rem;
+        font-weight: 300;
+    }
+
+    /* Cards Técnicos */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .feature-card {
+        background: rgba(15, 23, 42, 0.6); /* Semi-transparente */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px -10px rgba(0, 240, 255, 0.15);
+    }
+
+    .feature-card h3 {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.1rem;
+        margin: 1rem 0;
         color: var(--text-primary);
         font-weight: 600;
     }
-    p {
-        margin-bottom: 1.5rem;
-        font-size: 1.1rem;
+
+    .feature-card p {
+        font-size: 0.95rem;
         color: var(--text-secondary);
-    }
-    ul {
-        list-style: none;
-        padding: 0;
-    }
-    li {
         margin-bottom: 1rem;
-        padding-left: 1.5rem;
-        position: relative;
     }
-    li::before {
-        content: ">";
-        position: absolute;
-        left: 0;
+
+    /* Detalhe de Código dentro do Card */
+    .code-snippet {
+        display: block;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.75rem;
         color: var(--primary-color);
+        border-left: 2px solid var(--primary-color);
+        margin-top: 1rem;
     }
+
+    .feature-icon {
+        width: 40px; height: 40px;
+        color: var(--primary-color);
+        background: rgba(0, 240, 255, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Footer da Stack Tecnológica */
+    .tech-stack {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px dashed var(--border-color);
+    }
+    
+    .tech-stack h4 {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+    }
+
+    .stack-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .tech-tag {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        color: var(--text-primary);
+        transition: 0.2s;
+    }
+
+    .tech-tag:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: rgba(0, 240, 255, 0.05);
+    }
+
     .back-link {
         display: inline-flex;
         align-items: center;
@@ -63,34 +151,10 @@
         text-decoration: none;
         font-size: 0.9rem;
         transition: color 0.2s;
-        cursor: pointer;
+        font-family: 'Fira Code', monospace;
     }
-    .back-link:hover {
-        color: var(--primary-color);
-    }
-    .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
-    }
-    .feature-card {
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
-        padding: 1.5rem;
-        border-radius: var(--radius-md);
-        transition: transform 0.2s, border-color 0.2s;
-    }
-    .feature-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--primary-color);
-        box-shadow: 0 5px 15px rgba(0, 240, 255, 0.1);
-    }
-    .feature-icon {
-        width: 32px; height: 32px;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-    }
+    .back-link:hover { color: var(--primary-color); }
+
   </style>
 </head>
 <body>
@@ -102,70 +166,68 @@
 
   <div id="layout-container" style="overflow-y: auto;">
       <div id="about-container">
+          
           <a href="index.html" class="back-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-              Voltar para o Chat
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              ../voltar_para_terminal
           </a>
 
-          <h1>Sobre J.A.D.E.</h1>
-          
-          <p><strong>J.A.D.E.</strong> (Just A Digital Entity) é uma assistente de inteligência artificial avançada projetada para auxiliar em tarefas complexas, desde programação e análise de dados até pesquisa acadêmica aprofundada.</p>
+          <h1>J.A.D.E. ARCHITECTURE</h1>
+          <p class="subtitle">Arquitetura Cognitiva Híbrida & Sistema Multi-Agente.</p>
 
           <div class="feature-grid">
+              
               <div class="feature-card">
                   <div class="feature-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                   </div>
-                  <h3>Segurança & Privacidade</h3>
-                  <p>Interações seguras e processamento de dados focado em privacidade.</p>
+                  <h3>ShoreStone Memory Engine™</h3>
+                  <p>Sistema de memória vetorial persistente com <strong>Curadoria Heurística</strong>. A J.A.D.E. utiliza algoritmos de decaimento temporal para simular o esquecimento biológico e manter o contexto relevante.</p>
+                  <span class="code-snippet">RFR_Score = α*Freq + β*Rec + γ*Rel</span>
               </div>
 
               <div class="feature-card">
                   <div class="feature-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                   </div>
-                  <h3>Assistência de Código</h3>
-                  <p>Geração de código otimizado, debug e explicações técnicas detalhadas sem leitura em voz alta dos blocos.</p>
+                  <h3>Scholar Graph Swarm</h3>
+                  <p>Orquestração de múltiplos agentes autônomos especializados. Pesquisadores, Roteiristas, Professores e Visualizadores operam em paralelo para transformar dados brutos em conhecimento estruturado.</p>
+                  <span class="code-snippet">Mode: Multi-Agent_Orchestration</span>
               </div>
 
               <div class="feature-card">
                   <div class="feature-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                   </div>
-                  <h3>Scholar Graph</h3>
-                  <p>Modo especializado para pesquisas acadêmicas e análise de grafos de conhecimento.</p>
+                  <h3>Multimodal & Híbrido</h3>
+                  <p>Integração nativa com modelos de visão (Florence-2) rodando <strong>Localmente</strong> para privacidade, combinado com a inferência de alta velocidade da Groq (Llama 3) para raciocínio complexo.</p>
+                  <span class="code-snippet">Local_Inference: TRUE</span>
               </div>
 
-              <div class="feature-card">
-                  <div class="feature-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><line x1="12" y1="19" x2="12" y2="23"></line><path d="M8 23h8"></path></svg>
-                  </div>
-                  <h3>Interface de Voz</h3>
-                  <p>Interação natural por voz com feedback visual e controle total de áudio.</p>
+          </div>
+
+          <div class="tech-stack">
+              <h4>// SYSTEM_SPECS</h4>
+              <div class="stack-tags">
+                  <span class="tech-tag">Python 3.10</span>
+                  <span class="tech-tag">FastAPI</span>
+                  <span class="tech-tag">PyTorch</span>
+                  <span class="tech-tag">CUDA 12.x</span>
+                  <span class="tech-tag">ChromaDB</span>
+                  <span class="tech-tag">Graphviz</span>
+                  <span class="tech-tag">Groq API</span>
               </div>
           </div>
 
-          <h2>Como Usar</h2>
-          <ul>
-              <li><strong>Chat:</strong> Digite suas perguntas ou use o microfone para falar com a J.A.D.E.</li>
-              <li><strong>Imagens:</strong> Cole imagens diretamente (Ctrl+V) ou use o botão de anexo para análise visual.</li>
-              <li><strong>Modos:</strong> Alterne entre J.A.D.E. (Geral) e Scholar Graph (Acadêmico) na barra lateral.</li>
-              <li><strong>Áudio:</strong> Controle a leitura das respostas com os botões de Mute e Parar na interface de input.</li>
-          </ul>
-
-          <h2>Tecnologias</h2>
-          <p>Este projeto utiliza tecnologias de ponta como Groq (LLM), FAISS (Banco Vetorial), Gradio e DuckDuckGo Search, integrados em uma interface "Tron Minimalist" desenvolvida com HTML5, CSS3 e JavaScript puro.</p>
       </div>
   </div>
   
   <script>
-    // Simple Theme Init to match main page
+    // Mantém o tema sincronizado
     (function() {
         const savedTheme = localStorage.getItem('jade_theme');
         if (savedTheme === 'light') {
             document.body.setAttribute('data-theme', 'light');
-        } else {
-            document.body.removeAttribute('data-theme');
         }
     })();
   </script>
