@@ -586,6 +586,11 @@
 
     function stopSpeaking() {
         window.speechSynthesis.cancel();
+        if (audioPlayer && !audioPlayer.paused) {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+        }
+
         if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
         
         // Ensure visualizer stops
@@ -731,8 +736,28 @@
             if (json.success) {
                 botResponse = json.bot_response;
                 if (json.audio_base64) {
-                    audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
-                    audioPlayer.play();
+                    if (!isMuted) {
+                        audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
+                        
+                        // Hook up visualizer events for audio player
+                        const inputWrapper = document.querySelector('.input-wrapper');
+                        
+                        audioPlayer.onplay = () => {
+                            if(audioVisualizer) audioVisualizer.classList.remove('hidden');
+                            if(inputWrapper) inputWrapper.classList.add('speaking');
+                            if(stopAudioBtn) stopAudioBtn.classList.remove('hidden');
+                        };
+                        
+                        audioPlayer.onended = () => {
+                            if(audioVisualizer) audioVisualizer.classList.add('hidden');
+                            if(inputWrapper) inputWrapper.classList.remove('speaking');
+                            if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
+                        };
+                        
+                        audioPlayer.onpause = audioPlayer.onended; // Handle manual stop
+
+                        audioPlayer.play();
+                    }
                 } else {
                     speakText(botResponse);
                 }
