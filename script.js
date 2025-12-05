@@ -1,8 +1,9 @@
 (function() {
     'use strict';
 
-    // 1. URL DA API (O Proxy no Render)
-    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+    // 1. URL DA API (Se estiver rodando local, mude para http://localhost:7860)
+    // Se estiver no Hugging Face, use a URL direta do Space ou Proxy
+    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com'; 
     const API_URL = `${PROXY_BASE_URL}/chat`;
     
     // State Management
@@ -38,7 +39,7 @@
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const newChatBtn = document.getElementById('new-chat-btn');
     const chatHistoryList = document.getElementById('chat-history-list');
-    const agentSwitcher = document.getElementById('agent-switcher'); // New
+    const agentSwitcher = document.getElementById('agent-switcher'); 
 
     // Header Elements
     const headerTitle = document.getElementById('header-title');
@@ -135,7 +136,7 @@
         } else {
             // Force dark as default
             document.body.removeAttribute('data-theme');
-            localStorage.setItem('jade_theme', 'dark'); // Ensure logic knows it's dark
+            localStorage.setItem('jade_theme', 'dark'); 
             updateThemeIcons(false);
         }
     }
@@ -158,10 +159,8 @@
         const hljsLink = document.getElementById('highlight-theme');
         if (hljsLink) {
             if (isLight) {
-                // Use a light theme (e.g., Atom One Light or similar)
                 hljsLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css';
             } else {
-                // Revert to dark
                 hljsLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
             }
         }
@@ -216,6 +215,10 @@
         if (currentAgent === 'scholar') {
             headerTitle.textContent = 'Scholar Graph';
             userInput.placeholder = 'Envie uma mensagem para Scholar Graph...';
+        } else if (currentAgent === 'heavy') {
+            // ✨ Configuração Heavy ✨
+            headerTitle.textContent = 'J.A.D.E. HEAVY'; 
+            userInput.placeholder = 'Modo Raciocínio Profundo. Pergunte algo complexo...';
         } else {
             headerTitle.textContent = 'J.A.D.E.';
             userInput.placeholder = 'Envie uma mensagem para J.A.D.E...';
@@ -227,10 +230,6 @@
     function init() {
         initTheme();
         loadConversations();
-        
-        // Restore agent state if we want persistence (optional, sticking to default for now or infer from last chat)
-        // For now, let's stick to default 'jade' or maybe the last used?
-        // Let's keep it simple: Start with JADE.
         
         updateAgentUI();
 
@@ -298,15 +297,12 @@
 
         currentChatId = id;
         
-        // Ensure we switch the agent context if we load a chat from history (though UI hides others)
+        // Ensure we switch the agent context if we load a chat from history
         const chatAgent = chat.agent || 'jade';
         if (chatAgent !== currentAgent) {
-             // This might happen if we click a link that was somehow visible, 
-             // but our renderHistoryList filters them. 
-             // Just in case, update state.
              currentAgent = chatAgent;
              updateAgentUI();
-             renderHistoryList(); // Re-render list to match new agent
+             renderHistoryList(); 
         }
 
         chatbox.innerHTML = '';
@@ -329,7 +325,7 @@
             const chat = conversations[chatIndex];
             chat.messages.push({ sender, text, timestamp: Date.now() });
             
-            // Ensure agent is set (for migration of old chats)
+            // Ensure agent is set
             if (!chat.agent) chat.agent = 'jade';
 
             if (sender === 'Você' && chat.title === 'Nova conversa') {
@@ -350,7 +346,6 @@
             saveConversations();
             
             if (currentChatId === id) {
-                // Try to find another chat for current agent
                 const nextChat = conversations.find(c => (c.agent || 'jade') === currentAgent);
                 if (nextChat) {
                     loadChat(nextChat.id);
@@ -365,7 +360,6 @@
 
     function renderHistoryList() {
         chatHistoryList.innerHTML = '';
-        // Filter conversations by current agent
         const filteredConversations = conversations.filter(c => (c.agent || 'jade') === currentAgent);
 
         filteredConversations.forEach(chat => {
@@ -393,10 +387,17 @@
     }
 
     function appendWelcomeMessage() {
-        const agentName = currentAgent === 'scholar' ? 'Scholar Graph' : 'J.A.D.E.';
-        const welcomeText = currentAgent === 'scholar' 
-            ? 'Olá. Eu sou Scholar Graph, seu assistente de pesquisa. Como posso ajudar em seus estudos?' 
-            : 'Olá. Eu sou J.A.D.E., sua assistente de inteligência artificial avançada. Como posso ajudar você hoje?';
+        let agentName = 'J.A.D.E.';
+        let welcomeText = 'Olá. Eu sou J.A.D.E., sua assistente de inteligência artificial avançada. Como posso ajudar você hoje?';
+
+        // Lógica de Boas Vindas
+        if (currentAgent === 'scholar') {
+            agentName = 'Scholar Graph';
+            welcomeText = 'Olá. Eu sou Scholar Graph, seu assistente de pesquisa. Como posso ajudar em seus estudos?';
+        } else if (currentAgent === 'heavy') {
+            agentName = 'Jade Heavy';
+            welcomeText = 'Iniciando módulo **Heavy Reasoning** (ToT/CoT). Estou pronta para resolver problemas complexos com pensamento estratégico. Qual o desafio?';
+        }
 
         const el = document.createElement('div');
         el.className = 'message bot welcome-message';
@@ -406,7 +407,7 @@
             </div>
             <div class="content">
             <div class="sender-name">${agentName}</div>
-            <div class="text">${welcomeText}</div>
+            <div class="text">${renderMarkdown(welcomeText)}</div>
             </div>
         `;
         chatbox.appendChild(el);
@@ -424,13 +425,6 @@
             const item = items[index];
             if (item.kind === 'file' && item.type.includes('image/')) {
                 const blob = item.getAsFile();
-                // Create a container for the file to mimic input selection if needed,
-                // or just use a separate state variable for the pasted image.
-                // For simplicity, let's assign it to our file input if possible or just handle it.
-                // Since we can't programmatically set file input value easily, we'll need a state variable.
-                // Let's reuse the existing logic but we need to support non-input files.
-
-                // Workaround: We will use DataTransfer to set the input files
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(blob);
                 imageInput.files = dataTransfer.files;
@@ -454,7 +448,6 @@
         imagePreviewContainer.classList.add('hidden');
     }
 
-    // 🔴 FUNÇÃO CORRIGIDA PARA OS LINKS 🔴
     function renderMarkdown(text) {
         let html;
         if (typeof marked !== 'undefined') {
@@ -467,13 +460,9 @@
             html = html.replace(/\n/g, '<br>');
         }
 
-        // AQUI ESTÁ O FIX DO 404
-        // Substitui links relativos /generated/ por links absolutos do Render
+        // Links de arquivos gerados
         const regex = /href="\/generated\/(.*?)"/g;
         html = html.replace(regex, `target="_blank" href="${PROXY_BASE_URL}/generated/$1"`);
-        
-        // Garante que links normais abram em nova aba também
-        // (opcional, mas bom pra UX)
         html = html.replace(/<a href="http/g, '<a target="_blank" href="http');
 
         return html;
@@ -548,7 +537,7 @@
         const preBlocks = container.querySelectorAll('pre');
 
         preBlocks.forEach(pre => {
-            if (pre.querySelector('.copy-btn')) return; // Already has button
+            if (pre.querySelector('.copy-btn')) return; 
 
             const btn = document.createElement('button');
             btn.className = 'copy-btn';
@@ -577,7 +566,7 @@
         if (isMuted) {
             volOnIcon.classList.add('hidden');
             volOffIcon.classList.remove('hidden');
-            window.speechSynthesis.cancel(); // Stop current
+            window.speechSynthesis.cancel(); 
         } else {
             volOnIcon.classList.remove('hidden');
             volOffIcon.classList.add('hidden');
@@ -593,7 +582,6 @@
 
         if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
         
-        // Ensure visualizer stops
         const inputWrapper = document.querySelector('.input-wrapper');
         if(audioVisualizer) audioVisualizer.classList.add('hidden');
         if(inputWrapper) inputWrapper.classList.remove('speaking');
@@ -603,11 +591,7 @@
         if ('speechSynthesis' in window && !isMuted) {
             window.speechSynthesis.cancel();
 
-            // 1. Remove Code Blocks completely
-            // Remove content between ``` and ``` (multiline) and ` and ` (inline if desired, but mostly blocks are annoying)
             let speechText = text.replace(/```[\s\S]*?```/g, ' [Código] ');
-            
-            // 2. Clean other markdown for speech
             speechText = speechText.replace(/[#*`\[\]]/g, '').replace(/\(http.*?\)/g, '');
 
             const utterance = new SpeechSynthesisUtterance(speechText);
@@ -616,7 +600,6 @@
             const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
             if (preferredVoice) utterance.voice = preferredVoice;
 
-            // Visualizer & Pulse Events
             const inputWrapper = document.querySelector('.input-wrapper');
             utterance.onstart = () => {
                 if(audioVisualizer) audioVisualizer.classList.remove('hidden');
@@ -659,14 +642,14 @@
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
-            voiceBtn.classList.add('listening'); // Add CSS class for pulsing effect
-            voiceBtn.style.color = '#ef4444'; // Red to indicate recording
+            voiceBtn.classList.add('listening'); 
+            voiceBtn.style.color = '#ef4444'; 
             recognition.started = true;
         };
 
         recognition.onend = () => {
             voiceBtn.classList.remove('listening');
-            voiceBtn.style.color = ''; // Reset color
+            voiceBtn.style.color = ''; 
             recognition.started = false;
         };
 
@@ -674,7 +657,6 @@
             const transcript = event.results[0][0].transcript;
             userInput.value += (userInput.value ? ' ' : '') + transcript;
             userInput.focus();
-            // Trigger auto-resize
             userInput.style.height = 'auto';
             userInput.style.height = (userInput.scrollHeight) + 'px';
         };
@@ -694,8 +676,10 @@
 
         if (!currentChatId) startNewChat();
 
-        // Use global currentAgent instead of selector
-        const agentName = currentAgent === 'scholar' ? 'Scholar Graph' : 'J.A.D.E.';
+        // NOME CORRETO PARA O CHAT
+        let agentName = 'J.A.D.E.';
+        if (currentAgent === 'scholar') agentName = 'Scholar Graph';
+        if (currentAgent === 'heavy') agentName = 'Jade Heavy';
 
         if (imageInput.files.length > 0) {
             const msgText = `${message || ''} [Imagem Anexada]`;
@@ -721,7 +705,7 @@
                     user_input: message, 
                     image_base64: image_base64,
                     user_id: masterUserId,
-                    agent_type: currentAgent // Use global currentAgent
+                    agent_type: currentAgent // ENVIA 'jade', 'scholar' ou 'heavy'
                 })
             });
 
@@ -739,7 +723,6 @@
                     if (!isMuted) {
                         audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
                         
-                        // Hook up visualizer events for audio player
                         const inputWrapper = document.querySelector('.input-wrapper');
                         
                         audioPlayer.onplay = () => {
@@ -754,7 +737,7 @@
                             if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
                         };
                         
-                        audioPlayer.onpause = audioPlayer.onended; // Handle manual stop
+                        audioPlayer.onpause = audioPlayer.onended; 
 
                         audioPlayer.play();
                     }
