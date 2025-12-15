@@ -37,6 +37,10 @@
     let webSearchEnabled = false;
     const webSearchBtn = document.getElementById('webSearchBtn');
 
+    // Thinking Mode State
+    let thinkingModeEnabled = false;
+    const thinkingBtn = document.getElementById('thinkingBtn');
+
     // Sidebar Elements
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
@@ -100,6 +104,9 @@
 
         // Web Search Toggle
         if (webSearchBtn) webSearchBtn.addEventListener('click', toggleWebSearch);
+
+        // Thinking Mode Toggle
+        if (thinkingBtn) thinkingBtn.addEventListener('click', toggleThinkingMode);
 
         // Sidebar Events
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
@@ -456,15 +463,42 @@
     }
 
     function renderMarkdown(text) {
-        let html;
+        // Parse thinking blocks first
+        let thinkingContent = '';
+        let mainContent = text;
+
+        const thinkingMatch = text.match(/<thinking>([\s\S]*?)<\/thinking>/i);
+        if (thinkingMatch) {
+            thinkingContent = thinkingMatch[1].trim();
+            mainContent = text.replace(/<thinking>[\s\S]*?<\/thinking>/i, '').trim();
+        }
+
+        let html = '';
+
+        // Render thinking block if exists
+        if (thinkingContent) {
+            const thinkingHtml = typeof marked !== 'undefined' ? marked.parse(thinkingContent) : escapeHtml(thinkingContent).replace(/\n/g, '<br>');
+            html += `
+                <div class="thinking-block">
+                    <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                        <span>🧠 Pensando...</span>
+                        <span class="thinking-toggle">▼</span>
+                    </div>
+                    <div class="thinking-content">${thinkingHtml}</div>
+                </div>
+            `;
+        }
+
+        // Render main content
         if (typeof marked !== 'undefined') {
-            html = marked.parse(text);
+            html += marked.parse(mainContent);
         } else {
-            html = escapeHtml(text);
-            html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-            html = html.replace(/\*(.*?)\*/g, '<b>$1</b>');
-            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-            html = html.replace(/\n/g, '<br>');
+            let mainHtml = escapeHtml(mainContent);
+            mainHtml = mainHtml.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            mainHtml = mainHtml.replace(/\*(.*?)\*/g, '<b>$1</b>');
+            mainHtml = mainHtml.replace(/`(.*?)`/g, '<code>$1</code>');
+            mainHtml = mainHtml.replace(/\n/g, '<br>');
+            html += mainHtml;
         }
 
         // Links de arquivos gerados
@@ -591,6 +625,21 @@
                 webSearchBtn.classList.remove('active');
                 webSearchBtn.title = 'Ativar Busca Web (Tavily)';
                 console.log('🔍 Web Search: OFF');
+            }
+        }
+    }
+
+    function toggleThinkingMode() {
+        thinkingModeEnabled = !thinkingModeEnabled;
+        if (thinkingBtn) {
+            if (thinkingModeEnabled) {
+                thinkingBtn.classList.add('active');
+                thinkingBtn.title = 'Modo Thinking ATIVADO';
+                console.log('🧠 Thinking Mode: ON');
+            } else {
+                thinkingBtn.classList.remove('active');
+                thinkingBtn.title = 'Modo Thinking (CoT)';
+                console.log('🧠 Thinking Mode: OFF');
             }
         }
     }
@@ -728,7 +777,8 @@
                     image_base64: image_base64,
                     user_id: masterUserId,
                     agent_type: currentAgent, // ENVIA 'jade', 'scholar' ou 'heavy'
-                    web_search: webSearchEnabled && currentAgent === 'jade' // Só ativa busca no modo J.A.D.E.
+                    web_search: webSearchEnabled && currentAgent === 'jade', // Só ativa busca no modo J.A.D.E.
+                    thinking_mode: thinkingModeEnabled && currentAgent === 'jade' // Só ativa thinking no modo J.A.D.E.
                 })
             });
 
