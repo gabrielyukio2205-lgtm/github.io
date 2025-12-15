@@ -528,9 +528,30 @@
 
         let textHTML;
         if (isTyping) {
-            textHTML = `<div class="text"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+            // Heavy Mode gets special loading indicator
+            if (sender === 'Jade Heavy') {
+                textHTML = `<div class="text heavy-processing">
+                    <div class="heavy-loading">
+                        <div class="heavy-spinner"></div>
+                        <div class="heavy-phases">
+                            <span class="phase-label">Orquestrando modelos...</span>
+                            <div class="phase-steps">
+                                <span class="phase active" data-phase="1">⚡ Planejando</span>
+                                <span class="phase" data-phase="2">🎯 Podando</span>
+                                <span class="phase" data-phase="3">📝 Expandindo</span>
+                                <span class="phase" data-phase="4">🔍 Refinando</span>
+                                <span class="phase" data-phase="5">✨ Sintetizando</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                textHTML = `<div class="text"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+            }
         } else {
-            textHTML = `<div class="text">${renderMarkdown(content)}</div>`;
+            // Add Heavy Mode badge if applicable
+            const heavyBadge = sender === 'Jade Heavy' ? '<span class="heavy-badge">🧠 Multi-Model</span>' : '';
+            textHTML = `<div class="text">${heavyBadge}${renderMarkdown(content)}</div>`;
         }
 
         const contentHTML = `
@@ -764,6 +785,25 @@
 
         const jadeTypingMessage = appendMessage(agentName, '', true, false);
 
+        // Start Heavy Mode phase animation if applicable
+        let heavyPhaseInterval = null;
+        if (currentAgent === 'heavy') {
+            let phaseIndex = 0;
+            const phases = [1, 2, 3, 4, 5];
+            const phaseTimes = [3000, 2000, 4000, 3000, 2000]; // Approximate times per phase
+
+            heavyPhaseInterval = setInterval(() => {
+                phaseIndex++;
+                if (phaseIndex < phases.length) {
+                    const phaseSteps = jadeTypingMessage.querySelectorAll('.phase');
+                    phaseSteps.forEach((el, idx) => {
+                        el.classList.toggle('active', idx <= phaseIndex);
+                        el.classList.toggle('done', idx < phaseIndex);
+                    });
+                }
+            }, 3000); // Change phase every 3 seconds
+        }
+
         const masterUserId = getPersistentUserId();
 
         try {
@@ -825,12 +865,21 @@
                 botResponse = "[Erro de comunicação]";
             }
 
+            // Stop Heavy Mode phase animation
+            if (heavyPhaseInterval) {
+                clearInterval(heavyPhaseInterval);
+            }
+
             updateBotMessage(jadeTypingMessage, botResponse);
             saveMessageToCurrentChat(agentName, botResponse);
             chatbox.scrollTop = chatbox.scrollHeight;
 
         } catch (err) {
             console.error(err);
+            // Stop Heavy Mode phase animation on error too
+            if (heavyPhaseInterval) {
+                clearInterval(heavyPhaseInterval);
+            }
             const errorText = `Falha ao conectar (${err.message}).`;
             updateBotMessage(jadeTypingMessage, errorText);
             saveMessageToCurrentChat(agentName, errorText);
