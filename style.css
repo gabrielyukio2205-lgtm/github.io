@@ -615,6 +615,25 @@ code { font-family: var(--font-mono); font-size: 0.9em; }
   box-shadow: 0 0 15px var(--primary-glow);
 }
 
+/* Web Search Button Active State */
+#webSearchBtn.active {
+  color: var(--secondary-color);
+  background: rgba(0, 255, 157, 0.1);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
+  animation: searchPulse 2s infinite ease-in-out;
+}
+@keyframes searchPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 157, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(0, 255, 157, 0.6); }
+}
+[data-theme="light"] #webSearchBtn.active {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
 /* Image Preview */
 #image-preview-container {
     position: absolute; bottom: 100%; left: 0; margin-bottom: 10px; padding-left: 1rem;

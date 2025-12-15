@@ -1,16 +1,16 @@
-(function() {
+(function () {
     'use strict';
 
     // 1. URL DA API (Se estiver rodando local, mude para http://localhost:7860)
     // Se estiver no Hugging Face, use a URL direta do Space ou Proxy
-    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com'; 
+    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
     const API_URL = `${PROXY_BASE_URL}/chat`;
-    
+
     // State Management
     let conversations = [];
     let currentChatId = null;
     let currentAgent = 'jade'; // Default agent
-    
+
     // Cache DOM elements
     const chatbox = document.getElementById('chatbox');
     const userInput = document.getElementById('userInput');
@@ -21,9 +21,9 @@
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
     const removeImageBtn = document.getElementById('remove-image-btn');
-    const voiceBtn = document.getElementById('voiceBtn'); 
-    const audioVisualizer = document.getElementById('audio-visualizer'); 
-    
+    const voiceBtn = document.getElementById('voiceBtn');
+    const audioVisualizer = document.getElementById('audio-visualizer');
+
     // Audio Control Elements
     const stopAudioBtn = document.getElementById('stop-audio-btn');
     const muteBtn = document.getElementById('mute-btn');
@@ -33,13 +33,17 @@
     // Audio State
     let isMuted = false;
 
+    // Web Search State
+    let webSearchEnabled = false;
+    const webSearchBtn = document.getElementById('webSearchBtn');
+
     // Sidebar Elements
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const newChatBtn = document.getElementById('new-chat-btn');
     const chatHistoryList = document.getElementById('chat-history-list');
-    const agentSwitcher = document.getElementById('agent-switcher'); 
+    const agentSwitcher = document.getElementById('agent-switcher');
 
     // Header Elements
     const headerTitle = document.getElementById('header-title');
@@ -52,7 +56,7 @@
     // Init Marked & Highlight.js
     if (typeof marked !== 'undefined') {
         marked.setOptions({
-            highlight: function(code, lang) {
+            highlight: function (code, lang) {
                 const language = hljs.getLanguage(lang) ? lang : 'plaintext';
                 return hljs.highlight(code, { language }).value;
             },
@@ -64,7 +68,7 @@
         sendBtn.addEventListener('click', sendMessage);
 
         // Auto-resize textarea
-        userInput.addEventListener('input', function() {
+        userInput.addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
             if (this.value === '') this.style.height = 'auto';
@@ -84,7 +88,7 @@
         imageBtn.addEventListener('click', () => imageInput.click());
         imageInput.addEventListener('change', handleImageSelection);
         removeImageBtn.addEventListener('click', clearImagePreview);
-        
+
         // Voice Mode
         if (voiceBtn) {
             voiceBtn.addEventListener('click', toggleVoiceRecognition);
@@ -93,6 +97,9 @@
         // Audio Controls
         if (stopAudioBtn) stopAudioBtn.addEventListener('click', stopSpeaking);
         if (muteBtn) muteBtn.addEventListener('click', toggleMute);
+
+        // Web Search Toggle
+        if (webSearchBtn) webSearchBtn.addEventListener('click', toggleWebSearch);
 
         // Sidebar Events
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
@@ -115,7 +122,7 @@
     }
 
     // --- Identity Management ---
-    
+
     function getPersistentUserId() {
         let userId = localStorage.getItem('jade_master_user_id');
         if (!userId) {
@@ -136,7 +143,7 @@
         } else {
             // Force dark as default
             document.body.removeAttribute('data-theme');
-            localStorage.setItem('jade_theme', 'dark'); 
+            localStorage.setItem('jade_theme', 'dark');
             updateThemeIcons(false);
         }
     }
@@ -179,13 +186,13 @@
     function switchAgent(agent) {
         if (currentAgent === agent) return;
         currentAgent = agent;
-        
+
         // Update UI
         updateAgentUI();
-        
+
         // Reload history and start new chat or load latest
         renderHistoryList();
-        
+
         // Try to find the most recent chat for this agent
         const lastChat = conversations.find(c => (c.agent || 'jade') === currentAgent);
         if (lastChat) {
@@ -217,7 +224,7 @@
             userInput.placeholder = 'Envie uma mensagem para Scholar Graph...';
         } else if (currentAgent === 'heavy') {
             // ✨ Configuração Heavy ✨
-            headerTitle.textContent = 'J.A.D.E. HEAVY'; 
+            headerTitle.textContent = 'J.A.D.E. HEAVY';
             userInput.placeholder = 'Modo Raciocínio Profundo. Pergunte algo complexo...';
         } else {
             headerTitle.textContent = 'J.A.D.E.';
@@ -230,7 +237,7 @@
     function init() {
         initTheme();
         loadConversations();
-        
+
         updateAgentUI();
 
         // Load initial chat
@@ -242,7 +249,7 @@
         }
         renderHistoryList();
     }
-    
+
     function toggleSidebar() {
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
@@ -285,7 +292,7 @@
         };
         conversations.unshift(newChat); // Add to top
         saveConversations();
-        
+
         chatbox.innerHTML = '';
         appendWelcomeMessage();
         sidebar.classList.remove('open');
@@ -296,17 +303,17 @@
         if (!chat) return;
 
         currentChatId = id;
-        
+
         // Ensure we switch the agent context if we load a chat from history
         const chatAgent = chat.agent || 'jade';
         if (chatAgent !== currentAgent) {
-             currentAgent = chatAgent;
-             updateAgentUI();
-             renderHistoryList(); 
+            currentAgent = chatAgent;
+            updateAgentUI();
+            renderHistoryList();
         }
 
         chatbox.innerHTML = '';
-        
+
         if (chat.messages.length === 0) {
             appendWelcomeMessage();
         } else {
@@ -314,7 +321,7 @@
                 appendMessage(msg.sender, msg.text, false, false);
             });
         }
-        
+
         renderHistoryList();
         sidebar.classList.remove('open');
     }
@@ -324,17 +331,17 @@
         if (chatIndex !== -1) {
             const chat = conversations[chatIndex];
             chat.messages.push({ sender, text, timestamp: Date.now() });
-            
+
             // Ensure agent is set
             if (!chat.agent) chat.agent = 'jade';
 
             if (sender === 'Você' && chat.title === 'Nova conversa') {
                 chat.title = text.length > 30 ? text.substring(0, 30) + '...' : text;
             }
-            
+
             conversations.splice(chatIndex, 1);
             conversations.unshift(chat);
-            
+
             saveConversations();
         }
     }
@@ -344,7 +351,7 @@
         if (confirm('Tem certeza que deseja excluir esta conversa?')) {
             conversations = conversations.filter(c => c.id !== id);
             saveConversations();
-            
+
             if (currentChatId === id) {
                 const nextChat = conversations.find(c => (c.agent || 'jade') === currentAgent);
                 if (nextChat) {
@@ -365,13 +372,13 @@
         filteredConversations.forEach(chat => {
             const div = document.createElement('div');
             div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
-            
+
             const span = document.createElement('span');
             span.textContent = chat.title;
             span.style.flex = '1';
             span.style.overflow = 'hidden';
             span.style.textOverflow = 'ellipsis';
-            
+
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-chat-btn';
             delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -381,7 +388,7 @@
             div.appendChild(span);
             div.appendChild(delBtn);
             div.onclick = () => loadChat(chat.id);
-            
+
             chatHistoryList.appendChild(div);
         });
     }
@@ -477,11 +484,11 @@
     function createMessageElement(sender, content, isTyping = false) {
         const isUser = sender === 'Você';
         const senderClass = isUser ? 'user' : 'bot';
-        
+
         const el = document.createElement('div');
         el.className = `message ${senderClass}`;
-        
-        const avatarHTML = isUser 
+
+        const avatarHTML = isUser
             ? `<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`
             : `<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></div>`;
 
@@ -491,14 +498,14 @@
         } else {
             textHTML = `<div class="text">${renderMarkdown(content)}</div>`;
         }
-        
+
         const contentHTML = `
             <div class="content">
                 <div class="sender-name">${sender}</div>
                 ${textHTML}
             </div>
         `;
-        
+
         el.innerHTML = isUser ? (contentHTML + avatarHTML) : (avatarHTML + contentHTML);
         return el;
     }
@@ -507,11 +514,11 @@
         const el = createMessageElement(sender, textContent, isTyping);
         chatbox.appendChild(el);
         chatbox.scrollTop = chatbox.scrollHeight;
-        
+
         if (save && !isTyping) {
             saveMessageToCurrentChat(sender, textContent);
         }
-        
+
         return el;
     }
 
@@ -537,7 +544,7 @@
         const preBlocks = container.querySelectorAll('pre');
 
         preBlocks.forEach(pre => {
-            if (pre.querySelector('.copy-btn')) return; 
+            if (pre.querySelector('.copy-btn')) return;
 
             const btn = document.createElement('button');
             btn.className = 'copy-btn';
@@ -566,10 +573,25 @@
         if (isMuted) {
             volOnIcon.classList.add('hidden');
             volOffIcon.classList.remove('hidden');
-            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.cancel();
         } else {
             volOnIcon.classList.remove('hidden');
             volOffIcon.classList.add('hidden');
+        }
+    }
+
+    function toggleWebSearch() {
+        webSearchEnabled = !webSearchEnabled;
+        if (webSearchBtn) {
+            if (webSearchEnabled) {
+                webSearchBtn.classList.add('active');
+                webSearchBtn.title = 'Busca Web ATIVADA (Tavily)';
+                console.log('🔍 Web Search: ON');
+            } else {
+                webSearchBtn.classList.remove('active');
+                webSearchBtn.title = 'Ativar Busca Web (Tavily)';
+                console.log('🔍 Web Search: OFF');
+            }
         }
     }
 
@@ -580,11 +602,11 @@
             audioPlayer.currentTime = 0;
         }
 
-        if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
-        
+        if (stopAudioBtn) stopAudioBtn.classList.add('hidden');
+
         const inputWrapper = document.querySelector('.input-wrapper');
-        if(audioVisualizer) audioVisualizer.classList.add('hidden');
-        if(inputWrapper) inputWrapper.classList.remove('speaking');
+        if (audioVisualizer) audioVisualizer.classList.add('hidden');
+        if (inputWrapper) inputWrapper.classList.remove('speaking');
     }
 
     function speakText(text) {
@@ -595,26 +617,26 @@
             speechText = speechText.replace(/[#*`\[\]]/g, '').replace(/\(http.*?\)/g, '');
 
             const utterance = new SpeechSynthesisUtterance(speechText);
-            utterance.lang = 'pt-BR'; 
+            utterance.lang = 'pt-BR';
             const voices = window.speechSynthesis.getVoices();
             const preferredVoice = voices.find(v => v.lang.includes('pt-BR') && v.name.includes('Google'));
             if (preferredVoice) utterance.voice = preferredVoice;
 
             const inputWrapper = document.querySelector('.input-wrapper');
             utterance.onstart = () => {
-                if(audioVisualizer) audioVisualizer.classList.remove('hidden');
-                if(inputWrapper) inputWrapper.classList.add('speaking');
-                if(stopAudioBtn) stopAudioBtn.classList.remove('hidden');
+                if (audioVisualizer) audioVisualizer.classList.remove('hidden');
+                if (inputWrapper) inputWrapper.classList.add('speaking');
+                if (stopAudioBtn) stopAudioBtn.classList.remove('hidden');
             };
             utterance.onend = () => {
-                if(audioVisualizer) audioVisualizer.classList.add('hidden');
-                if(inputWrapper) inputWrapper.classList.remove('speaking');
-                if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
+                if (audioVisualizer) audioVisualizer.classList.add('hidden');
+                if (inputWrapper) inputWrapper.classList.remove('speaking');
+                if (stopAudioBtn) stopAudioBtn.classList.add('hidden');
             };
             utterance.onerror = () => {
-                if(audioVisualizer) audioVisualizer.classList.add('hidden');
-                if(inputWrapper) inputWrapper.classList.remove('speaking');
-                if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
+                if (audioVisualizer) audioVisualizer.classList.add('hidden');
+                if (inputWrapper) inputWrapper.classList.remove('speaking');
+                if (stopAudioBtn) stopAudioBtn.classList.add('hidden');
             };
 
             window.speechSynthesis.speak(utterance);
@@ -642,14 +664,14 @@
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
-            voiceBtn.classList.add('listening'); 
-            voiceBtn.style.color = '#ef4444'; 
+            voiceBtn.classList.add('listening');
+            voiceBtn.style.color = '#ef4444';
             recognition.started = true;
         };
 
         recognition.onend = () => {
             voiceBtn.classList.remove('listening');
-            voiceBtn.style.color = ''; 
+            voiceBtn.style.color = '';
             recognition.started = false;
         };
 
@@ -697,23 +719,24 @@
 
         try {
             console.log(`📡 Enviando para: ${API_URL}`);
-            
+
             const resp = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    user_input: message, 
+                body: JSON.stringify({
+                    user_input: message,
                     image_base64: image_base64,
                     user_id: masterUserId,
-                    agent_type: currentAgent // ENVIA 'jade', 'scholar' ou 'heavy'
+                    agent_type: currentAgent, // ENVIA 'jade', 'scholar' ou 'heavy'
+                    web_search: webSearchEnabled && currentAgent === 'jade' // Só ativa busca no modo J.A.D.E.
                 })
             });
 
             if (!resp.ok) {
-                 const errorText = await resp.text();
-                 throw new Error(`HTTP ${resp.status} - ${errorText.substring(0, 100)}`);
+                const errorText = await resp.text();
+                throw new Error(`HTTP ${resp.status} - ${errorText.substring(0, 100)}`);
             }
-            
+
             const json = await resp.json();
             let botResponse;
 
@@ -722,22 +745,22 @@
                 if (json.audio_base64) {
                     if (!isMuted) {
                         audioPlayer.src = `data:audio/mpeg;base64,${json.audio_base64}`;
-                        
+
                         const inputWrapper = document.querySelector('.input-wrapper');
-                        
+
                         audioPlayer.onplay = () => {
-                            if(audioVisualizer) audioVisualizer.classList.remove('hidden');
-                            if(inputWrapper) inputWrapper.classList.add('speaking');
-                            if(stopAudioBtn) stopAudioBtn.classList.remove('hidden');
+                            if (audioVisualizer) audioVisualizer.classList.remove('hidden');
+                            if (inputWrapper) inputWrapper.classList.add('speaking');
+                            if (stopAudioBtn) stopAudioBtn.classList.remove('hidden');
                         };
-                        
+
                         audioPlayer.onended = () => {
-                            if(audioVisualizer) audioVisualizer.classList.add('hidden');
-                            if(inputWrapper) inputWrapper.classList.remove('speaking');
-                            if(stopAudioBtn) stopAudioBtn.classList.add('hidden');
+                            if (audioVisualizer) audioVisualizer.classList.add('hidden');
+                            if (inputWrapper) inputWrapper.classList.remove('speaking');
+                            if (stopAudioBtn) stopAudioBtn.classList.add('hidden');
                         };
-                        
-                        audioPlayer.onpause = audioPlayer.onended; 
+
+                        audioPlayer.onpause = audioPlayer.onended;
 
                         audioPlayer.play();
                     }
@@ -747,7 +770,7 @@
             } else {
                 botResponse = `[Erro: ${json.error || 'Desconhecido'}]`;
             }
-            
+
             if (botResponse === undefined) {
                 botResponse = "[Erro de comunicação]";
             }
