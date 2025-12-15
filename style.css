@@ -1,83 +1,85 @@
 :root {
-  /* --- Paleta Tron Minimalist --- */
+  /* --- Notion-Style Palette (Dark) --- */
 
-  /* Backgrounds (Preto Absoluto/Espacial) */
-  --bg-color: #030303;
-  --sidebar-bg: #050505;
-  --surface-color: rgba(0, 240, 255, 0.03);
-  --surface-hover: rgba(0, 240, 255, 0.08);
-  --input-bg: rgba(5, 5, 5, 0.85);
-  /* Vidro escuro */
+  /* Backgrounds */
+  --bg-color: #191919;
+  --sidebar-bg: #202020;
+  --surface-color: #262626;
+  --surface-hover: #2f2f2f;
+  --input-bg: #262626;
 
   /* Bordas */
-  --border-color: rgba(0, 240, 255, 0.15);
-  --border-highlight: rgba(0, 240, 255, 0.4);
-  --glass-border: 1px solid var(--border-color);
+  --border-color: #353535;
+  --border-highlight: #454545;
 
   /* Cores de Destaque */
-  --primary-color: #00f0ff;
-  /* Ciano Neon */
-  --primary-gradient: linear-gradient(135deg, #00f0ff 0%, #00a8ff 100%);
-  --secondary-color: #00ff9d;
-  /* Verde Mint Neon */
-  --accent-glow: rgba(0, 240, 255, 0.5);
-  --primary-glow: rgba(0, 240, 255, 0.3);
+  --primary-color: #2383e2;
+  --primary-gradient: linear-gradient(135deg, #2383e2 0%, #528bff 100%);
+  --secondary-color: #35a855;
+  --accent-glow: rgba(35, 131, 226, 0.15);
+  --primary-glow: rgba(35, 131, 226, 0.1);
 
   /* Texto */
-  --text-primary: #e0f7fa;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #475569;
+  --text-primary: #ebebeb;
+  --text-secondary: #9b9b9b;
+  --text-tertiary: #6b6b6b;
 
   /* Fontes */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
 
   /* Efeitos */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 0 20px rgba(0, 240, 255, 0.1), 0 0 40px rgba(0, 0, 0, 0.8);
-  --backdrop-blur: blur(20px);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+  /* Transições */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
 
   /* Raios de Borda */
   --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
 
   /* Componentes Específicos */
-  --user-msg-bg: rgba(0, 240, 255, 0.1);
-  --user-msg-text: #00f0ff;
+  --user-msg-bg: rgba(35, 131, 226, 0.12);
+  --user-msg-text: #6eb3f7;
   --bot-msg-bg: transparent;
-  --code-header-bg: #0a0a0a;
-  --code-bg: #080808;
+  --code-header-bg: #2a2a2a;
+  --code-bg: #1e1e1e;
 }
 
-/* Light Mode Override (Clean High-Tech) */
+/* Light Mode Override (Notion Style) */
 [data-theme="light"] {
   --bg-color: #ffffff;
-  --sidebar-bg: #f8fafc;
-  --surface-color: #f1f5f9;
-  --surface-hover: #e2e8f0;
-  --input-bg: rgba(255, 255, 255, 0.95);
+  --sidebar-bg: #fbfbfa;
+  --surface-color: #f7f6f3;
+  --surface-hover: #efefef;
+  --input-bg: #ffffff;
 
-  --border-color: #e2e8f0;
-  --border-highlight: #cbd5e1;
+  --border-color: #e8e7e4;
+  --border-highlight: #d8d7d4;
 
-  /* Mantém o azul visível mas legível no branco */
-  --primary-color: #0ea5e9;
-  /* Sky 500 */
-  --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-  --accent-glow: rgba(14, 165, 233, 0.3);
+  --primary-color: #2383e2;
+  --primary-gradient: linear-gradient(135deg, #2383e2 0%, #528bff 100%);
+  --accent-glow: rgba(35, 131, 226, 0.1);
+  --primary-glow: rgba(35, 131, 226, 0.05);
 
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --text-tertiary: #94a3b8;
+  --text-primary: #37352f;
+  --text-secondary: #787774;
+  --text-tertiary: #9b9a97;
 
-  --user-msg-bg: #f0f9ff;
-  --user-msg-text: #0284c7;
+  --user-msg-bg: rgba(35, 131, 226, 0.08);
+  --user-msg-text: #2383e2;
 
-  --code-bg: #f3f4f6;
-  --code-header-bg: #e5e7eb;
+  --code-bg: #f7f6f3;
+  --code-header-bg: #efefef;
 
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -99,69 +101,16 @@ body {
   flex-direction: column;
 }
 
-/* --- BACKGROUND EFFECTS --- */
+/* --- BACKGROUND EFFECTS (Hidden for Notion style) --- */
 .background-effects {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
+  display: none;
+  /* Hidden for clean Notion aesthetic */
 }
 
-/* Glowing Orbs */
-.glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.15;
-  animation: float 30s infinite ease-in-out;
-  mix-blend-mode: screen;
-}
-
-.orb-1 {
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
-  top: -30%;
-  left: -10%;
-  opacity: 0.1;
-}
-
-.orb-2 {
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(circle, #00a8ff 0%, transparent 70%);
-  bottom: -30%;
-  right: -10%;
-  animation-delay: -10s;
-  opacity: 0.08;
-}
-
-/* Grid Overlay */
+/* Keeping these in case user wants to re-enable */
+.glow-orb,
 .grid-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: 50px 50px;
-  background-image:
-    linear-gradient(to right, var(--border-color) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
-  opacity: 0.2;
-  mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-}
-
-[data-theme="light"] .grid-overlay {
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  mask-image: none;
-  opacity: 1;
+  display: none;
 }
 
 @keyframes float {
@@ -229,8 +178,8 @@ body {
 #mobile-menu-btn:hover,
 #theme-toggle-btn:hover {
   background: var(--surface-hover);
-  color: var(--primary-color);
-  box-shadow: 0 0 8px var(--primary-glow);
+  color: var(--text-primary);
+  transform: scale(1.05);
 }
 
 /* Agent Switcher */
@@ -261,22 +210,20 @@ body {
 .agent-btn:hover {
   background: var(--surface-hover);
   color: var(--text-primary);
-  border-color: var(--border-color);
+  transform: translateX(4px);
 }
 
 /* Estado Ativo */
 .agent-btn.active {
-  background: rgba(0, 240, 255, 0.05);
+  background: var(--accent-glow);
   color: var(--primary-color);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+  border-color: transparent;
   font-weight: 600;
 }
 
-/* No tema claro, ajuste a sombra */
+/* No tema claro */
 [data-theme="light"] .agent-btn.active {
-  background: rgba(14, 165, 233, 0.1);
-  box-shadow: none;
+  background: var(--accent-glow);
 }
 
 .agent-icon {
@@ -313,9 +260,8 @@ body {
 
 #new-chat-btn:hover {
   background: var(--surface-hover);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  box-shadow: 0 0 8px var(--primary-glow);
+  border-color: var(--border-highlight);
+  transform: translateY(-1px);
 }
 
 /* Histórico */
@@ -540,10 +486,9 @@ body {
 }
 
 .bot .avatar {
-  background: var(--surface-hover);
+  background: var(--surface-color);
   color: var(--primary-color);
   border: 1px solid var(--border-color);
-  box-shadow: 0 0 5px var(--primary-glow);
 }
 
 .user .avatar {
@@ -584,8 +529,7 @@ body {
   background: var(--user-msg-bg);
   color: var(--user-msg-text);
   padding: 0.75rem 1.15rem;
-  border-radius: 4px 16px 4px 16px;
-  box-shadow: 0 0 10px var(--primary-glow);
+  border-radius: 16px 16px 4px 16px;
   border: 1px solid var(--border-color);
 }
 
@@ -605,9 +549,8 @@ body {
 .typing-indicator span {
   width: 6px;
   height: 6px;
-  background: var(--primary-color);
+  background: var(--text-secondary);
   border-radius: 50%;
-  box-shadow: 0 0 5px var(--primary-color);
   animation: bounce 1.4s infinite ease-in-out both;
 }
 
@@ -670,17 +613,17 @@ code {
 }
 
 :not(pre)>code {
-  background: rgba(0, 240, 255, 0.1);
+  background: var(--surface-color);
   padding: 0.2em 0.4em;
   border-radius: 4px;
   color: var(--primary-color);
-  border: 1px solid rgba(0, 240, 255, 0.2);
+  border: 1px solid var(--border-color);
 }
 
 [data-theme="light"] :not(pre)>code {
-  background: rgba(0, 0, 0, 0.05);
-  color: #0ea5e9;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(55, 53, 47, 0.06);
+  color: #eb5757;
+  border: none;
 }
 
 /* Markdown formatting */
@@ -806,7 +749,7 @@ code {
 
 .input-wrapper:focus-within {
   border-color: var(--primary-color);
-  box-shadow: var(--shadow-lg), 0 0 15px var(--primary-glow);
+  box-shadow: var(--shadow-md);
 }
 
 /* Speaking State Pulse */
@@ -875,70 +818,41 @@ code {
 
 .send-btn {
   background: var(--primary-color);
-  color: #000;
-  box-shadow: 0 0 10px var(--primary-glow);
+  color: #fff;
 }
 
 .send-btn:hover {
-  background: #00c3ff;
+  background: #1a73cc;
   transform: translateY(-1px);
-  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.send-btn:active {
+  transform: scale(0.96);
 }
 
 /* Web Search Button Active State */
 #webSearchBtn.active {
   color: var(--secondary-color);
-  background: rgba(0, 255, 157, 0.1);
+  background: rgba(53, 168, 85, 0.15);
   border-color: var(--secondary-color);
-  box-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
-  animation: searchPulse 2s infinite ease-in-out;
-}
-
-@keyframes searchPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
-  }
-
-  50% {
-    box-shadow: 0 0 16px rgba(0, 255, 157, 0.6);
-  }
 }
 
 [data-theme="light"] #webSearchBtn.active {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+  color: #35a855;
+  background: rgba(53, 168, 85, 0.1);
+  border-color: #35a855;
 }
 
 /* Thinking Mode Button Active State */
 #thinkingBtn.active {
-  color: #f472b6;
-  background: rgba(244, 114, 182, 0.15);
-  border-color: #f472b6;
-  box-shadow: 0 0 12px rgba(244, 114, 182, 0.4);
-  animation: thinkingPulse 2s infinite ease-in-out;
-}
-
-@keyframes thinkingPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 8px rgba(244, 114, 182, 0.3);
-  }
-
-  50% {
-    box-shadow: 0 0 18px rgba(244, 114, 182, 0.6);
-  }
+  color: #eb5757;
+  background: rgba(235, 87, 87, 0.12);
+  border-color: transparent;
 }
 
 [data-theme="light"] #thinkingBtn.active {
-  color: #ec4899;
-  background: rgba(236, 72, 153, 0.1);
-  border-color: #ec4899;
-  box-shadow: 0 0 8px rgba(236, 72, 153, 0.3);
+  color: #e03e3e;
+  background: rgba(224, 62, 62, 0.08);
 }
 
 /* Thinking Block Styling - ChatGPT Style */
