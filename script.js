@@ -536,11 +536,11 @@
                         <div class="heavy-phases">
                             <span class="phase-label">Orquestrando modelos...</span>
                             <div class="phase-steps">
-                                <span class="phase active" data-phase="1">⚡ Planejando</span>
-                                <span class="phase" data-phase="2">🎯 Podando</span>
-                                <span class="phase" data-phase="3">📝 Expandindo</span>
-                                <span class="phase" data-phase="4">🔍 Refinando</span>
-                                <span class="phase" data-phase="5">✨ Sintetizando</span>
+                                <span class="phase active" data-phase="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Planejando</span>
+                                <span class="phase" data-phase="2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg> Selecionando</span>
+                                <span class="phase" data-phase="3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Expandindo</span>
+                                <span class="phase" data-phase="4"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Refinando</span>
+                                <span class="phase" data-phase="5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18M5.64 5.64l12.72 12.72M18.36 5.64L5.64 18.36"/></svg> Sintetizando</span>
                             </div>
                         </div>
                     </div>
@@ -550,7 +550,7 @@
             }
         } else {
             // Add Heavy Mode badge if applicable
-            const heavyBadge = sender === 'Jade Heavy' ? '<span class="heavy-badge">🧠 Multi-Model</span>' : '';
+            const heavyBadge = sender === 'Jade Heavy' ? '<span class="heavy-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 3.5 2.5 6.5 6 7.5V22h4v-4.5c3.5-1 6-4 6-7.5a8 8 0 0 0-8-8z"/></svg> Multi-Model</span>' : '';
             textHTML = `<div class="text">${heavyBadge}${renderMarkdown(content)}</div>`;
         }
 
@@ -790,7 +790,6 @@
         if (currentAgent === 'heavy') {
             let phaseIndex = 0;
             const phases = [1, 2, 3, 4, 5];
-            const phaseTimes = [3000, 2000, 4000, 3000, 2000]; // Approximate times per phase
 
             heavyPhaseInterval = setInterval(() => {
                 phaseIndex++;
@@ -801,7 +800,7 @@
                         el.classList.toggle('done', idx < phaseIndex);
                     });
                 }
-            }, 3000); // Change phase every 3 seconds
+            }, 5000); // Change phase every 5 seconds (more realistic)
         }
 
         const masterUserId = getPersistentUserId();

@@ -975,17 +975,24 @@ code {
 .phase-steps {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 8px 12px;
 }
 
 .phase {
   font-size: 0.75rem;
   color: var(--text-tertiary);
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
   background: var(--surface-color);
   transition: all 0.3s ease;
   opacity: 0.5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.phase svg {
+  flex-shrink: 0;
 }
 
 .phase.active {
@@ -1014,7 +1021,9 @@ code {
 
 /* Heavy Mode Badge on Response */
 .heavy-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.7rem;
   font-weight: 600;
   color: #8b5cf6;
