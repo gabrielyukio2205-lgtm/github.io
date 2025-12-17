@@ -49,6 +49,7 @@
     const fileList = document.getElementById('fileList');
     const modalTabs = document.getElementById('modalTabs');
     const sandpackContainer = document.getElementById('sandpackContainer');
+    const modelSelect = document.getElementById('modelSelect');
 
     // Initialize
     function init() {
@@ -170,7 +171,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt,
-                    mode: currentMode
+                    mode: currentMode,
+                    model: modelSelect.value
                 })
             });
 
@@ -224,7 +226,8 @@
                 body: JSON.stringify({
                     prompt: feedback,
                     existing_code: existingCode,
-                    mode: currentMode
+                    mode: currentMode,
+                    model: modelSelect.value
                 })
             });
 
@@ -461,7 +464,8 @@ ${allCode}
                     prompt: originalPrompt,
                     existing_code: JSON.stringify(currentFiles),
                     mode: 'react',
-                    error_message: errorMessage
+                    error_message: errorMessage,
+                    model: modelSelect.value
                 })
             });
 
