@@ -364,13 +364,24 @@ root.render(React.createElement(App));
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         body { margin: 0; }
+        .error-box { background: #450a0a; color: #fca5a5; padding: 20px; border-radius: 8px; margin: 20px; font-family: monospace; white-space: pre-wrap; }
         ${customStyles}
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
-    <div id="root"></div>
+    <div id="root"><div style="padding: 40px; text-align: center; color: #888;">Compilando React...</div></div>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro JavaScript:</strong>\\n' + msg + '\\n\\nLinha: ' + line + '</div>';
+            return true;
+        };
+    </script>
     <script type="text/babel" data-presets="react,typescript">
+        try {
 ${allCode}
+        } catch(e) {
+            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro React:</strong>\\n' + e.message + '</div>';
+        }
     </script>
 </body>
 </html>`;
