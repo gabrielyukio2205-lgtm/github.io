@@ -31,6 +31,7 @@
     const refineInput = document.getElementById('refineInput');
     const refineBtn = document.getElementById('refineBtn');
     const themeBtn = document.getElementById('themeBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
 
     // Initialize
     function init() {
@@ -47,6 +48,7 @@
         refreshBtn.addEventListener('click', refreshPreview);
         refineBtn.addEventListener('click', refineSite);
         themeBtn.addEventListener('click', toggleTheme);
+        fullscreenBtn.addEventListener('click', openFullscreen);
 
         // Prompt hints click
         document.querySelectorAll('.hint').forEach(hint => {
@@ -237,6 +239,16 @@
         if (currentCode) {
             renderPreview(currentCode);
         }
+    }
+
+    function openFullscreen() {
+        if (!currentCode) {
+            alert('Gere um site primeiro!');
+            return;
+        }
+        const blob = new Blob([currentCode], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
     }
 
     function loadTheme() {

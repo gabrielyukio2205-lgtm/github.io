@@ -106,7 +106,7 @@ body {
     background: var(--surface-hover);
 }
 
-.header-center {
+.header-left {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -165,6 +165,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent;
     margin-bottom: 0.75rem;
 }
 
