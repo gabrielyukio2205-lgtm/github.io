@@ -171,34 +171,16 @@
                     <span class="hint" data-prompt="Dashboard com sidebar e stats">📊 Dashboard</span>
                 </div>
 
-                <!-- Model Selector Pills -->
-                <div class="model-pills" id="modelPills">
-                    <button class="model-pill active" data-model="kimi-k2" title="Rápido, bom para código">
-                        <span class="pill-icon">⚡</span>
-                        <span class="pill-name">Kimi K2</span>
-                    </button>
-                    <button class="model-pill" data-model="qwen-coder" title="Especialista em código">
-                        <span class="pill-icon">💻</span>
-                        <span class="pill-name">Qwen</span>
-                    </button>
-                    <button class="model-pill" data-model="claude-sonnet" title="Alta qualidade">
-                        <span class="pill-icon">🎭</span>
-                        <span class="pill-name">Claude</span>
-                    </button>
-                    <button class="model-pill" data-model="deepseek-coder" title="Open-source">
-                        <span class="pill-icon">🔍</span>
-                        <span class="pill-name">DeepSeek</span>
-                    </button>
-                    <button class="model-pill" data-model="gpt-4o-mini" title="Rápido e capaz">
-                        <span class="pill-icon">🤖</span>
-                        <span class="pill-name">GPT-4o</span>
-                    </button>
-                    <button class="model-pill compound-pill" data-model="compound"
-                        title="Multi-agente: Planner + Builder + Reviewer">
-                        <span class="pill-icon">🧠</span>
-                        <span class="pill-name">Compound</span>
-                        <span class="pill-badge">PRO</span>
-                    </button>
+                <!-- Model Selector Dropdown -->
+                <div class="model-dropdown">
+                    <select id="modelSelect">
+                        <option value="kimi-k2">⚡ Kimi K2</option>
+                        <option value="qwen-coder">💻 Qwen Coder</option>
+                        <option value="claude-sonnet">🎭 Claude Sonnet</option>
+                        <option value="deepseek-coder">🔍 DeepSeek</option>
+                        <option value="gpt-4o-mini">🤖 GPT-4o Mini</option>
+                        <option value="compound">🧠 Compound PRO</option>
+                    </select>
                 </div>
 
                 <button id="generateBtn" class="generate-btn">
