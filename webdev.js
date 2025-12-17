@@ -58,6 +58,14 @@
             });
         });
 
+        // Template cards click - populate and auto-generate
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', () => {
+                promptInput.value = card.dataset.prompt;
+                generateSite();
+            });
+        });
+
         // Allow Ctrl+Enter to generate
         promptInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
