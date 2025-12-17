@@ -56,18 +56,6 @@
             </button>
         </div>
 
-        <!-- Model Selector -->
-        <div class="model-selector">
-            <select id="modelSelect">
-                <option value="kimi-k2">⚡ Kimi K2</option>
-                <option value="qwen-coder">💻 Qwen Coder</option>
-                <option value="llama-90b">🦙 Llama 3.3</option>
-                <option value="claude-sonnet">🎭 Claude Sonnet</option>
-                <option value="deepseek-coder">🔍 DeepSeek</option>
-                <option value="gpt-4o-mini">🤖 GPT-4o Mini</option>
-            </select>
-        </div>
-
         <button id="themeBtn" class="theme-btn" title="Alternar tema">
             <svg id="darkIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
@@ -182,6 +170,31 @@
                     <span class="hint" data-prompt="Modal de login com email e senha">🔐 Login</span>
                     <span class="hint" data-prompt="Dashboard com sidebar e stats">📊 Dashboard</span>
                 </div>
+
+                <!-- Model Selector Pills -->
+                <div class="model-pills" id="modelPills">
+                    <button class="model-pill active" data-model="kimi-k2" title="Rápido, bom para código">
+                        <span class="pill-icon">⚡</span>
+                        <span class="pill-name">Kimi K2</span>
+                    </button>
+                    <button class="model-pill" data-model="qwen-coder" title="Especialista em código">
+                        <span class="pill-icon">💻</span>
+                        <span class="pill-name">Qwen</span>
+                    </button>
+                    <button class="model-pill" data-model="claude-sonnet" title="Alta qualidade">
+                        <span class="pill-icon">🎭</span>
+                        <span class="pill-name">Claude</span>
+                    </button>
+                    <button class="model-pill" data-model="deepseek-coder" title="Open-source">
+                        <span class="pill-icon">🔍</span>
+                        <span class="pill-name">DeepSeek</span>
+                    </button>
+                    <button class="model-pill" data-model="gpt-4o-mini" title="Rápido e capaz">
+                        <span class="pill-icon">🤖</span>
+                        <span class="pill-name">GPT-4o</span>
+                    </button>
+                </div>
+
                 <button id="generateBtn" class="generate-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />

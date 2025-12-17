@@ -16,6 +16,7 @@
     let currentFiles = {}; // For React mode
     let activeFile = 'App.tsx';
     let loadingInterval = null;
+    let currentModel = 'kimi-k2'; // Selected model
 
     // Agentic auto-fix state
     const MAX_FIX_ATTEMPTS = 3;
@@ -49,7 +50,6 @@
     const fileList = document.getElementById('fileList');
     const modalTabs = document.getElementById('modalTabs');
     const sandpackContainer = document.getElementById('sandpackContainer');
-    const modelSelect = document.getElementById('modelSelect');
 
     // Initialize
     function init() {
@@ -92,6 +92,15 @@
                     : card.dataset.htmlPrompt;
                 promptInput.value = prompt;
                 generateSite();
+            });
+        });
+
+        // Model pill selection
+        document.querySelectorAll('.model-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                currentModel = pill.dataset.model;
+                document.querySelectorAll('.model-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
             });
         });
 
@@ -172,7 +181,7 @@
                 body: JSON.stringify({
                     prompt,
                     mode: currentMode,
-                    model: modelSelect.value
+                    model: currentModel
                 })
             });
 
@@ -227,7 +236,7 @@
                     prompt: feedback,
                     existing_code: existingCode,
                     mode: currentMode,
-                    model: modelSelect.value
+                    model: currentModel
                 })
             });
 
@@ -465,7 +474,7 @@ ${allCode}
                     existing_code: JSON.stringify(currentFiles),
                     mode: 'react',
                     error_message: errorMessage,
-                    model: modelSelect.value
+                    model: currentModel
                 })
             });
 
