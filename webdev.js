@@ -1,6 +1,6 @@
 /**
- * Jade Web Dev - Vibe Coder
- * Frontend logic for AI-powered web generation
+ * Jade Web Dev - AI Vibe Coder
+ * Premium frontend logic with Tailwind CSS generation
  */
 
 (function () {
@@ -12,6 +12,7 @@
 
     // State
     let currentCode = '';
+    let loadingInterval = null;
 
     // DOM Elements
     const promptInput = document.getElementById('promptInput');
@@ -47,9 +48,17 @@
         refineBtn.addEventListener('click', refineSite);
         themeBtn.addEventListener('click', toggleTheme);
 
-        // Allow Enter to generate
+        // Prompt hints click
+        document.querySelectorAll('.hint').forEach(hint => {
+            hint.addEventListener('click', () => {
+                promptInput.value = hint.dataset.prompt;
+                promptInput.focus();
+            });
+        });
+
+        // Allow Ctrl+Enter to generate
         promptInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 generateSite();
             }
@@ -62,20 +71,23 @@
             }
         });
 
-        // Close modal on outside click
+        // Close modal on backdrop click
         codeModal.addEventListener('click', (e) => {
-            if (e.target === codeModal) hideCodeModal();
+            if (e.target === codeModal || e.target.classList.contains('modal-backdrop')) {
+                hideCodeModal();
+            }
         });
     }
 
     async function generateSite() {
         const prompt = promptInput.value.trim();
         if (!prompt) {
-            alert('Digite uma descrição para o site!');
+            promptInput.focus();
             return;
         }
 
         showLoading();
+        startLoadingAnimation();
 
         try {
             const response = await fetch(API_URL, {
@@ -92,11 +104,12 @@
                 showPreview();
             } else {
                 alert('Erro ao gerar: ' + (data.error || 'Tente novamente'));
-                hideLoading();
             }
         } catch (error) {
             console.error('Erro:', error);
             alert('Erro de conexão. Verifique se o backend está rodando.');
+        } finally {
+            stopLoadingAnimation();
             hideLoading();
         }
     }
@@ -110,6 +123,7 @@
         }
 
         showLoading();
+        startLoadingAnimation();
 
         try {
             const response = await fetch(API_URL, {
@@ -127,15 +141,32 @@
                 currentCode = data.code;
                 renderPreview(currentCode);
                 refineInput.value = '';
-                hideLoading();
             } else {
                 alert('Erro ao refinar: ' + (data.error || 'Tente novamente'));
-                hideLoading();
             }
         } catch (error) {
             console.error('Erro:', error);
             alert('Erro de conexão.');
+        } finally {
+            stopLoadingAnimation();
             hideLoading();
+        }
+    }
+
+    function startLoadingAnimation() {
+        const steps = document.querySelectorAll('.loading-steps .step');
+        let currentStep = 0;
+
+        loadingInterval = setInterval(() => {
+            steps.forEach((s, i) => s.classList.toggle('active', i <= currentStep));
+            currentStep = (currentStep + 1) % steps.length;
+        }, 2000);
+    }
+
+    function stopLoadingAnimation() {
+        if (loadingInterval) {
+            clearInterval(loadingInterval);
+            loadingInterval = null;
         }
     }
 
@@ -157,7 +188,6 @@
         emptyState.classList.add('hidden');
         previewFrame.classList.remove('hidden');
         refineSection.classList.remove('hidden');
-        hideLoading();
     }
 
     function showCodeModal() {
@@ -176,6 +206,7 @@
     function copyCode() {
         if (!currentCode) return;
         navigator.clipboard.writeText(currentCode).then(() => {
+            const originalHTML = copyCodeBtn.innerHTML;
             copyCodeBtn.innerHTML = `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="20 6 9 17 4 12"/>
@@ -183,13 +214,7 @@
                 Copiado!
             `;
             setTimeout(() => {
-                copyCodeBtn.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                    </svg>
-                    Copiar
-                `;
+                copyCodeBtn.innerHTML = originalHTML;
             }, 2000);
         });
     }
