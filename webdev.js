@@ -17,6 +17,12 @@
     let activeFile = 'App.tsx';
     let loadingInterval = null;
 
+    // Agentic auto-fix state
+    const MAX_FIX_ATTEMPTS = 3;
+    let fixAttempts = 0;
+    let lastError = null;
+    let originalPrompt = '';
+
     // DOM Elements
     const promptInput = document.getElementById('promptInput');
     const generateBtn = document.getElementById('generateBtn');
@@ -65,6 +71,9 @@
         // Mode toggle
         htmlModeBtn.addEventListener('click', () => setMode('html'));
         reactModeBtn.addEventListener('click', () => setMode('react'));
+
+        // Listen for errors from iframe (for auto-fix)
+        window.addEventListener('message', handleIframeMessage);
 
         // Prompt hints
         document.querySelectorAll('.hint').forEach(hint => {
@@ -147,6 +156,11 @@
             promptInput.focus();
             return;
         }
+
+        // Save for auto-fix and reset attempts
+        originalPrompt = prompt;
+        fixAttempts = 0;
+        lastError = null;
 
         showLoading();
 
@@ -358,6 +372,9 @@ const { useState, useEffect, useRef, useCallback, useMemo, useContext, useReduce
 // Render
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(App));
+
+// Signal success to parent
+window.parent.postMessage({ type: 'react-success' }, '*');
 `;
 
         const html = `<!DOCTYPE html>
@@ -372,6 +389,7 @@ root.render(React.createElement(App));
     <style>
         body { margin: 0; }
         .error-box { background: #450a0a; color: #fca5a5; padding: 20px; border-radius: 8px; margin: 20px; font-family: monospace; white-space: pre-wrap; }
+        .fixing-box { background: #422006; color: #fcd34d; padding: 20px; border-radius: 8px; margin: 20px; text-align: center; }
         ${customStyles}
     </style>
 </head>
@@ -379,7 +397,10 @@ root.render(React.createElement(App));
     <div id="root"><div style="padding: 40px; text-align: center; color: #888;">Compilando React...</div></div>
     <script>
         window.onerror = function(msg, url, line, col, error) {
-            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro JavaScript:</strong>\\n' + msg + '\\n\\nLinha: ' + line + '</div>';
+            var errorMsg = msg + (line ? ' (linha ' + line + ')' : '');
+            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro:</strong> ' + errorMsg + '</div>';
+            // Send error to parent for auto-fix
+            window.parent.postMessage({ type: 'react-error', error: errorMsg }, '*');
             return true;
         };
     </script>
@@ -387,7 +408,8 @@ root.render(React.createElement(App));
         try {
 ${allCode}
         } catch(e) {
-            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro React:</strong>\\n' + e.message + '</div>';
+            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro:</strong> ' + e.message + '</div>';
+            window.parent.postMessage({ type: 'react-error', error: e.message }, '*');
         }
     </script>
 </body>
@@ -400,12 +422,77 @@ ${allCode}
         sandpackContainer.classList.add('hidden');
     }
 
+    // Handle messages from iframe (for auto-fix)
+    function handleIframeMessage(event) {
+        if (!event.data || !event.data.type) return;
+
+        if (event.data.type === 'react-error' && currentMode === 'react') {
+            lastError = event.data.error;
+
+            // Only auto-fix if we haven't exceeded max attempts
+            if (fixAttempts < MAX_FIX_ATTEMPTS) {
+                autoFixReact(event.data.error);
+            }
+        } else if (event.data.type === 'react-success') {
+            // Reset fix attempts on success
+            fixAttempts = 0;
+            lastError = null;
+        }
+    }
+
+    // Agentic auto-fix for React errors
+    async function autoFixReact(errorMessage) {
+        fixAttempts++;
+
+        console.log(`🔧 Auto-fix attempt ${fixAttempts}/${MAX_FIX_ATTEMPTS}: ${errorMessage}`);
+
+        // Update loading overlay to show fixing status
+        const loadingText = loadingOverlay.querySelector('.loading-text');
+        if (loadingText) {
+            loadingText.textContent = `Corrigindo erro (${fixAttempts}/${MAX_FIX_ATTEMPTS})...`;
+        }
+        showLoading();
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: originalPrompt,
+                    existing_code: JSON.stringify(currentFiles),
+                    mode: 'react',
+                    error_message: errorMessage
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.files) {
+                currentFiles = data.files;
+                renderFileExplorer();
+                renderReactPreview();
+                // Note: success/error will be detected via postMessage
+            } else {
+                console.error('Auto-fix failed:', data.error);
+                hideLoading();
+            }
+        } catch (error) {
+            console.error('Auto-fix error:', error);
+            hideLoading();
+        }
+    }
+
     function showLoading() {
         loadingOverlay.classList.remove('hidden');
     }
 
     function hideLoading() {
         loadingOverlay.classList.add('hidden');
+        // Reset loading text
+        const loadingText = loadingOverlay.querySelector('.loading-text');
+        if (loadingText) {
+            loadingText.textContent = 'Gerando...';
+        }
     }
 
     function showPreview() {
