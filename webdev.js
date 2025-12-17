@@ -6,8 +6,9 @@
 (function () {
     'use strict';
 
-    // API Configuration
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    // API Configuration - matches main script.js
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE = isLocal
         ? 'http://localhost:7860'
         : 'https://gabrielyukio2205-jade-port.hf.space';
 
