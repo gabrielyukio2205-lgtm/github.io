@@ -344,6 +344,13 @@
             .replace(/export\s+default\s+/g, 'const App = ')
             .replace(/export\s+/g, '');
 
+        // Add React hooks as globals (required for UMD React)
+        const reactHooksShim = `
+// React Hooks (UMD compatibility)
+const { useState, useEffect, useRef, useCallback, useMemo, useContext, useReducer } = React;
+`;
+
+        allCode = reactHooksShim + allCode;
         allCode += `\n// App.tsx\n${cleanAppCode}\n`;
 
         // Add render call
