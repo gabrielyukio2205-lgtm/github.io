@@ -6,11 +6,9 @@
 (function () {
     'use strict';
 
-    // API Configuration - matches main script.js
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE = isLocal
-        ? 'http://localhost:7860'
-        : 'https://gabrielyukio2205-jade-port.hf.space';
+    // API Configuration - uses same proxy as main chat
+    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+    const API_URL = `${PROXY_BASE_URL}/webdev/generate`;
 
     // State
     let currentCode = '';
@@ -80,7 +78,7 @@
         showLoading();
 
         try {
-            const response = await fetch(`${API_BASE}/webdev/generate`, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt })
@@ -114,7 +112,7 @@
         showLoading();
 
         try {
-            const response = await fetch(`${API_BASE}/webdev/generate`, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
