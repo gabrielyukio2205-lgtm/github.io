@@ -32,9 +32,30 @@
             </div>
             <div class="header-text">
                 <h1>Jade Web Dev</h1>
-                <span class="subtitle">AI Vibe Coder • Tailwind CSS</span>
+                <span class="subtitle">AI Vibe Coder</span>
             </div>
         </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button id="htmlModeBtn" class="mode-btn active" data-mode="html">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
+                </svg>
+                HTML
+            </button>
+            <button id="reactModeBtn" class="mode-btn" data-mode="react">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="2" />
+                    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" />
+                    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" />
+                    <ellipse cx="12" cy="12" rx="10" ry="4" />
+                </svg>
+                React
+            </button>
+        </div>
+
         <button id="themeBtn" class="theme-btn" title="Alternar tema">
             <svg id="darkIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
@@ -44,19 +65,19 @@
                 stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="5" />
                 <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
             </svg>
         </button>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h2 class="hero-title">Crie sites incríveis com IA</h2>
-        <p class="hero-subtitle">Escolha um template ou descreva sua ideia</p>
+        <h2 class="hero-title">Crie apps com IA</h2>
+        <p class="hero-subtitle" id="modeDescription">Gere código HTML + Tailwind CSS funcional</p>
 
         <!-- Template Grid -->
         <div class="template-grid">
-            <div class="template-card" data-prompt="Navbar responsivo com logo, links e botão CTA">
+            <div class="template-card" data-html-prompt="Navbar responsivo com logo, links e botão CTA"
+                data-react-prompt="Navbar component com useState para mobile menu toggle">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="3" y1="12" x2="21" y2="12" />
@@ -66,7 +87,8 @@
                 </div>
                 <span class="template-name">Navbar</span>
             </div>
-            <div class="template-card" data-prompt="Hero section com gradiente, título grande, subtítulo e botões CTA">
+            <div class="template-card" data-html-prompt="Hero section com gradiente, título e botões CTA"
+                data-react-prompt="Hero component com animação e props para título customizável">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -74,7 +96,8 @@
                 </div>
                 <span class="template-name">Hero</span>
             </div>
-            <div class="template-card" data-prompt="Grid de cards de produto com imagem, título, preço e botão comprar">
+            <div class="template-card" data-html-prompt="Grid de cards de produto com imagem e preço"
+                data-react-prompt="ProductCard component reutilizável com props e estado de favorito">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -83,19 +106,18 @@
                 </div>
                 <span class="template-name">Cards</span>
             </div>
-            <div class="template-card"
-                data-prompt="Formulário de contato com campos nome, email, mensagem e botão enviar">
+            <div class="template-card" data-html-prompt="Formulário de contato com validação"
+                data-react-prompt="Formulário React com useState, validação e feedback visual">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
                     </svg>
                 </div>
                 <span class="template-name">Form</span>
             </div>
-            <div class="template-card" data-prompt="Tabela de preços com 3 planos: Básico, Pro e Enterprise">
+            <div class="template-card" data-html-prompt="Tabela de preços com 3 planos"
+                data-react-prompt="PricingTable com toggle mensal/anual usando useState">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="1" x2="12" y2="23" />
@@ -104,8 +126,8 @@
                 </div>
                 <span class="template-name">Pricing</span>
             </div>
-            <div class="template-card"
-                data-prompt="Seção de features com ícones, títulos e descrições em grid 3 colunas">
+            <div class="template-card" data-html-prompt="Seção de features com ícones"
+                data-react-prompt="Features grid component com array de features e ícones">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7" />
@@ -116,24 +138,26 @@
                 </div>
                 <span class="template-name">Features</span>
             </div>
-            <div class="template-card" data-prompt="Seção de testimonials com foto, nome, cargo e citação">
+            <div class="template-card" data-html-prompt="App de contador funcional"
+                data-react-prompt="Counter app com useState, increment, decrement e reset">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
                 </div>
-                <span class="template-name">Testimonials</span>
+                <span class="template-name">Counter</span>
             </div>
-            <div class="template-card" data-prompt="Footer completo com links, redes sociais e newsletter">
+            <div class="template-card" data-html-prompt="Todo list funcional com adicionar/remover"
+                data-react-prompt="Todo app completo com useState, add, delete, toggle complete">
                 <div class="template-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="14" width="18" height="7" rx="1" />
-                        <line x1="8" y1="17" x2="8" y2="17.01" />
-                        <line x1="12" y1="17" x2="12" y2="17.01" />
-                        <line x1="16" y1="17" x2="16" y2="17.01" />
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                 </div>
-                <span class="template-name">Footer</span>
+                <span class="template-name">Todo</span>
             </div>
         </div>
 
@@ -162,6 +186,7 @@
             <div class="preview-title">
                 <div class="preview-dot"></div>
                 <span>Preview</span>
+                <span id="modeIndicator" class="mode-indicator">HTML</span>
             </div>
             <div class="preview-actions">
                 <button id="refreshBtn" class="action-btn" title="Atualizar">
@@ -194,38 +219,50 @@
             </div>
         </div>
 
-        <div class="preview-container">
-            <div id="loadingOverlay" class="loading-overlay hidden">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <span class="loading-text">Gerando seu site com Tailwind...</span>
-                    <div class="loading-steps">
-                        <span class="step active">Analisando prompt</span>
-                        <span class="step">Estruturando HTML</span>
-                        <span class="step">Aplicando Tailwind</span>
+        <!-- Main Preview Area -->
+        <div class="preview-layout">
+            <!-- File Explorer (React mode) -->
+            <div class="file-explorer hidden" id="fileExplorer">
+                <div class="file-explorer-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <span>Arquivos</span>
+                </div>
+                <div class="file-list" id="fileList">
+                    <!-- Files will be populated here -->
+                </div>
+            </div>
+
+            <!-- Preview Container -->
+            <div class="preview-container">
+                <div id="loadingOverlay" class="loading-overlay hidden">
+                    <div class="loading-content">
+                        <div class="loading-spinner"></div>
+                        <span class="loading-text">Gerando...</span>
                     </div>
                 </div>
-            </div>
-            <div id="emptyState" class="empty-state">
-                <div class="empty-icon">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <line x1="3" y1="9" x2="21" y2="9" />
-                        <circle cx="7" cy="6" r="1" fill="currentColor" />
-                        <circle cx="10" cy="6" r="1" fill="currentColor" />
-                        <circle cx="13" cy="6" r="1" fill="currentColor" />
-                    </svg>
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <line x1="3" y1="9" x2="21" y2="9" />
+                        </svg>
+                    </div>
+                    <h3>Seu app aparecerá aqui</h3>
+                    <p>Escolha um template ou descreva sua ideia</p>
                 </div>
-                <h3>Seu site aparecerá aqui</h3>
-                <p>Digite um prompt acima e clique em <strong>Gerar Site</strong></p>
+                <iframe id="previewFrame" class="preview-frame hidden"></iframe>
+
+                <!-- Sandpack Container (React mode) -->
+                <div id="sandpackContainer" class="sandpack-container hidden"></div>
             </div>
-            <iframe id="previewFrame" class="preview-frame hidden"></iframe>
         </div>
 
-        <!-- Refine Bar (shows after generation) -->
+        <!-- Refine Bar -->
         <div class="refine-bar hidden" id="refineSection">
-            <input type="text" id="refineInput"
-                placeholder="Mude a cor do header para roxo, adicione mais animações..." />
+            <input type="text" id="refineInput" placeholder="Mude a cor do header, adicione animações..." />
             <button id="refineBtn" class="refine-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
@@ -240,7 +277,9 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <span>📄 Código Gerado</span>
+                <div class="modal-tabs" id="modalTabs">
+                    <span class="modal-tab active" data-file="main">📄 Código</span>
+                </div>
                 <button id="closeModalBtn" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">

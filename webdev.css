@@ -133,6 +133,40 @@ body {
     color: var(--text-secondary);
 }
 
+/* Mode Toggle */
+.mode-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-color);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-btn:hover {
+    color: var(--text-primary);
+}
+
+.mode-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
 .theme-btn {
     background: transparent;
     border: none;
@@ -344,6 +378,84 @@ body {
     animation: pulse 2s infinite;
 }
 
+.mode-indicator {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--primary-color);
+    color: white;
+    text-transform: uppercase;
+}
+
+.mode-indicator.react {
+    background: #61dafb;
+    color: #1a1a2e;
+}
+
+/* Preview Layout with File Explorer */
+.preview-layout {
+    display: flex;
+    gap: 1rem;
+}
+
+.file-explorer {
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.file-explorer-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.file-list {
+    padding: 8px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.file-item:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.file-item.active {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--primary-color);
+}
+
+.file-item svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.file-item.folder {
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
 @keyframes pulse {
 
     0%,
@@ -393,6 +505,7 @@ body {
 
 /* Preview Container */
 .preview-container {
+    flex: 1;
     background: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: 16px;
@@ -583,6 +696,32 @@ body {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     font-weight: 600;
+}
+
+.modal-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.modal-tab {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.modal-tab:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.modal-tab.active {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--primary-color);
 }
 
 .close-btn {
