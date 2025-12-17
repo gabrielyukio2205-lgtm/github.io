@@ -305,15 +305,53 @@
 
     function renderReactPreview() {
         // Create a standalone HTML that runs React with Babel
+        // All code must be in ONE script to avoid async compilation issues
+
         const appCode = currentFiles['App.tsx'] || currentFiles['App.jsx'] || '';
-        const components = Object.entries(currentFiles)
-            .filter(([name]) => name !== 'App.tsx' && name !== 'App.jsx' && name.endsWith('.tsx') || name.endsWith('.jsx'))
-            .map(([name, code]) => {
-                const componentName = name.split('/').pop().replace('.tsx', '').replace('.jsx', '');
-                return { name: componentName, code };
+        const customStyles = currentFiles['styles.css'] || '';
+
+        // Get all component files (not App.tsx)
+        const componentEntries = Object.entries(currentFiles)
+            .filter(([name]) => {
+                return name !== 'App.tsx' &&
+                    name !== 'App.jsx' &&
+                    name !== 'styles.css' &&
+                    (name.endsWith('.tsx') || name.endsWith('.jsx'));
             });
 
-        const customStyles = currentFiles['styles.css'] || '';
+        // Build all code into one script
+        let allCode = '';
+
+        // First, add all components
+        componentEntries.forEach(([name, code]) => {
+            const componentName = name.split('/').pop().replace('.tsx', '').replace('.jsx', '');
+            // Convert: export default function X -> const X = function
+            // Remove all imports
+            let cleanCode = code
+                .replace(/import\s+.*?from\s+['"].*?['"]\s*;?/g, '')
+                .replace(/import\s+['"].*?['"]\s*;?/g, '')
+                .replace(/export\s+default\s+function\s+(\w+)/g, 'const $1 = function')
+                .replace(/export\s+default\s+/g, `const ${componentName} = `)
+                .replace(/export\s+/g, '');
+            allCode += `\n// ${name}\n${cleanCode}\n`;
+        });
+
+        // Then add App code
+        let cleanAppCode = appCode
+            .replace(/import\s+.*?from\s+['"].*?['"]\s*;?/g, '')
+            .replace(/import\s+['"].*?['"]\s*;?/g, '')
+            .replace(/export\s+default\s+function\s+App/g, 'function App')
+            .replace(/export\s+default\s+/g, 'const App = ')
+            .replace(/export\s+/g, '');
+
+        allCode += `\n// App.tsx\n${cleanAppCode}\n`;
+
+        // Add render call
+        allCode += `
+// Render
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+`;
 
         const html = `<!DOCTYPE html>
 <html>
@@ -324,24 +362,15 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>${customStyles}</style>
+    <style>
+        body { margin: 0; }
+        ${customStyles}
+    </style>
 </head>
-<body class="bg-slate-900 text-white">
+<body class="bg-slate-900 text-white min-h-screen">
     <div id="root"></div>
-    
-    ${components.map(c => `
     <script type="text/babel" data-presets="react,typescript">
-    ${c.code.replace(/export default /g, `window.${c.name} = `).replace(/import .* from .*/g, '// import removed')}
-    </script>
-    `).join('\n')}
-    
-    <script type="text/babel" data-presets="react,typescript">
-        ${appCode
-                .replace(/import .* from .*/g, '// import removed')
-                .replace(/export default function App/g, 'function App')}
-        
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
+${allCode}
     </script>
 </body>
 </html>`;
