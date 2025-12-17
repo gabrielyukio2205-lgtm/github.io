@@ -165,7 +165,7 @@
             if (data.success) {
                 if (data.mode === 'react' && data.files) {
                     currentFiles = data.files;
-                    activeFile = 'App.tsx';
+                    activeFile = Object.keys(data.files).find(f => f.includes('App.')) || Object.keys(data.files)[0];
                     renderFileExplorer();
                     renderReactPreview();
                 } else {
