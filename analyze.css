@@ -132,6 +132,14 @@
     color: var(--text-primary);
     font-size: 0.9rem;
     cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.config-row select option {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 0.5rem;
 }
 
 .config-row select:focus {
@@ -285,15 +293,12 @@
 .metric-item .value {
     font-size: 1.75rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #60a5fa;
 }
 
 .metric-item .label {
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 0.25rem;

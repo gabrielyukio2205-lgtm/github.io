@@ -244,6 +244,32 @@
             `;
         }
         featureImportance.innerHTML = importanceHtml || '<p style="color: var(--text-secondary)">Feature importance não disponível para este modelo.</p>';
+
+        // Show download button and store model data
+        const downloadBtn = document.getElementById('download-model-btn');
+        if (training.model_base64) {
+            downloadBtn.classList.remove('hidden');
+            downloadBtn.onclick = () => downloadModel(training.model_base64, training.model_type);
+        }
+    }
+
+    // Download Model
+    function downloadModel(base64Data, modelType) {
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `modelo_${modelType}_${Date.now()}.joblib`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     // Show Error
