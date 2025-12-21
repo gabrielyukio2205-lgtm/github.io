@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>J.A.D.E. Apps | Ferramentas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="apps.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="layout-container">
+        <!-- Sidebar Simplificada -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <button id="toggle-sidebar-btn" aria-label="Fechar menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="nav-switcher">
+                <a href="index.html" class="nav-btn">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <span>Chat</span>
+                </a>
+
+                <a href="apps.html" class="nav-btn active">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    <span>Apps</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="about-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span>Sobre J.A.D.E.</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div id="app-container">
+            <header id="apps-header">
+                <div class="header-left">
+                    <button id="mobile-menu-btn" aria-label="Abrir menu">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="brand">
+                        <h1>Apps</h1>
+                        <span class="status-badge">Ferramentas J.A.D.E.</span>
+                    </div>
+                </div>
+            </header>
+
+            <main id="apps-container">
+                <section class="apps-intro">
+                    <h2>Escolha uma ferramenta</h2>
+                    <p>O ecossistema J.A.D.E. oferece diversas ferramentas especializadas para diferentes tarefas.</p>
+                </section>
+
+                <div class="apps-grid">
+                    <!-- Chat Principal -->
+                    <a href="index.html" class="app-card featured">
+                        <div class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z">
+                                </path>
+                                <path d="M2 12H22"></path>
+                                <path
+                                    d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="app-content">
+                            <h3>J.A.D.E. Chat</h3>
+                            <span class="app-badge">Principal</span>
+                            <p>Assistente multimodal com visão, voz, memória e busca web. Seu companheiro de IA para
+                                qualquer tarefa.</p>
+                        </div>
+                        <div class="app-arrow">→</div>
+                    </a>
+
+                    <!-- Web Dev -->
+                    <a href="webdev.html" class="app-card">
+                        <div class="app-icon webdev">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                        </div>
+                        <div class="app-content">
+                            <h3>Web Dev</h3>
+                            <span class="app-badge">Código</span>
+                            <p>Gera código HTML/CSS/JS com preview ao vivo. Crie sites e aplicações web completas.</p>
+                        </div>
+                        <div class="app-arrow">→</div>
+                    </a>
+
+                    <!-- Analyst -->
+                    <a href="analyze.html" class="app-card">
+                        <div class="app-icon analyst">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                        </div>
+                        <div class="app-content">
+                            <h3>Analyst</h3>
+                            <span class="app-badge beta">AutoML</span>
+                            <p>Upload de CSV, análise exploratória automática e treino de modelos ML (XGBoost, LightGBM,
+                                MLP).</p>
+                        </div>
+                        <div class="app-arrow">→</div>
+                    </a>
+
+                    <!-- Scholar Graph -->
+                    <a href="index.html?agent=scholar" class="app-card">
+                        <div class="app-icon scholar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
+                        </div>
+                        <div class="app-content">
+                            <h3>Scholar Graph</h3>
+                            <span class="app-badge">Pesquisa</span>
+                            <p>Agente especializado em pesquisa acadêmica e científica com raciocínio estruturado.</p>
+                        </div>
+                        <div class="app-arrow">→</div>
+                    </a>
+
+                    <!-- Jade Heavy -->
+                    <a href="index.html?agent=heavy" class="app-card">
+                        <div class="app-icon heavy">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="app-content">
+                            <h3>Jade Heavy</h3>
+                            <span class="app-badge">Avançado</span>
+                            <p>Modo de raciocínio profundo com Tree-of-Thought para problemas complexos.</p>
+                        </div>
+                        <div class="app-arrow">→</div>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar toggle
+        const toggleBtn = document.getElementById('toggle-sidebar-btn');
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+        }
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+        }
+    </script>
+</body>
+
+</html>

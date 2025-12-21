@@ -113,7 +113,7 @@
         mobileMenuBtn.addEventListener('click', toggleSidebar);
         newChatBtn.addEventListener('click', startNewChat);
 
-        // Agent Switcher Events
+        // Agent Switcher Events (legacy - se existir)
         if (agentSwitcher) {
             const buttons = agentSwitcher.querySelectorAll('.agent-btn');
             buttons.forEach(btn => {
@@ -122,6 +122,21 @@
                     switchAgent(agent);
                 });
             });
+        }
+
+        // Agent Mode Selector (novo dropdown)
+        const agentModeSelect = document.getElementById('agent-mode-select');
+        if (agentModeSelect) {
+            agentModeSelect.addEventListener('change', (e) => {
+                switchAgent(e.target.value);
+            });
+        }
+
+        // Check URL params for agent selection (from Apps page)
+        const urlParams = new URLSearchParams(window.location.search);
+        const agentFromUrl = urlParams.get('agent');
+        if (agentFromUrl && ['jade', 'scholar', 'heavy'].includes(agentFromUrl)) {
+            currentAgent = agentFromUrl;
         }
 
         // Theme Event
@@ -215,15 +230,23 @@
     }
 
     function updateAgentUI() {
-        // Update Sidebar Buttons
-        const buttons = agentSwitcher.querySelectorAll('.agent-btn');
-        buttons.forEach(btn => {
-            if (btn.getAttribute('data-agent') === currentAgent) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
+        // Update Sidebar Buttons (legacy - se existir)
+        if (agentSwitcher) {
+            const buttons = agentSwitcher.querySelectorAll('.agent-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-agent') === currentAgent) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Update Agent Mode Dropdown (novo)
+        const agentModeSelect = document.getElementById('agent-mode-select');
+        if (agentModeSelect) {
+            agentModeSelect.value = currentAgent;
+        }
 
         // Update Header Title and Input Placeholder
         if (currentAgent === 'scholar') {

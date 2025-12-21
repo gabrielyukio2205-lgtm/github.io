@@ -37,73 +37,39 @@
                 </button>
             </div>
 
-            <div id="agent-switcher">
-                <!-- Botão J.A.D.E. Padrão -->
-                <button class="agent-btn active" data-agent="jade">
-                    <div class="agent-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M2 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path
-                                d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <div id="nav-switcher">
+                <!-- Chat Principal -->
+                <button class="nav-btn active" data-nav="chat" id="chat-nav-btn">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
                     </div>
-                    <span>J.A.D.E.</span>
+                    <span>Chat</span>
                 </button>
 
-                <!-- Botão Scholar Graph -->
-                <button class="agent-btn" data-agent="scholar">
-                    <div class="agent-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                <!-- Apps -->
+                <a href="apps.html" class="nav-btn" id="apps-nav-link">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
                         </svg>
                     </div>
-                    <span>Scholar Graph</span>
-                </button>
-
-                <!-- ✨ NOVO BOTÃO: JADE HEAVY ✨ -->
-                <button class="agent-btn" data-agent="heavy">
-                    <div class="agent-icon">
-                        <!-- Ícone representando camadas de raciocínio (ToT/Stack) -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                            <polyline points="2 17 12 22 22 17"></polyline>
-                            <polyline points="2 12 12 17 22 12"></polyline>
-                        </svg>
-                    </div>
-                    <span>Jade Heavy</span>
-                </button>
-
-                <!-- Botão Web Dev (link para página separada) -->
-                <a href="webdev.html" class="agent-btn" id="webdev-link">
-                    <div class="agent-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="16 18 22 12 16 6"></polyline>
-                            <polyline points="8 6 2 12 8 18"></polyline>
-                        </svg>
-                    </div>
-                    <span>Web Dev</span>
+                    <span>Apps</span>
                 </a>
+            </div>
 
-                <!-- Botão Analyst (link para página separada) -->
-                <a href="analyze.html" class="agent-btn" id="analyst-link">
-                    <div class="agent-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
-                            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
-                        </svg>
-                    </div>
-                    <span>Analyst</span>
-                </a>
+            <!-- Agent Mode Selector (dentro do chat) -->
+            <div id="agent-mode-selector">
+                <span class="mode-label">Modo:</span>
+                <select id="agent-mode-select">
+                    <option value="jade">J.A.D.E.</option>
+                    <option value="scholar">Scholar</option>
+                    <option value="heavy">Heavy</option>
+                </select>
             </div>
 
             <button id="new-chat-btn">
