@@ -148,19 +148,24 @@
             const result = await response.json();
             loadingIndicator.classList.add('hidden');
 
+            console.log('API Response:', result);  // Debug
+
             if (result.success) {
                 if (result.eda) {
                     displayEDA(result.eda);
                 }
                 if (result.training && result.training.success) {
                     displayTraining(result.training);
+                } else if (result.training && result.training.error) {
+                    showError(`Erro no treino: ${result.training.error}`);
                 }
             } else {
-                showError(result.error || 'Erro desconhecido');
+                showError(result.error || result.detail || JSON.stringify(result));
             }
 
         } catch (err) {
             loadingIndicator.classList.add('hidden');
+            console.error('Fetch error:', err);  // Debug
             showError(`Erro de conexão: ${err.message}`);
         } finally {
             edaBtn.disabled = false;
