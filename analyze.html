@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>J.A.D.E. Analyst | Data Analysis</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="analyze.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <div id="layout-container">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <button id="toggle-sidebar-btn" aria-label="Fechar menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="agent-switcher">
+                <a href="index.html" class="agent-btn">
+                    <div class="agent-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path
+                                d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span>J.A.D.E.</span>
+                </a>
+
+                <a href="webdev.html" class="agent-btn">
+                    <div class="agent-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </div>
+                    <span>Web Dev</span>
+                </a>
+
+                <!-- Analyst - Active -->
+                <button class="agent-btn active" data-agent="analyst">
+                    <div class="agent-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                        </svg>
+                    </div>
+                    <span>Analyst</span>
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="about-link"
+                    style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary); padding: 8px 12px; text-decoration: none; border-radius: var(--radius-md); transition: 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span>Voltar ao Chat</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div id="app-container">
+            <header id="chat-header">
+                <div class="header-left">
+                    <button id="mobile-menu-btn" aria-label="Abrir menu">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="brand">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                            </svg>
+                        </div>
+                        <h1>Analyst</h1>
+                        <span class="status-badge">Beta</span>
+                    </div>
+                </div>
+            </header>
+
+            <main id="analyst-container">
+                <!-- Upload Section -->
+                <section class="analyst-section upload-section">
+                    <h2>📊 Upload de Dados</h2>
+                    <div class="upload-zone" id="upload-zone">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Arraste um arquivo CSV ou clique para selecionar</p>
+                        <input type="file" id="csv-input" accept=".csv" hidden>
+                    </div>
+                    <div id="file-info" class="hidden">
+                        <span id="file-name"></span>
+                        <button id="remove-file-btn">✕</button>
+                    </div>
+                </section>
+
+                <!-- Config Section -->
+                <section class="analyst-section config-section">
+                    <h2>⚙️ Configuração</h2>
+
+                    <div class="config-row">
+                        <label for="user-prompt">O que você quer analisar?</label>
+                        <textarea id="user-prompt"
+                            placeholder="Ex: Quero prever quais clientes vão cancelar (churn)"></textarea>
+                    </div>
+
+                    <div class="config-row config-grid">
+                        <div>
+                            <label for="target-col">Coluna Target (opcional)</label>
+                            <select id="target-col">
+                                <option value="">Auto-detectar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="model-type">Modelo</label>
+                            <select id="model-type">
+                                <option value="xgboost">XGBoost</option>
+                                <option value="lightgbm">LightGBM</option>
+                                <option value="mlp">MLP (Neural Net)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="config-actions">
+                        <button id="eda-btn" class="secondary-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            Apenas EDA
+                        </button>
+                        <button id="analyze-btn" class="primary-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            Analisar e Treinar
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Results Section -->
+                <section class="analyst-section results-section hidden" id="results-section">
+                    <h2>📈 Resultados</h2>
+
+                    <div id="loading-indicator" class="hidden">
+                        <div class="spinner"></div>
+                        <p>Treinando modelo no TrainerBox...</p>
+                    </div>
+
+                    <div id="results-content">
+                        <!-- EDA Results -->
+                        <div id="eda-results" class="result-card hidden">
+                            <h3>🔍 Análise Exploratória</h3>
+                            <div class="stats-grid" id="eda-stats"></div>
+                        </div>
+
+                        <!-- Training Results -->
+                        <div id="training-results" class="result-card hidden">
+                            <h3>🎯 Resultados do Treino</h3>
+                            <div class="metrics-grid" id="metrics-grid"></div>
+
+                            <h4>Feature Importance</h4>
+                            <div id="feature-importance"></div>
+                        </div>
+
+                        <!-- Error Display -->
+                        <div id="error-display" class="result-card error hidden">
+                            <h3>❌ Erro</h3>
+                            <p id="error-message"></p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="analyze.js"></script>
+</body>
+
+</html>
