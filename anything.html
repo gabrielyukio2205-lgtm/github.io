@@ -86,12 +86,12 @@
                 </div>
             </header>
 
-            <!-- Model & Character Selector Bar -->
+            <!-- Model & GEM Selector Bar -->
             <div id="model-selector-bar">
                 <div class="selector-group">
                     <label>Provider:</label>
                     <select id="provider-select">
-                        <option value="openrouter">OpenRouter (Free)</option>
+                        <option value="openrouter">OpenRouter</option>
                         <option value="groq">Groq</option>
                         <option value="cerebras">Cerebras</option>
                         <option value="mistral">Mistral</option>
@@ -101,9 +101,18 @@
                     <label>Modelo:</label>
                     <select id="model-select"></select>
                 </div>
-                <div class="selector-group">
-                    <label>Persona:</label>
-                    <select id="character-select"></select>
+                <div class="selector-group gem-selector">
+                    <label>GEM:</label>
+                    <select id="gem-select">
+                        <option value="">Sem GEM</option>
+                    </select>
+                    <button id="create-gem-btn" class="icon-btn" title="Criar/Editar GEM">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
                 <div class="model-info">
                     <span id="current-model-badge"></span>
@@ -125,8 +134,49 @@
                         </svg>
                     </button>
                 </div>
-                <p class="disclaimer">Chat Anything · Histórico salvo localmente · Múltiplos providers</p>
+                <p class="disclaimer">Chat Anything · Histórico local · GEMs customizáveis</p>
             </div>
+        </div>
+    </div>
+
+    <!-- GEM Modal -->
+    <div id="gem-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Criar GEM</h2>
+            <form id="gem-form">
+                <input type="hidden" id="gem-id">
+
+                <div class="form-row">
+                    <div class="form-group emoji-group">
+                        <label for="gem-emoji">Emoji</label>
+                        <input type="text" id="gem-emoji" value="✨" maxlength="4" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="gem-name">Nome</label>
+                        <input type="text" id="gem-name" placeholder="Ex: Assistente de Código" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gem-prompt">Prompt do Sistema</label>
+                    <textarea id="gem-prompt" rows="4" placeholder="Instruções de como a GEM deve se comportar..."
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="gem-context">Contexto Adicional (opcional)</label>
+                    <textarea id="gem-context" rows="3"
+                        placeholder="Informações extras, base de conhecimento, regras..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="delete-gem-btn" class="danger-btn hidden">Excluir</button>
+                    <div class="action-right">
+                        <button type="button" id="cancel-gem-btn" class="secondary-btn">Cancelar</button>
+                        <button type="submit" class="primary-btn">Salvar GEM</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

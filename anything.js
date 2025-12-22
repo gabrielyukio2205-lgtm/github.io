@@ -4,7 +4,7 @@
     // API Base URL
     const API_URL = 'https://jade-proxy.onrender.com/anything';
     const STORAGE_KEY = 'anything_conversations';
-    const CHARS_KEY = 'anything_characters';
+    const GEMS_KEY = 'anything_gems';
 
     // Provider Models Config
     const PROVIDERS = {
@@ -65,25 +65,14 @@
         }
     };
 
-    // Default Characters/Personas
-    const DEFAULT_CHARACTERS = [
-        { id: 'default', name: 'Padrão', emoji: '🤖', prompt: 'Você é um assistente útil e amigável.' },
-        { id: 'coder', name: 'Programador', emoji: '💻', prompt: 'Você é um programador senior especialista em múltiplas linguagens. Responda sempre com código limpo, bem comentado e boas práticas. Use markdown para formatar código.' },
-        { id: 'creative', name: 'Criativo', emoji: '🎨', prompt: 'Você é um artista criativo e imaginativo. Seja poético, use metáforas e pense fora da caixa. Inspire criatividade em suas respostas.' },
-        { id: 'professor', name: 'Professor', emoji: '📚', prompt: 'Você é um professor paciente e didático. Explique conceitos de forma clara, use exemplos práticos e analogias. Estimule o pensamento crítico.' },
-        { id: 'coach', name: 'Coach', emoji: '🧠', prompt: 'Você é um coach motivacional e psicólogo. Seja empático, faça perguntas poderosas e ajude a pessoa a encontrar suas próprias respostas.' },
-        { id: 'comedian', name: 'Comediante', emoji: '😂', prompt: 'Você é um comediante brasileiro. Use humor, piadas, trocadilhos e referências da cultura pop. Mantenha o clima leve e divertido.' },
-        { id: 'rpg', name: 'Mestre de RPG', emoji: '🐉', prompt: 'Você é um mestre de RPG épico. Narre histórias imersivas, crie cenários fantásticos e desafios. Use descrições vívidas e mantenha o suspense.' }
-    ];
-
     // State
     let currentProvider = 'openrouter';
     let currentModel = PROVIDERS.openrouter.models[0].id;
-    let currentCharacter = DEFAULT_CHARACTERS[0];
+    let currentGem = null; // GEM ativa (null = sem GEM)
     let conversations = [];
     let currentChatId = null;
     let messages = [];
-    let characters = [];
+    let gems = [];
     let isProcessing = false;
 
     // DOM Elements
@@ -92,7 +81,8 @@
     const sendBtn = document.getElementById('sendBtn');
     const providerSelect = document.getElementById('provider-select');
     const modelSelect = document.getElementById('model-select');
-    const characterSelect = document.getElementById('character-select');
+    const gemSelect = document.getElementById('gem-select');
+    const createGemBtn = document.getElementById('create-gem-btn');
     const modelBadge = document.getElementById('current-model-badge');
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
@@ -100,12 +90,23 @@
     const newChatBtn = document.getElementById('new-chat-btn');
     const chatHistoryList = document.getElementById('chat-history-list');
 
+    // GEM Modal Elements
+    const gemModal = document.getElementById('gem-modal');
+    const gemForm = document.getElementById('gem-form');
+    const gemNameInput = document.getElementById('gem-name');
+    const gemEmojiInput = document.getElementById('gem-emoji');
+    const gemPromptInput = document.getElementById('gem-prompt');
+    const gemContextInput = document.getElementById('gem-context');
+    const gemIdInput = document.getElementById('gem-id');
+    const cancelGemBtn = document.getElementById('cancel-gem-btn');
+    const deleteGemBtn = document.getElementById('delete-gem-btn');
+
     // Initialize
     function init() {
-        loadCharacters();
+        loadGems();
         loadConversations();
         populateModels();
-        populateCharacters();
+        populateGems();
         updateModelBadge();
         setupEventListeners();
 
@@ -145,13 +146,34 @@
             updateModelBadge();
         });
 
-        if (characterSelect) {
-            characterSelect.addEventListener('change', (e) => {
-                const char = characters.find(c => c.id === e.target.value);
-                if (char) {
-                    currentCharacter = char;
-                    updateModelBadge();
-                }
+        if (gemSelect) {
+            gemSelect.addEventListener('change', (e) => {
+                const gemId = e.target.value;
+                currentGem = gemId ? gems.find(g => g.id === gemId) : null;
+                updateModelBadge();
+            });
+        }
+
+        if (createGemBtn) {
+            createGemBtn.addEventListener('click', () => openGemModal());
+        }
+
+        if (cancelGemBtn) {
+            cancelGemBtn.addEventListener('click', closeGemModal);
+        }
+
+        if (deleteGemBtn) {
+            deleteGemBtn.addEventListener('click', deleteCurrentGem);
+        }
+
+        if (gemForm) {
+            gemForm.addEventListener('submit', saveGem);
+        }
+
+        // Close modal on backdrop click
+        if (gemModal) {
+            gemModal.addEventListener('click', (e) => {
+                if (e.target === gemModal) closeGemModal();
             });
         }
 
@@ -194,17 +216,122 @@
         renderHistoryList();
     }
 
-    function loadCharacters() {
-        const stored = localStorage.getItem(CHARS_KEY);
+    function loadGems() {
+        const stored = localStorage.getItem(GEMS_KEY);
         if (stored) {
             try {
-                const custom = JSON.parse(stored);
-                characters = [...DEFAULT_CHARACTERS, ...custom];
+                gems = JSON.parse(stored);
             } catch (e) {
-                characters = [...DEFAULT_CHARACTERS];
+                gems = [];
             }
+        }
+    }
+
+    function saveGems() {
+        localStorage.setItem(GEMS_KEY, JSON.stringify(gems));
+        populateGems();
+    }
+
+    // ========== GEMS ==========
+
+    function openGemModal(gem = null) {
+        if (!gemModal) return;
+
+        gemModal.classList.add('active');
+
+        if (gem) {
+            // Edit mode
+            gemIdInput.value = gem.id;
+            gemNameInput.value = gem.name;
+            gemEmojiInput.value = gem.emoji;
+            gemPromptInput.value = gem.prompt;
+            gemContextInput.value = gem.context || '';
+            deleteGemBtn.classList.remove('hidden');
+            document.querySelector('.modal-title').textContent = 'Editar GEM';
         } else {
-            characters = [...DEFAULT_CHARACTERS];
+            // Create mode
+            gemIdInput.value = '';
+            gemNameInput.value = '';
+            gemEmojiInput.value = '✨';
+            gemPromptInput.value = '';
+            gemContextInput.value = '';
+            deleteGemBtn.classList.add('hidden');
+            document.querySelector('.modal-title').textContent = 'Criar GEM';
+        }
+
+        gemNameInput.focus();
+    }
+
+    function closeGemModal() {
+        if (gemModal) {
+            gemModal.classList.remove('active');
+        }
+    }
+
+    function saveGem(e) {
+        e.preventDefault();
+
+        const id = gemIdInput.value || createId();
+        const gem = {
+            id,
+            name: gemNameInput.value.trim(),
+            emoji: gemEmojiInput.value.trim() || '✨',
+            prompt: gemPromptInput.value.trim(),
+            context: gemContextInput.value.trim()
+        };
+
+        if (!gem.name || !gem.prompt) {
+            alert('Nome e Prompt são obrigatórios!');
+            return;
+        }
+
+        const existingIndex = gems.findIndex(g => g.id === id);
+        if (existingIndex >= 0) {
+            gems[existingIndex] = gem;
+        } else {
+            gems.push(gem);
+        }
+
+        saveGems();
+        closeGemModal();
+
+        // Select the new/edited GEM
+        currentGem = gem;
+        if (gemSelect) gemSelect.value = gem.id;
+        updateModelBadge();
+    }
+
+    function deleteCurrentGem() {
+        const id = gemIdInput.value;
+        if (!id) return;
+
+        if (confirm('Excluir esta GEM?')) {
+            gems = gems.filter(g => g.id !== id);
+            saveGems();
+            closeGemModal();
+
+            if (currentGem && currentGem.id === id) {
+                currentGem = null;
+                if (gemSelect) gemSelect.value = '';
+            }
+            updateModelBadge();
+        }
+    }
+
+    function populateGems() {
+        if (!gemSelect) return;
+
+        gemSelect.innerHTML = '<option value="">Sem GEM</option>';
+        gems.forEach(gem => {
+            const option = document.createElement('option');
+            option.value = gem.id;
+            option.textContent = `${gem.emoji} ${gem.name}`;
+            gemSelect.appendChild(option);
+        });
+
+        // Add edit options for existing gems
+        if (currentGem) {
+            gemSelect.value = currentGem.id;
         }
     }
 
@@ -224,7 +351,7 @@
             messages: [],
             provider: currentProvider,
             model: currentModel,
-            character: currentCharacter.id,
+            gemId: currentGem ? currentGem.id : null,
             timestamp: Date.now()
         };
 
@@ -256,12 +383,12 @@
             currentModel = chat.model;
             modelSelect.value = currentModel;
         }
-        if (chat.character) {
-            const char = characters.find(c => c.id === chat.character);
-            if (char) {
-                currentCharacter = char;
-                if (characterSelect) characterSelect.value = char.id;
-            }
+        if (chat.gemId) {
+            currentGem = gems.find(g => g.id === chat.gemId) || null;
+            if (gemSelect) gemSelect.value = chat.gemId;
+        } else {
+            currentGem = null;
+            if (gemSelect) gemSelect.value = '';
         }
 
         updateModelBadge();
@@ -306,7 +433,7 @@
             chat.messages.push({ role, content, modelName, providerName, timestamp: Date.now() });
             chat.provider = currentProvider;
             chat.model = currentModel;
-            chat.character = currentCharacter.id;
+            chat.gemId = currentGem ? currentGem.id : null;
 
             // Update title from first user message
             if (role === 'user' && chat.title === 'Nova conversa') {
@@ -332,10 +459,11 @@
             const div = document.createElement('div');
             div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
 
-            const char = characters.find(c => c.id === chat.character) || DEFAULT_CHARACTERS[0];
+            const gem = chat.gemId ? gems.find(g => g.id === chat.gemId) : null;
+            const emoji = gem ? gem.emoji : '💬';
 
             div.innerHTML = `
-                <span class="history-emoji">${char.emoji}</span>
+                <span class="history-emoji">${emoji}</span>
                 <span class="history-title">${chat.title}</span>
                 <button class="delete-chat-btn" title="Excluir">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -366,38 +494,38 @@
         currentModel = provider.models[0].id;
     }
 
-    function populateCharacters() {
-        if (!characterSelect) return;
-
-        characterSelect.innerHTML = '';
-        characters.forEach(char => {
-            const option = document.createElement('option');
-            option.value = char.id;
-            option.textContent = `${char.emoji} ${char.name}`;
-            characterSelect.appendChild(option);
-        });
-    }
-
     function updateModelBadge() {
         const provider = PROVIDERS[currentProvider];
         const model = provider.models.find(m => m.id === currentModel) || provider.models[0];
+        const gemInfo = currentGem ? `${currentGem.emoji} ${currentGem.name} · ` : '';
         modelBadge.innerHTML = `
             <span style="color: ${provider.color}">●</span>
-            ${currentCharacter.emoji} ${model.name}
+            ${gemInfo}${model.name}
         `;
     }
 
     function appendWelcomeMessage() {
         const el = document.createElement('div');
         el.className = 'message bot';
+
+        let welcomeText = '';
+        if (currentGem) {
+            welcomeText = `
+                <p><strong>${currentGem.emoji} ${currentGem.name}</strong> está ativa!</p>
+                <p>${currentGem.prompt.substring(0, 100)}${currentGem.prompt.length > 100 ? '...' : ''}</p>
+            `;
+        } else {
+            welcomeText = `
+                <p>Olá! Escolha um <strong>provider</strong> e <strong>modelo</strong> acima.</p>
+                <p>Você pode criar uma <strong>GEM</strong> para personalizar o comportamento do chat com prompts customizados.</p>
+            `;
+        }
+
         el.innerHTML = `
-            <div class="avatar">${currentCharacter.emoji}</div>
+            <div class="avatar">${currentGem ? currentGem.emoji : '🌐'}</div>
             <div class="content">
-                <div class="sender-name">${currentCharacter.name}</div>
-                <div class="text">
-                    <p>Olá! Eu sou <strong>${currentCharacter.name}</strong> - ${currentCharacter.prompt.substring(0, 80)}...</p>
-                    <p>Escolha um provider e modelo acima, ou mude minha persona para começar!</p>
-                </div>
+                <div class="sender-name">Chat Anything</div>
+                <div class="text">${welcomeText}</div>
             </div>
         `;
         chatbox.appendChild(el);
@@ -413,6 +541,7 @@
 
         const displayModelName = modelName || model.name;
         const displayProviderName = providerName || provider.name;
+        const avatar = currentGem ? currentGem.emoji : provider.name.charAt(0);
 
         if (isUser) {
             el.innerHTML = `
@@ -426,10 +555,10 @@
                 : renderMarkdown(text);
 
             el.innerHTML = `
-                <div class="avatar">${currentCharacter.emoji}</div>
+                <div class="avatar">${avatar}</div>
                 <div class="content">
                     <div class="sender-name">
-                        ${currentCharacter.name}
+                        ${currentGem ? currentGem.name : 'Assistente'}
                         <span class="model-tag">${displayProviderName} · ${displayModelName}</span>
                     </div>
                     <div class="text">${textContent}</div>
@@ -473,11 +602,18 @@
         const model = provider.models.find(m => m.id === currentModel) || provider.models[0];
 
         try {
-            // Build messages with system prompt from character
-            const apiMessages = [
-                { role: 'system', content: currentCharacter.prompt },
-                ...messages
-            ];
+            // Build messages with system prompt from GEM
+            const apiMessages = [];
+
+            if (currentGem) {
+                let systemPrompt = currentGem.prompt;
+                if (currentGem.context) {
+                    systemPrompt += '\n\nContexto adicional:\n' + currentGem.context;
+                }
+                apiMessages.push({ role: 'system', content: systemPrompt });
+            }
+
+            apiMessages.push(...messages);
 
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -522,6 +658,13 @@
         }
         return escapeHtml(text).replace(/\n/g, '<br>');
     }
+
+    // Expose openGemModal to edit from select
+    window.editCurrentGem = function () {
+        if (currentGem) {
+            openGemModal(currentGem);
+        }
+    };
 
     // Start
     init();
