@@ -20,7 +20,7 @@
 
 <body>
     <div id="layout-container">
-        <!-- Sidebar -->
+        <!-- Sidebar com Histórico -->
         <aside id="sidebar">
             <div class="sidebar-header">
                 <button id="toggle-sidebar-btn" aria-label="Fechar menu">
@@ -32,47 +32,37 @@
                 </button>
             </div>
 
-            <div id="nav-switcher">
-                <a href="index.html" class="nav-btn">
-                    <div class="nav-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                    </div>
-                    <span>Chat</span>
-                </a>
+            <!-- Nova Conversa -->
+            <button id="new-chat-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Nova Conversa</span>
+            </button>
 
-                <a href="apps.html" class="nav-btn">
-                    <div class="nav-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                    </div>
-                    <span>Apps</span>
-                </a>
-
-                <button class="nav-btn active">
-                    <div class="nav-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path
-                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42">
-                            </path>
-                        </svg>
-                    </div>
-                    <span>Chat Anything</span>
-                </button>
+            <!-- Histórico -->
+            <div class="history-section">
+                <span class="history-label">RECENTES</span>
+                <div id="chat-history-list"></div>
             </div>
 
+            <!-- Nav Links -->
             <div class="sidebar-footer">
+                <a href="apps.html" class="about-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Apps</span>
+                </a>
                 <a href="index.html" class="about-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
-                    <span>Voltar ao Chat</span>
+                    <span>J.A.D.E. Chat</span>
                 </a>
             </div>
         </aside>
@@ -90,20 +80,13 @@
                         </svg>
                     </button>
                     <div class="brand">
-                        <div class="logo-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2">
-                                </path>
-                            </svg>
-                        </div>
                         <h1 id="header-title">Chat Anything</h1>
                         <span class="status-badge">Multi-Provider</span>
                     </div>
                 </div>
             </header>
 
-            <!-- Model Selector Bar -->
+            <!-- Model & Character Selector Bar -->
             <div id="model-selector-bar">
                 <div class="selector-group">
                     <label>Provider:</label>
@@ -116,9 +99,11 @@
                 </div>
                 <div class="selector-group">
                     <label>Modelo:</label>
-                    <select id="model-select">
-                        <!-- Populated by JS -->
-                    </select>
+                    <select id="model-select"></select>
+                </div>
+                <div class="selector-group">
+                    <label>Persona:</label>
+                    <select id="character-select"></select>
                 </div>
                 <div class="model-info">
                     <span id="current-model-badge"></span>
@@ -140,7 +125,7 @@
                         </svg>
                     </button>
                 </div>
-                <p class="disclaimer">Chat Anything usa múltiplos providers. Respostas podem variar.</p>
+                <p class="disclaimer">Chat Anything · Histórico salvo localmente · Múltiplos providers</p>
             </div>
         </div>
     </div>

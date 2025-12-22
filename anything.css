@@ -343,3 +343,132 @@
 body.sidebar-closed #mobile-menu-btn {
     display: flex !important;
 }
+
+/* ========== HISTORY STYLES ========== */
+
+/* New Chat Button */
+#new-chat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px dashed var(--border-color);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin: 0 0 1rem 0;
+    width: 100%;
+}
+
+#new-chat-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* History Section */
+.history-section {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+}
+
+.history-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 1px;
+    padding: 0 0 0.5rem 0;
+    text-transform: uppercase;
+}
+
+#chat-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.history-item:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.history-item.active {
+    background: var(--accent-glow);
+    color: var(--primary-color);
+}
+
+.history-emoji {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.history-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-item .delete-chat-btn {
+    opacity: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.history-item:hover .delete-chat-btn {
+    opacity: 1;
+}
+
+.history-item .delete-chat-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Sidebar Footer Links */
+.sidebar-footer {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-top: auto;
+}
+
+.sidebar-footer .about-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: 0.2s;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.sidebar-footer .about-link:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
