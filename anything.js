@@ -115,10 +115,20 @@
         });
 
         if (toggleSidebarBtn) {
-            toggleSidebarBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+            toggleSidebarBtn.addEventListener('click', toggleSidebar);
         }
         if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+        }
+    }
+
+    function toggleSidebar() {
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            sidebar.classList.toggle('open');
+        } else {
+            sidebar.classList.toggle('collapsed');
+            document.body.classList.toggle('sidebar-closed');
         }
     }
 
