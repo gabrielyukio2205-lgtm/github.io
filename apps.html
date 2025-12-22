@@ -200,18 +200,35 @@
     </div>
 
     <script>
-        // Sidebar toggle
+        // Sidebar toggle - igual à página principal
         const toggleBtn = document.getElementById('toggle-sidebar-btn');
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
 
+        function toggleSidebar() {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                sidebar.classList.toggle('open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                document.body.classList.toggle('sidebar-closed');
+            }
+        }
+
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+            toggleBtn.addEventListener('click', toggleSidebar);
         }
         if (mobileBtn) {
-            mobileBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+            mobileBtn.addEventListener('click', toggleSidebar);
         }
     </script>
+
+    <style>
+        /* Show mobile menu when sidebar is closed on desktop */
+        body.sidebar-closed #mobile-menu-btn {
+            display: flex !important;
+        }
+    </style>
 </body>
 
 </html>
