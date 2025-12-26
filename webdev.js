@@ -185,6 +185,14 @@
                     activeFile = Object.keys(data.files).find(f => f.includes('App.')) || Object.keys(data.files)[0];
                     renderFileExplorer();
                     renderReactPreview();
+
+                    // Set a timeout to hide loading if iframe doesn't respond
+                    setTimeout(() => {
+                        if (!loadingOverlay.classList.contains('hidden')) {
+                            console.log('⏱️ Timeout: hiding loading after 8s');
+                            hideLoading();
+                        }
+                    }, 8000);
                 } else {
                     currentCode = data.code;
                     renderHtmlPreview(currentCode);
@@ -203,8 +211,13 @@
         } catch (error) {
             console.error('Erro:', error);
             alert('Erro de conexão.');
-        } finally {
             hideLoading();
+        } finally {
+            // For HTML mode, hide loading immediately
+            // For React mode, loading will be hidden when iframe sends success/error message
+            if (currentMode === 'html') {
+                hideLoading();
+            }
         }
     }
 
@@ -443,11 +456,17 @@ ${allCode}
             // Only auto-fix if we haven't exceeded max attempts
             if (fixAttempts < MAX_FIX_ATTEMPTS) {
                 autoFixReact(event.data.error);
+            } else {
+                // Max attempts reached - stop loading and show error
+                console.log('🛑 Max fix attempts reached, showing code as-is');
+                hideLoading();
+                alert(`O código React tem erro de compilação após ${MAX_FIX_ATTEMPTS} tentativas de correção.\n\nErro: ${event.data.error}\n\nVeja o código para debug.`);
             }
         } else if (event.data.type === 'react-success') {
             // Reset fix attempts on success
             fixAttempts = 0;
             lastError = null;
+            hideLoading(); // Make sure to hide loading on success!
         }
     }
 
