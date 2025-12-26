@@ -50,6 +50,7 @@
     const modalTabs = document.getElementById('modalTabs');
     const sandpackContainer = document.getElementById('sandpackContainer');
     const modelSelect = document.getElementById('modelSelect');
+    const qualityBadge = document.getElementById('qualityBadge');
 
     // Initialize
     function init() {
@@ -189,6 +190,13 @@
                     renderHtmlPreview(currentCode);
                 }
                 showPreview();
+
+                // Show quality score if available (Compound PRO)
+                if (data.quality_score) {
+                    showQualityScore(data.quality_score);
+                } else {
+                    hideQualityScore();
+                }
             } else {
                 alert('Erro ao gerar: ' + (data.error || 'Tente novamente'));
             }
@@ -503,6 +511,33 @@ ${allCode}
         emptyState.classList.add('hidden');
         previewFrame.classList.remove('hidden');
         refineSection.classList.remove('hidden');
+    }
+
+    function showQualityScore(score) {
+        if (!qualityBadge) return;
+
+        const scoreEl = qualityBadge.querySelector('.score');
+        if (scoreEl) {
+            scoreEl.textContent = score.toFixed(1);
+        }
+
+        // Color based on score
+        qualityBadge.classList.remove('score-low', 'score-mid', 'score-high');
+        if (score >= 8) {
+            qualityBadge.classList.add('score-high');
+        } else if (score >= 6) {
+            qualityBadge.classList.add('score-mid');
+        } else {
+            qualityBadge.classList.add('score-low');
+        }
+
+        qualityBadge.classList.remove('hidden');
+    }
+
+    function hideQualityScore() {
+        if (qualityBadge) {
+            qualityBadge.classList.add('hidden');
+        }
     }
 
     function showCodeModal() {

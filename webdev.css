@@ -433,6 +433,54 @@ body {
     color: #1a1a2e;
 }
 
+/* Quality Badge */
+.quality-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    margin-left: 8px;
+    animation: badge-appear 0.3s ease-out;
+}
+
+.quality-badge svg {
+    width: 12px;
+    height: 12px;
+}
+
+.quality-badge .score {
+    font-weight: 700;
+}
+
+.quality-badge.score-high {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.quality-badge.score-mid {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+}
+
+.quality-badge.score-low {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+@keyframes badge-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 /* Preview Layout with File Explorer */
 .preview-layout {
     display: flex;

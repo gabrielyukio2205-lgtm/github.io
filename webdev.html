@@ -174,12 +174,21 @@
                 <!-- Model Selector Dropdown -->
                 <div class="model-dropdown">
                     <select id="modelSelect">
-                        <option value="kimi-k2">⚡ Kimi K2</option>
-                        <option value="qwen-coder">💻 Qwen Coder</option>
-                        <option value="claude-sonnet">🎭 Claude Sonnet</option>
-                        <option value="deepseek-coder">🔍 DeepSeek</option>
-                        <option value="gpt-4o-mini">🤖 GPT-4o Mini</option>
-                        <option value="compound">🧠 Compound PRO</option>
+                        <optgroup label="⚡ Modelos Rápidos">
+                            <option value="kimi-k2">⚡ Kimi K2</option>
+                            <option value="qwen-coder">💻 Qwen Coder</option>
+                            <option value="gpt-4o-mini">🤖 GPT-4o Mini</option>
+                        </optgroup>
+                        <optgroup label="🎯 Alta Qualidade">
+                            <option value="claude-sonnet">🎭 Claude Sonnet</option>
+                            <option value="qwen3-coder">🧠 Qwen 3 Coder</option>
+                            <option value="mimo">🔮 MiMo (Xiaomi)</option>
+                            <option value="deepseek-coder">🔍 DeepSeek</option>
+                        </optgroup>
+                        <optgroup label="🚀 Multi-Agent">
+                            <option value="compound">🧬 Compound Básico</option>
+                            <option value="compound_pro">⭐ Compound PRO</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -200,6 +209,13 @@
                 <div class="preview-dot"></div>
                 <span>Preview</span>
                 <span id="modeIndicator" class="mode-indicator">HTML</span>
+                <span id="qualityBadge" class="quality-badge hidden">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    <span class="score">9.0</span>
+                </span>
             </div>
             <div class="preview-actions">
                 <button id="refreshBtn" class="action-btn" title="Atualizar">
