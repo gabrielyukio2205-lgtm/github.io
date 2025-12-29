@@ -3,6 +3,10 @@
  * Handles image generation with Chutes.ai models
  */
 
+// API Configuration - Same proxy used by other JADE pages
+const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+const API_URL = `${PROXY_BASE_URL}/imagegen/generate`;
+
 // DOM Elements
 const modelBtns = document.querySelectorAll('.model-btn');
 const promptInput = document.getElementById('prompt-input');
@@ -196,7 +200,7 @@ async function generateImage() {
     }
 
     try {
-        const response = await fetch('/imagegen/generate', {
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
