@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>J.A.D.E. Image Gen | AI Image Generation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="imagegen.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <div id="layout-container">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <button id="toggle-sidebar-btn" aria-label="Fechar menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="nav-switcher">
+                <a href="index.html" class="nav-btn">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <span>Chat</span>
+                </a>
+
+                <a href="apps.html" class="nav-btn">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    <span>Apps</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="about.html" class="about-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span>Sobre J.A.D.E.</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div id="app-container">
+            <header id="imagegen-header">
+                <div class="header-left">
+                    <button id="mobile-menu-btn" aria-label="Abrir menu">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="brand">
+                        <div class="logo-icon imagegen-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <h1>Image Gen</h1>
+                        <span class="status-badge">Chutes AI</span>
+                    </div>
+                </div>
+            </header>
+
+            <main id="imagegen-main">
+                <!-- Controls Panel -->
+                <section class="controls-panel">
+                    <!-- Model Selector -->
+                    <div class="control-group">
+                        <label>Modelo</label>
+                        <div class="model-selector">
+                            <button class="model-btn active" data-model="z-turbo">
+                                <span class="model-icon">⚡</span>
+                                <span class="model-name">Z Turbo</span>
+                                <span class="model-desc">Rápido</span>
+                            </button>
+                            <button class="model-btn" data-model="qwen">
+                                <span class="model-icon">🎨</span>
+                                <span class="model-name">Qwen Image</span>
+                                <span class="model-desc">Controle Total</span>
+                            </button>
+                            <button class="model-btn" data-model="qwen-edit">
+                                <span class="model-icon">✏️</span>
+                                <span class="model-name">Qwen Edit</span>
+                                <span class="model-desc">Edição</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Prompt Input -->
+                    <div class="control-group">
+                        <label for="prompt-input">Prompt</label>
+                        <textarea id="prompt-input" placeholder="Descreva a imagem que você quer gerar..."
+                            rows="3"></textarea>
+                    </div>
+
+                    <!-- Image Upload (for edit mode) -->
+                    <div class="control-group upload-group hidden" id="upload-group">
+                        <label>Imagem de Referência</label>
+                        <div class="upload-zone" id="upload-zone">
+                            <input type="file" id="image-upload" accept="image/*" hidden>
+                            <div class="upload-placeholder" id="upload-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Clique ou arraste uma imagem</span>
+                            </div>
+                            <div class="upload-preview hidden" id="upload-preview">
+                                <img id="preview-image" src="" alt="Preview">
+                                <button class="remove-image-btn" id="remove-image-btn">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Controls (collapsible) -->
+                    <div class="control-group">
+                        <button class="toggle-advanced" id="toggle-advanced">
+                            <span>Opções Avançadas</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="advanced-controls hidden" id="advanced-controls">
+                            <!-- Negative Prompt -->
+                            <div class="control-row">
+                                <label for="negative-prompt">Negative Prompt</label>
+                                <input type="text" id="negative-prompt" placeholder="blur, distortion, low quality...">
+                            </div>
+
+                            <!-- Guidance Scale -->
+                            <div class="control-row">
+                                <label for="guidance-scale">Guidance Scale: <span id="guidance-value">7.5</span></label>
+                                <input type="range" id="guidance-scale" min="1" max="20" step="0.5" value="7.5">
+                            </div>
+
+                            <!-- Dimensions -->
+                            <div class="control-row dimensions">
+                                <div>
+                                    <label for="width">Largura</label>
+                                    <select id="width">
+                                        <option value="512">512</option>
+                                        <option value="768">768</option>
+                                        <option value="1024" selected>1024</option>
+                                        <option value="1280">1280</option>
+                                        <option value="1536">1536</option>
+                                    </select>
+                                </div>
+                                <span class="dimension-x">×</span>
+                                <div>
+                                    <label for="height">Altura</label>
+                                    <select id="height">
+                                        <option value="512">512</option>
+                                        <option value="768">768</option>
+                                        <option value="1024" selected>1024</option>
+                                        <option value="1280">1280</option>
+                                        <option value="1536">1536</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Seed -->
+                            <div class="control-row">
+                                <label for="seed">Seed (opcional)</label>
+                                <input type="number" id="seed" placeholder="Deixe vazio para aleatório">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button class="generate-btn" id="generate-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        <span>Gerar Imagem</span>
+                    </button>
+                </section>
+
+                <!-- Result Display -->
+                <section class="result-panel">
+                    <div class="result-container" id="result-container">
+                        <div class="result-placeholder" id="result-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <span>Sua imagem aparecerá aqui</span>
+                        </div>
+                        <div class="result-loading hidden" id="result-loading">
+                            <div class="spinner"></div>
+                            <span>Gerando imagem...</span>
+                        </div>
+                        <div class="result-image hidden" id="result-image">
+                            <img id="generated-image" src="" alt="Generated Image">
+                            <div class="result-actions">
+                                <button class="action-btn" id="download-btn" title="Download">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" id="save-gallery-btn" title="Salvar na Galeria">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z">
+                                        </path>
+                                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                        <polyline points="7 3 7 8 15 8"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" id="use-as-input-btn" title="Usar como Input (Edit)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-error hidden" id="result-error">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <span id="error-message">Erro ao gerar imagem</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Gallery -->
+                <section class="gallery-section">
+                    <div class="gallery-header">
+                        <h3>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            Galeria
+                        </h3>
+                        <button class="clear-gallery-btn" id="clear-gallery-btn">Limpar</button>
+                    </div>
+                    <div class="gallery-grid" id="gallery-grid">
+                        <!-- Gallery items will be injected here -->
+                        <div class="gallery-empty" id="gallery-empty">
+                            <span>Suas imagens geradas aparecerão aqui</span>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="imagegen.js"></script>
+</body>
+
+</html>
