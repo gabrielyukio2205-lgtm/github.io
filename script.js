@@ -5,6 +5,7 @@
     // Se estiver no Hugging Face, use a URL direta do Space ou Proxy
     const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
     const API_URL = `${PROXY_BASE_URL}/chat`;
+    const OCR_URL = `${PROXY_BASE_URL}/ocr`;
 
     // State Management
     let conversations = [];
@@ -23,6 +24,11 @@
     const removeImageBtn = document.getElementById('remove-image-btn');
     const voiceBtn = document.getElementById('voiceBtn');
     const audioVisualizer = document.getElementById('audio-visualizer');
+
+    // PDF/OCR Elements
+    const pdfBtn = document.getElementById('pdfBtn');
+    const pdfInput = document.getElementById('pdfInput');
+    let pdfTextContext = null; // Extracted text from PDF
 
     // Audio Control Elements
     const stopAudioBtn = document.getElementById('stop-audio-btn');
@@ -107,6 +113,10 @@
 
         // Thinking Mode Toggle
         if (thinkingBtn) thinkingBtn.addEventListener('click', toggleThinkingMode);
+
+        // PDF/OCR Button
+        if (pdfBtn) pdfBtn.addEventListener('click', () => pdfInput.click());
+        if (pdfInput) pdfInput.addEventListener('change', handlePdfSelection);
 
         // Sidebar Events
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
@@ -828,6 +838,14 @@
 
         const masterUserId = getPersistentUserId();
 
+        // Prepare message with PDF context if available
+        let finalMessage = message;
+        if (pdfTextContext) {
+            finalMessage = `[DOCUMENTO PDF]:\n${pdfTextContext}\n\n[PERGUNTA DO USUÁRIO]:\n${message}`;
+            // Clear PDF context after using it
+            clearPdfContext();
+        }
+
         try {
             console.log(`📡 Enviando para: ${API_URL}`);
 
@@ -835,7 +853,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_input: message,
+                    user_input: finalMessage,
                     image_base64: image_base64,
                     user_id: masterUserId,
                     agent_type: currentAgent, // ENVIA 'jade', 'scholar' ou 'heavy'
@@ -905,6 +923,66 @@
             const errorText = `Falha ao conectar (${err.message}).`;
             updateBotMessage(jadeTypingMessage, errorText);
             saveMessageToCurrentChat(agentName, errorText);
+        }
+    }
+
+    // --- PDF/OCR Handling ---
+    async function handlePdfSelection() {
+        const file = pdfInput.files[0];
+        if (!file) return;
+
+        const isPdf = file.type === 'application/pdf';
+        const fileType = isPdf ? 'pdf' : 'image';
+
+        // Show processing message
+        const processingMsg = appendMessage('J.A.D.E.', `📄 Processando ${isPdf ? 'PDF' : 'documento'}... Extraindo texto com OCR.`, false, true);
+
+        try {
+            // Convert file to base64
+            const base64 = await fileToBase64(file);
+
+            // Call OCR API
+            const response = await fetch(OCR_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    file_base64: base64,
+                    file_type: fileType
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.text) {
+                // Store extracted text
+                pdfTextContext = data.text;
+
+                // Update message with success
+                const preview = data.text.substring(0, 300) + (data.text.length > 300 ? '...' : '');
+                updateBotMessage(processingMsg, `✅ **Documento processado!** (${data.pages || 1} página${data.pages > 1 ? 's' : ''})\n\nPrévia do texto:\n\`\`\`\n${preview}\n\`\`\`\n\n*Agora você pode fazer perguntas sobre o conteúdo do documento.*`);
+
+                // Highlight PDF button to show context is active
+                if (pdfBtn) {
+                    pdfBtn.classList.add('active');
+                    pdfBtn.title = 'PDF carregado - clique para trocar';
+                }
+            } else {
+                updateBotMessage(processingMsg, `❌ Erro no OCR: ${data.error || 'Falha ao extrair texto'}`);
+            }
+        } catch (error) {
+            console.error('OCR Error:', error);
+            updateBotMessage(processingMsg, `❌ Erro de conexão: ${error.message}`);
+        }
+
+        // Clear file input
+        pdfInput.value = '';
+    }
+
+    function clearPdfContext() {
+        pdfTextContext = null;
+        if (pdfBtn) {
+            pdfBtn.classList.remove('active');
+            pdfBtn.title = 'Enviar PDF/Documento (OCR)';
         }
     }
 
