@@ -62,6 +62,16 @@
                 { id: 'pixtral-large-latest', name: 'Pixtral Large (Vision)' },
                 { id: 'mistral-small-latest', name: 'Mistral Small' }
             ]
+        },
+        chutes: {
+            name: 'Chutes',
+            color: '#06b6d4',
+            models: [
+                { id: 'deepseek-ai/DeepSeek-V3-0324-TEE', name: 'DeepSeek V3' },
+                { id: 'zai-org/GLM-4.7-TEE', name: 'GLM 4.7' },
+                { id: 'moonshotai/Kimi-K2-Thinking-TEE', name: 'Kimi K2 Thinking' },
+                { id: 'MiniMaxAI/MiniMax-M2.1-TEE', name: 'MiniMax M2.1' }
+            ]
         }
     };
 
