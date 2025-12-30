@@ -98,7 +98,7 @@
 
     function setupEventListeners() {
         generateBtn.addEventListener('click', generateSite);
-        codeBtn.addEventListener('click', showCodeModal);
+        // Note: codeBtn listener is set up later to support Monaco Editor
         closeModalBtn.addEventListener('click', hideCodeModal);
         copyCodeBtn.addEventListener('click', copyCode);
         downloadBtn.addEventListener('click', downloadCode);
@@ -1211,6 +1211,7 @@ root.render(<App />);
                 },
                 scripts: {
                     dev: 'vite',
+                    start: 'npm run dev',
                     build: 'vite build',
                     preview: 'vite preview'
                 },
