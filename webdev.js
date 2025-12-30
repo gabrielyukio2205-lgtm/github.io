@@ -632,41 +632,9 @@ root.render(<App />);
     }
 
     async function renderReactPreview() {
-        const SandpackClient = await loadSandpackClient();
-        if (!SandpackClient) {
-            renderReactFallback('Sandpack falhou. Usando preview simples.');
-            return;
-        }
-
-        const files = normalizeSandpackFiles(currentFiles);
-        const dependencies = resolveDependencies();
-        ensurePackageJson(files, dependencies);
-
-        if (files['/package.json']) {
-            currentFiles['package.json'] = files['/package.json'];
-        }
-
-        reactPreviewMode = 'sandpack';
-        sandpackContainer.classList.remove('hidden');
-        previewFrame.classList.add('hidden');
-
-        const frame = buildSandpackFrame();
-        const entry = getSandpackEntry(files);
-
-        try {
-            sandpackClient = new SandpackClient(frame, {
-                template: 'react',
-                files,
-                dependencies,
-                entry
-            });
-        } catch (error) {
-            console.error('Sandpack init error:', error);
-            renderReactFallback('Sandpack falhou. Usando preview simples.');
-            return;
-        }
-
-        scheduleSandpackHide();
+        // Sandpack CDNs are completely broken (404s, parsing errors)
+        // Use direct Babel + React CDN approach instead
+        renderReactFallback();
     }
 
     function renderReactFallback(message) {
