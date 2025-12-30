@@ -9,13 +9,18 @@
     // API Configuration
     const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
     const API_URL = `${PROXY_BASE_URL}/webdev/generate`;
+    const SANDPACK_IMPORT_URL = 'https://esm.sh/@codesandbox/sandpack-client@2';
 
     // State
     let currentMode = 'html'; // 'html' or 'react'
     let currentCode = '';
     let currentFiles = {}; // For React mode
-    let activeFile = 'App.tsx';
+    let currentDependencies = {};
+    let activeFile = 'src/App.jsx';
     let loadingInterval = null;
+    let sandpackClient = null;
+    let sandpackImportPromise = null;
+    let sandpackCtor = null;
 
     // Agentic auto-fix state
     const MAX_FIX_ATTEMPTS = 3;
@@ -121,6 +126,7 @@
         // Reset state when switching modes
         currentCode = '';
         currentFiles = {};
+        currentDependencies = {};
         updateModeUI();
         resetPreview();
     }
@@ -132,7 +138,7 @@
 
         // Update description
         if (currentMode === 'react') {
-            modeDescription.textContent = 'Gere apps React com componentes e hooks';
+            modeDescription.textContent = 'Gere projetos React com imports e dependencias';
             modeIndicator.textContent = 'React';
             modeIndicator.classList.add('react');
         } else {
@@ -148,8 +154,172 @@
     function resetPreview() {
         emptyState.classList.remove('hidden');
         previewFrame.classList.add('hidden');
+        sandpackContainer.classList.add('hidden');
+        sandpackContainer.innerHTML = '';
+        sandpackClient = null;
         refineSection.classList.add('hidden');
         fileList.innerHTML = '';
+    }
+
+    function getBackendMode() {
+        return currentMode === 'react' ? 'react_project' : 'html';
+    }
+
+    function isReactPayload(data) {
+        if (!data || !data.files) return false;
+        const fallbackMode = currentMode === 'react' ? 'react' : '';
+        const mode = data.mode || fallbackMode;
+        return mode.startsWith('react');
+    }
+
+    function extractDependenciesFromPackage(files) {
+        if (!files) return {};
+        const pkgRaw = files['package.json'] || files['/package.json'];
+        if (!pkgRaw) return {};
+        try {
+            const pkg = JSON.parse(pkgRaw);
+            if (pkg && typeof pkg.dependencies === 'object') {
+                return pkg.dependencies;
+            }
+        } catch (error) {
+            console.warn('Failed to parse package.json dependencies', error);
+        }
+        return {};
+    }
+
+    function pickDefaultFile() {
+        const candidates = [
+            'src/App.jsx',
+            'src/App.js',
+            'App.jsx',
+            'App.js',
+            'index.html'
+        ];
+
+        for (const name of candidates) {
+            if (currentFiles[name]) return name;
+        }
+        return Object.keys(currentFiles)[0] || '';
+    }
+
+    function normalizeSandpackFiles(rawFiles) {
+        const files = {};
+
+        Object.entries(rawFiles || {}).forEach(([name, code]) => {
+            if (!name) return;
+            const normalized = name.startsWith('/') ? name : `/${name}`;
+            const content = typeof code === 'string' ? code : (code && code.code) ? code.code : '';
+            files[normalized] = content;
+        });
+
+        if (!files['/index.html']) {
+            files['/index.html'] = buildDefaultIndexHtml();
+        }
+
+        if (!files['/src/App.jsx'] && !files['/src/App.js']) {
+            files['/src/App.jsx'] = buildDefaultApp();
+        }
+
+        if (!files['/src/main.jsx'] && !files['/src/main.js']) {
+            const hasStyles = Boolean(files['/src/styles.css'] || files['/src/index.css'] || files['/src/App.css']);
+            files['/src/main.jsx'] = buildDefaultMain(hasStyles);
+        }
+
+        return files;
+    }
+
+    function buildDefaultIndexHtml() {
+        return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-900 text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>`;
+    }
+
+    function buildDefaultMain(hasStyles) {
+        const styleImport = hasStyles ? "import './styles.css';\n" : '';
+        return `import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+${styleImport}
+const root = createRoot(document.getElementById("root"));
+root.render(<App />);
+`;
+    }
+
+    function buildDefaultApp() {
+        return `export default function App() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-3">React Project</h1>
+        <p className="text-slate-300">Start editing to see changes.</p>
+      </div>
+    </div>
+  );
+}
+`;
+    }
+
+    function resolveDependencies() {
+        const base = { react: '18.2.0', 'react-dom': '18.2.0' };
+        const pkgDeps = extractDependenciesFromPackage(currentFiles);
+        return Object.assign({}, base, pkgDeps, currentDependencies);
+    }
+
+    function getSandpackEntry(files) {
+        if (files['/src/main.jsx']) return '/src/main.jsx';
+        if (files['/src/main.js']) return '/src/main.js';
+        if (files['/src/index.jsx']) return '/src/index.jsx';
+        if (files['/src/index.js']) return '/src/index.js';
+        return '/src/main.jsx';
+    }
+
+    async function loadSandpackClient() {
+        if (sandpackCtor) return sandpackCtor;
+        if (!sandpackImportPromise) {
+            sandpackImportPromise = import(SANDPACK_IMPORT_URL)
+                .then((mod) => mod.SandpackClient || mod.default || null)
+                .catch((error) => {
+                    console.error('Failed to load Sandpack client', error);
+                    return null;
+                });
+        }
+        sandpackCtor = await sandpackImportPromise;
+        return sandpackCtor;
+    }
+
+    function buildSandpackFrame() {
+        sandpackContainer.innerHTML = '';
+        const frame = document.createElement('iframe');
+        frame.className = 'preview-frame';
+        frame.title = 'React Preview';
+        frame.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-scripts allow-same-origin');
+        sandpackContainer.appendChild(frame);
+        return frame;
+    }
+
+    function showSandpackError(message) {
+        sandpackContainer.innerHTML = `<div class="sandpack-error">${message}</div>`;
+        sandpackContainer.classList.remove('hidden');
+        previewFrame.classList.add('hidden');
+        hideLoading();
+    }
+
+    function scheduleSandpackHide() {
+        setTimeout(() => {
+            if (!loadingOverlay.classList.contains('hidden')) {
+                hideLoading();
+            }
+        }, 1200);
     }
 
     async function generateSite() {
@@ -172,7 +342,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt,
-                    mode: currentMode,
+                    mode: getBackendMode(),
                     model: modelSelect.value
                 })
             });
@@ -180,11 +350,12 @@
             const data = await response.json();
 
             if (data.success) {
-                if (data.mode === 'react' && data.files) {
-                    currentFiles = data.files;
-                    activeFile = Object.keys(data.files).find(f => f.includes('App.')) || Object.keys(data.files)[0];
+                if (isReactPayload(data)) {
+                    currentFiles = data.files || {};
+                    currentDependencies = data.dependencies || extractDependenciesFromPackage(currentFiles);
+                    activeFile = pickDefaultFile();
                     renderFileExplorer();
-                    renderReactPreview();
+                    await renderReactPreview();
 
                     // Set a timeout to hide loading if iframe doesn't respond
                     setTimeout(() => {
@@ -214,7 +385,7 @@
             hideLoading();
         } finally {
             // For HTML mode, hide loading immediately
-            // For React mode, loading will be hidden when iframe sends success/error message
+            // For React mode, loading is hidden after Sandpack boots
             if (currentMode === 'html') {
                 hideLoading();
             }
@@ -238,7 +409,7 @@
 
         try {
             const existingCode = currentMode === 'react'
-                ? JSON.stringify(currentFiles, null, 2)
+                ? JSON.stringify({ files: currentFiles, dependencies: currentDependencies }, null, 2)
                 : currentCode;
 
             const response = await fetch(API_URL, {
@@ -247,7 +418,7 @@
                 body: JSON.stringify({
                     prompt: feedback,
                     existing_code: existingCode,
-                    mode: currentMode,
+                    mode: getBackendMode(),
                     model: modelSelect.value
                 })
             });
@@ -255,10 +426,12 @@
             const data = await response.json();
 
             if (data.success) {
-                if (data.mode === 'react' && data.files) {
-                    currentFiles = data.files;
+                if (isReactPayload(data)) {
+                    currentFiles = data.files || {};
+                    currentDependencies = data.dependencies || extractDependenciesFromPackage(currentFiles);
+                    activeFile = pickDefaultFile();
                     renderFileExplorer();
-                    renderReactPreview();
+                    await renderReactPreview();
                 } else {
                     currentCode = data.code;
                     renderHtmlPreview(currentCode);
@@ -278,12 +451,19 @@
     function renderFileExplorer() {
         fileList.innerHTML = '';
 
-        // Sort files: App.tsx first, then components folder
+        // Sort files: root essentials first, then src files
         const fileNames = Object.keys(currentFiles).sort((a, b) => {
-            if (a === 'App.tsx') return -1;
-            if (b === 'App.tsx') return 1;
-            if (a.includes('/') && !b.includes('/')) return 1;
-            if (!a.includes('/') && b.includes('/')) return -1;
+            const priority = (name) => {
+                if (name === 'index.html') return 0;
+                if (name === 'package.json') return 1;
+                if (name === 'src/main.jsx' || name === 'src/main.js') return 2;
+                if (name === 'src/App.jsx' || name === 'src/App.js') return 3;
+                if (name.startsWith('src/')) return 4;
+                return 5;
+            };
+            const pa = priority(a);
+            const pb = priority(b);
+            if (pa !== pb) return pa - pb;
             return a.localeCompare(b);
         });
 
@@ -339,111 +519,39 @@
         previewFrame.src = url;
         previewFrame.classList.remove('hidden');
         sandpackContainer.classList.add('hidden');
+        sandpackContainer.innerHTML = '';
     }
 
-    function renderReactPreview() {
-        // Create a standalone HTML that runs React with Babel
-        // All code must be in ONE script to avoid async compilation issues
-
-        const appCode = currentFiles['App.tsx'] || currentFiles['App.jsx'] || '';
-        const customStyles = currentFiles['styles.css'] || '';
-
-        // Get all component files (not App.tsx)
-        const componentEntries = Object.entries(currentFiles)
-            .filter(([name]) => {
-                return name !== 'App.tsx' &&
-                    name !== 'App.jsx' &&
-                    name !== 'styles.css' &&
-                    (name.endsWith('.tsx') || name.endsWith('.jsx'));
-            });
-
-        // Build all code into one script
-        let allCode = '';
-
-        // First, add all components
-        componentEntries.forEach(([name, code]) => {
-            const componentName = name.split('/').pop().replace('.tsx', '').replace('.jsx', '');
-            // Convert: export default function X -> const X = function
-            // Remove all imports
-            let cleanCode = code
-                .replace(/import\s+.*?from\s+['"].*?['"]\s*;?/g, '')
-                .replace(/import\s+['"].*?['"]\s*;?/g, '')
-                .replace(/export\s+default\s+function\s+(\w+)/g, 'const $1 = function')
-                .replace(/export\s+default\s+/g, `const ${componentName} = `)
-                .replace(/export\s+/g, '');
-            allCode += `\n// ${name}\n${cleanCode}\n`;
-        });
-
-        // Then add App code
-        let cleanAppCode = appCode
-            .replace(/import\s+.*?from\s+['"].*?['"]\s*;?/g, '')
-            .replace(/import\s+['"].*?['"]\s*;?/g, '')
-            .replace(/export\s+default\s+function\s+App/g, 'function App')
-            .replace(/export\s+default\s+/g, 'const App = ')
-            .replace(/export\s+/g, '');
-
-        // Add React hooks as globals (required for UMD React)
-        const reactHooksShim = `
-// React Hooks (UMD compatibility)
-const { useState, useEffect, useRef, useCallback, useMemo, useContext, useReducer } = React;
-`;
-
-        allCode = reactHooksShim + allCode;
-        allCode += `\n// App.tsx\n${cleanAppCode}\n`;
-
-        // Add render call
-        allCode += `
-// Render
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(App));
-
-// Signal success to parent
-window.parent.postMessage({ type: 'react-success' }, '*');
-`;
-
-        const html = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        body { margin: 0; }
-        .error-box { background: #450a0a; color: #fca5a5; padding: 20px; border-radius: 8px; margin: 20px; font-family: monospace; white-space: pre-wrap; }
-        .fixing-box { background: #422006; color: #fcd34d; padding: 20px; border-radius: 8px; margin: 20px; text-align: center; }
-        ${customStyles}
-    </style>
-</head>
-<body class="bg-slate-900 text-white min-h-screen">
-    <div id="root"><div style="padding: 40px; text-align: center; color: #888;">Compilando React...</div></div>
-    <script>
-        window.onerror = function(msg, url, line, col, error) {
-            var errorMsg = msg + (line ? ' (linha ' + line + ')' : '');
-            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro:</strong> ' + errorMsg + '</div>';
-            // Send error to parent for auto-fix
-            window.parent.postMessage({ type: 'react-error', error: errorMsg }, '*');
-            return true;
-        };
-    </script>
-    <script type="text/babel" data-presets="react,typescript">
-        try {
-${allCode}
-        } catch(e) {
-            document.getElementById('root').innerHTML = '<div class="error-box"><strong>Erro:</strong> ' + e.message + '</div>';
-            window.parent.postMessage({ type: 'react-error', error: e.message }, '*');
+    async function renderReactPreview() {
+        const SandpackClient = await loadSandpackClient();
+        if (!SandpackClient) {
+            showSandpackError('Sandpack failed to load. Check your connection.');
+            return;
         }
-    </script>
-</body>
-</html>`;
 
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        previewFrame.src = url;
-        previewFrame.classList.remove('hidden');
-        sandpackContainer.classList.add('hidden');
+        const files = normalizeSandpackFiles(currentFiles);
+        const dependencies = resolveDependencies();
+        const entry = getSandpackEntry(files);
+
+        sandpackContainer.classList.remove('hidden');
+        previewFrame.classList.add('hidden');
+
+        const frame = buildSandpackFrame();
+
+        try {
+            sandpackClient = new SandpackClient(frame, {
+                template: 'react',
+                files,
+                dependencies,
+                entry
+            });
+        } catch (error) {
+            console.error('Sandpack init error:', error);
+            showSandpackError('Failed to start preview.');
+            return;
+        }
+
+        scheduleSandpackHide();
     }
 
     // Handle messages from iframe (for auto-fix)
@@ -489,8 +597,8 @@ ${allCode}
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt: originalPrompt,
-                    existing_code: JSON.stringify(currentFiles),
-                    mode: 'react',
+                    existing_code: JSON.stringify({ files: currentFiles, dependencies: currentDependencies }),
+                    mode: getBackendMode(),
                     error_message: errorMessage,
                     model: modelSelect.value
                 })
@@ -498,11 +606,12 @@ ${allCode}
 
             const data = await response.json();
 
-            if (data.success && data.files) {
-                currentFiles = data.files;
+            if (data.success && isReactPayload(data)) {
+                currentFiles = data.files || {};
+                currentDependencies = data.dependencies || extractDependenciesFromPackage(currentFiles);
+                activeFile = pickDefaultFile();
                 renderFileExplorer();
                 renderReactPreview();
-                // Note: success/error will be detected via postMessage
             } else {
                 console.error('Auto-fix failed:', data.error);
                 hideLoading();
@@ -528,7 +637,13 @@ ${allCode}
 
     function showPreview() {
         emptyState.classList.add('hidden');
-        previewFrame.classList.remove('hidden');
+        if (currentMode === 'react') {
+            sandpackContainer.classList.remove('hidden');
+            previewFrame.classList.add('hidden');
+        } else {
+            sandpackContainer.classList.add('hidden');
+            previewFrame.classList.remove('hidden');
+        }
         refineSection.classList.remove('hidden');
     }
 
@@ -617,12 +732,13 @@ ${allCode}
                 alert('Gere um app primeiro!');
                 return;
             }
-            // Download as JSON with all files
-            const blob = new Blob([JSON.stringify(currentFiles, null, 2)], { type: 'application/json' });
+            // Download as JSON with files + dependencies
+            const payload = { files: currentFiles, dependencies: currentDependencies };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'react-app.json';
+            a.download = 'react-project.json';
             a.click();
             URL.revokeObjectURL(url);
         } else {
@@ -659,9 +775,12 @@ ${allCode}
         }
 
         if (currentMode === 'react') {
-            // Re-render and open
-            const iframe = previewFrame;
-            window.open(iframe.src, '_blank');
+            const iframe = sandpackContainer.querySelector('iframe');
+            if (iframe && iframe.src) {
+                window.open(iframe.src, '_blank');
+            } else {
+                alert('Preview ainda nao esta pronto.');
+            }
         } else {
             const blob = new Blob([currentCode], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
