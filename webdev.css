@@ -1049,3 +1049,29 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(19, 137, 253, 0.3);
 }
+
+/* Vercel Button */
+.vercel-btn {
+    background: linear-gradient(135deg, #000, #333) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.vercel-btn:hover {
+    background: linear-gradient(135deg, #1a1a1a, #4a4a4a) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Netlify Button */
+.netlify-btn {
+    background: linear-gradient(135deg, #00AD9F, #00C7B7) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.netlify-btn:hover {
+    background: linear-gradient(135deg, #00C7B7, #00d4c8) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 199, 183, 0.3);
+}
