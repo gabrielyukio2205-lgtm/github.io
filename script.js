@@ -380,7 +380,11 @@
             appendWelcomeMessage();
         } else {
             chat.messages.forEach(msg => {
-                appendMessage(msg.sender, msg.text, false, false);
+                if (msg.attachment) {
+                    appendMessageWithAttachment(msg.sender, msg.text, msg.attachment);
+                } else {
+                    appendMessage(msg.sender, msg.text, false, false);
+                }
             });
         }
 
@@ -388,11 +392,13 @@
         sidebar.classList.remove('open');
     }
 
-    function saveMessageToCurrentChat(sender, text) {
+    function saveMessageToCurrentChat(sender, text, attachment = null) {
         const chatIndex = conversations.findIndex(c => c.id === currentChatId);
         if (chatIndex !== -1) {
             const chat = conversations[chatIndex];
-            chat.messages.push({ sender, text, timestamp: Date.now() });
+            const msgObj = { sender, text, timestamp: Date.now() };
+            if (attachment) msgObj.attachment = attachment;
+            chat.messages.push(msgObj);
 
             // Ensure agent is set
             if (!chat.agent) chat.agent = 'jade';
@@ -654,7 +660,7 @@
 
         chatbox.appendChild(el);
         chatbox.scrollTop = chatbox.scrollHeight;
-        saveMessageToCurrentChat(sender, textContent);
+        saveMessageToCurrentChat(sender, textContent, attachmentHTML);
 
         return el;
     }
