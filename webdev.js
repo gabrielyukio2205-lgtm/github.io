@@ -12,13 +12,21 @@
     const SANDPACK_IMPORT_URLS = [
         'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/+esm',
-        'https://cdn.skypack.dev/@codesandbox/sandpack-client@2'
+        'https://cdn.skypack.dev/@codesandbox/sandpack-client@2',
+        'https://esm.sh/@codesandbox/sandpack-client@2/clients/iframe?bundle',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/clients/iframe/+esm',
+        'https://esm.sh/@codesandbox/sandpack-client@2/clients/static?bundle',
+        'https://esm.sh/@codesandbox/sandpack-client@1?bundle',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@1/+esm',
+        'https://esm.sh/@codesandbox/sandpack-client@1/clients/iframe?bundle'
     ];
     const SANDPACK_UMD_URLS = [
         'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.umd.js',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.umd.js',
         'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.umd.min.js',
-        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.umd.min.js'
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.umd.min.js',
+        'https://unpkg.com/@codesandbox/sandpack-client@1/dist/index.umd.js',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@1/dist/index.umd.js'
     ];
 
     // State
@@ -300,7 +308,7 @@ root.render(<App />);
                 for (const url of SANDPACK_IMPORT_URLS) {
                     try {
                         const mod = await import(url);
-                        const ctor = mod && (mod.SandpackClient || mod.default);
+                        const ctor = resolveSandpackCtor(mod);
                         if (ctor) return ctor;
                         if (mod) {
                             console.warn('Sandpack module missing SandpackClient', url, Object.keys(mod));
@@ -313,7 +321,8 @@ root.render(<App />);
                 for (const url of SANDPACK_UMD_URLS) {
                     try {
                         await loadScript(url);
-                        const ctor = window.SandpackClient || (window.sandpack && window.sandpack.SandpackClient);
+                        const ctor = resolveSandpackCtor(window) ||
+                            (window.sandpack && resolveSandpackCtor(window.sandpack));
                         if (ctor) return ctor;
                     } catch (error) {
                         console.warn('Sandpack script failed', url, error);
@@ -336,6 +345,27 @@ root.render(<App />);
             script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
             document.head.appendChild(script);
         });
+    }
+
+    function resolveSandpackCtor(mod) {
+        if (!mod) return null;
+        if (typeof mod === 'function') return mod;
+        if (mod.SandpackClient) return mod.SandpackClient;
+        if (mod.sandpackClient) return mod.sandpackClient;
+        if (mod.createSandpackClient) return mod.createSandpackClient;
+        if (mod.createClient) return mod.createClient;
+        if (mod.Client) return mod.Client;
+        if (mod.default) {
+            if (typeof mod.default === 'function') return mod.default;
+            if (mod.default.SandpackClient) return mod.default.SandpackClient;
+            if (mod.default.sandpackClient) return mod.default.sandpackClient;
+            if (mod.default.createSandpackClient) return mod.default.createSandpackClient;
+            if (mod.default.createClient) return mod.default.createClient;
+        }
+        const match = Object.values(mod).find((value) => {
+            return typeof value === 'function' && value.name === 'SandpackClient';
+        });
+        return match || null;
     }
 
     function buildSandpackFrame() {
