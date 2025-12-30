@@ -720,27 +720,43 @@ root.render(<App />);
             return cleaned;
         }
 
+        // Helper to check if file is App.jsx/js
+        function isAppFile(filename) {
+            const basename = filename.split('/').pop();
+            return basename === 'App.jsx' || basename === 'App.js';
+        }
+
+        // Helper to check if file should be excluded
+        function shouldExclude(filename) {
+            const basename = filename.split('/').pop();
+            const lowerName = filename.toLowerCase();
+            return basename === 'main.jsx' ||
+                basename === 'main.js' ||
+                lowerName.includes('config') ||
+                basename === 'package.json' ||
+                basename === 'vite-env.d.ts';
+        }
+
         // First, add all non-App components (dependencies first)
         const componentFiles = Object.keys(currentFiles).filter(k => {
             const isJsx = k.endsWith('.jsx') || k.endsWith('.js');
-            const isNotMain = !k.includes('main.jsx') && !k.includes('main.js');
-            const isNotApp = !k.includes('App.jsx') && !k.includes('App.js');
-            const isNotConfig = !k.includes('config') && !k.includes('package.json');
-            return isJsx && isNotMain && isNotApp && isNotConfig;
+            return isJsx && !isAppFile(k) && !shouldExclude(k);
         });
+
+        console.log('📦 Component files found:', componentFiles);
 
         // Add each component
         componentFiles.forEach(key => {
             const componentCode = cleanComponentCode(currentFiles[key], false);
             if (componentCode.trim()) {
+                console.log(`📄 Adding component: ${key}`);
                 allComponentsCode += `\n// --- ${key} ---\n${componentCode}\n`;
             }
         });
 
         // Then add App component last (so it can use the other components)
-        const appKey = Object.keys(currentFiles).find(k =>
-            k.includes('App.jsx') || k.includes('App.js')
-        );
+        const appKey = Object.keys(currentFiles).find(k => isAppFile(k));
+        console.log('🎯 App file:', appKey);
         const appCode = appKey ? cleanComponentCode(currentFiles[appKey], true) : buildDefaultApp();
 
         return `<!DOCTYPE html>
