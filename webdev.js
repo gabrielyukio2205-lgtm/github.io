@@ -74,6 +74,21 @@
     const modelSelect = document.getElementById('modelSelect');
     const qualityBadge = document.getElementById('qualityBadge');
 
+    // Monaco Editor and Terminal Elements
+    const editorSection = document.getElementById('editorSection');
+    const monacoContainer = document.getElementById('monacoContainer');
+    const editorTabs = document.getElementById('editorTabs');
+    const closeEditorBtn = document.getElementById('closeEditorBtn');
+    const terminalSection = document.getElementById('terminalSection');
+    const terminalContainer = document.getElementById('terminalContainer');
+    const closeTerminalBtn = document.getElementById('closeTerminalBtn');
+
+    // Monaco/Terminal State
+    let monacoEditor = null;
+    let monacoReady = false;
+    let terminal = null;
+    let currentEditorFile = '';
+
     // Initialize
     function init() {
         loadTheme();
@@ -975,6 +990,185 @@ root.render(<App />);
         document.getElementById('darkIcon').classList.toggle('hidden', theme !== 'dark');
         document.getElementById('lightIcon').classList.toggle('hidden', theme === 'dark');
     }
+
+    // ========== MONACO EDITOR ==========
+    function initMonaco() {
+        if (monacoReady || !window.require) return;
+
+        require.config({
+            paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }
+        });
+
+        require(['vs/editor/editor.main'], function () {
+            monacoReady = true;
+            console.log('📝 Monaco Editor pronto');
+        });
+    }
+
+    function openEditor(fileName) {
+        if (!monacoReady) {
+            initMonaco();
+            setTimeout(() => openEditor(fileName), 500);
+            return;
+        }
+
+        currentEditorFile = fileName || Object.keys(currentFiles)[0];
+        if (!currentEditorFile) {
+            alert('Gere um projeto primeiro!');
+            return;
+        }
+
+        const fileContent = currentFiles[currentEditorFile] || '';
+        const language = getMonacoLanguage(currentEditorFile);
+
+        // Show editor section
+        editorSection.classList.remove('hidden');
+
+        // Render tabs
+        renderEditorTabs();
+
+        // Create or update editor
+        if (!monacoEditor) {
+            monacoEditor = monaco.editor.create(monacoContainer, {
+                value: fileContent,
+                language: language,
+                theme: document.body.getAttribute('data-theme') === 'light' ? 'vs' : 'vs-dark',
+                fontSize: 14,
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                wordWrap: 'on'
+            });
+
+            // Save on change
+            monacoEditor.onDidChangeModelContent(() => {
+                if (currentEditorFile) {
+                    currentFiles[currentEditorFile] = monacoEditor.getValue();
+                }
+            });
+        } else {
+            monaco.editor.setModelLanguage(monacoEditor.getModel(), language);
+            monacoEditor.setValue(fileContent);
+        }
+    }
+
+    function renderEditorTabs() {
+        if (!editorTabs) return;
+        editorTabs.innerHTML = '';
+
+        Object.keys(currentFiles).forEach(fileName => {
+            const tab = document.createElement('span');
+            tab.className = `editor-tab ${fileName === currentEditorFile ? 'active' : ''}`;
+            tab.textContent = fileName.split('/').pop();
+            tab.title = fileName;
+            tab.addEventListener('click', () => switchEditorFile(fileName));
+            editorTabs.appendChild(tab);
+        });
+    }
+
+    function switchEditorFile(fileName) {
+        if (currentEditorFile === fileName) return;
+
+        // Save current file
+        if (currentEditorFile && monacoEditor) {
+            currentFiles[currentEditorFile] = monacoEditor.getValue();
+        }
+
+        currentEditorFile = fileName;
+        const content = currentFiles[fileName] || '';
+        const language = getMonacoLanguage(fileName);
+
+        if (monacoEditor) {
+            monaco.editor.setModelLanguage(monacoEditor.getModel(), language);
+            monacoEditor.setValue(content);
+        }
+
+        renderEditorTabs();
+    }
+
+    function getMonacoLanguage(fileName) {
+        if (fileName.endsWith('.jsx') || fileName.endsWith('.tsx')) return 'javascript';
+        if (fileName.endsWith('.js')) return 'javascript';
+        if (fileName.endsWith('.ts')) return 'typescript';
+        if (fileName.endsWith('.css')) return 'css';
+        if (fileName.endsWith('.html')) return 'html';
+        if (fileName.endsWith('.json')) return 'json';
+        return 'plaintext';
+    }
+
+    function closeEditor() {
+        if (monacoEditor && currentEditorFile) {
+            currentFiles[currentEditorFile] = monacoEditor.getValue();
+        }
+        editorSection.classList.add('hidden');
+    }
+
+    // ========== TERMINAL ==========
+    function initTerminal() {
+        if (terminal) return;
+        if (!window.Terminal) {
+            console.warn('XTerm.js not loaded');
+            return;
+        }
+
+        terminal = new Terminal({
+            cursorBlink: true,
+            fontSize: 13,
+            fontFamily: 'Menlo, Monaco, Consolas, monospace',
+            theme: {
+                background: '#0b0b12',
+                foreground: '#f5f5f7',
+                cursor: '#8b5cf6'
+            }
+        });
+
+        terminal.open(terminalContainer);
+        terminal.writeln('\x1b[32m$ Jade WebDev Terminal\x1b[0m');
+        terminal.writeln('');
+    }
+
+    function showTerminal() {
+        terminalSection.classList.remove('hidden');
+        if (!terminal) initTerminal();
+    }
+
+    function closeTerminal() {
+        terminalSection.classList.add('hidden');
+    }
+
+    function writeToTerminal(text, color = 'white') {
+        if (!terminal) return;
+        const colors = {
+            green: '\x1b[32m',
+            red: '\x1b[31m',
+            yellow: '\x1b[33m',
+            blue: '\x1b[34m',
+            white: '\x1b[37m'
+        };
+        terminal.writeln(`${colors[color] || colors.white}${text}\x1b[0m`);
+    }
+
+    // Add event listeners for editor buttons
+    if (closeEditorBtn) closeEditorBtn.addEventListener('click', closeEditor);
+    if (closeTerminalBtn) closeTerminalBtn.addEventListener('click', closeTerminal);
+
+    // Modify code button to open Monaco instead of modal
+    if (codeBtn) {
+        codeBtn.removeEventListener('click', showCodeModal);
+        codeBtn.addEventListener('click', () => {
+            if (currentMode === 'react' && Object.keys(currentFiles).length > 0) {
+                openEditor();
+            } else if (currentMode === 'html' && currentCode) {
+                // For HTML mode, still use modal (simpler)
+                showCodeModal();
+            } else {
+                alert('Gere um projeto primeiro!');
+            }
+        });
+    }
+
+    // Initialize Monaco on load
+    initMonaco();
 
     init();
 })();
