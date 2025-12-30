@@ -1239,3 +1239,91 @@ code {
 .copy-btn:hover {
   color: var(--primary-color);
 }
+
+/* --- PDF CHIP (ChatGPT Style) --- */
+#pdf-chip-container {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.pdf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  max-width: 300px;
+  transition: all 0.2s;
+}
+
+.pdf-chip:hover {
+  border-color: var(--border-highlight);
+}
+
+.pdf-chip .pdf-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.pdf-chip.loading .pdf-icon {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.pdf-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+#pdf-filename {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdf-meta {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.remove-pdf {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  padding: 4px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-pdf:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* PDF button active state */
+#pdfBtn.active {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}

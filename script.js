@@ -926,7 +926,16 @@
         }
     }
 
-    // --- PDF/OCR Handling ---
+    // --- PDF/OCR Handling (ChatGPT-style chip) ---
+    const pdfChipContainer = document.getElementById('pdf-chip-container');
+    const pdfFilename = document.getElementById('pdf-filename');
+    const pdfPages = document.getElementById('pdf-pages');
+    const removePdfBtn = document.getElementById('remove-pdf-btn');
+
+    if (removePdfBtn) {
+        removePdfBtn.addEventListener('click', clearPdfContext);
+    }
+
     async function handlePdfSelection() {
         const file = pdfInput.files[0];
         if (!file) return;
@@ -934,8 +943,13 @@
         const isPdf = file.type === 'application/pdf';
         const fileType = isPdf ? 'pdf' : 'image';
 
-        // Show processing message
-        const processingMsg = appendMessage('J.A.D.E.', `📄 Processando ${isPdf ? 'PDF' : 'documento'}... Extraindo texto com OCR.`, false, true);
+        // Show chip with loading state
+        if (pdfChipContainer) {
+            pdfChipContainer.classList.remove('hidden');
+            pdfFilename.textContent = file.name;
+            pdfPages.textContent = 'Processando...';
+            pdfChipContainer.querySelector('.pdf-chip').classList.add('loading');
+        }
 
         try {
             // Convert file to base64
@@ -957,21 +971,25 @@
                 // Store extracted text
                 pdfTextContext = data.text;
 
-                // Update message with success
-                const preview = data.text.substring(0, 300) + (data.text.length > 300 ? '...' : '');
-                updateBotMessage(processingMsg, `✅ **Documento processado!** (${data.pages || 1} página${data.pages > 1 ? 's' : ''})\n\nPrévia do texto:\n\`\`\`\n${preview}\n\`\`\`\n\n*Agora você pode fazer perguntas sobre o conteúdo do documento.*`);
+                // Update chip with success
+                if (pdfChipContainer) {
+                    pdfPages.textContent = `${data.pages || 1} página${(data.pages || 1) > 1 ? 's' : ''} • Pronto`;
+                    pdfChipContainer.querySelector('.pdf-chip').classList.remove('loading');
+                }
 
-                // Highlight PDF button to show context is active
+                // Highlight PDF button
                 if (pdfBtn) {
                     pdfBtn.classList.add('active');
-                    pdfBtn.title = 'PDF carregado - clique para trocar';
                 }
             } else {
-                updateBotMessage(processingMsg, `❌ Erro no OCR: ${data.error || 'Falha ao extrair texto'}`);
+                // Show error and hide chip
+                clearPdfContext();
+                alert(`Erro no OCR: ${data.error || 'Falha ao extrair texto'}`);
             }
         } catch (error) {
             console.error('OCR Error:', error);
-            updateBotMessage(processingMsg, `❌ Erro de conexão: ${error.message}`);
+            clearPdfContext();
+            alert(`Erro de conexão: ${error.message}`);
         }
 
         // Clear file input
@@ -983,6 +1001,9 @@
         if (pdfBtn) {
             pdfBtn.classList.remove('active');
             pdfBtn.title = 'Enviar PDF/Documento (OCR)';
+        }
+        if (pdfChipContainer) {
+            pdfChipContainer.classList.add('hidden');
         }
     }
 
