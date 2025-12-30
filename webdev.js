@@ -703,18 +703,18 @@ root.render(<App />);
             .replace(/^import\s+['"].*?['"];?\s*$/gm, '')
             .trim();
 
-        // Remove all export statements to prevent "exports is not defined" error
-        appCode = appCode
-            .replace(/^export\s+default\s+/gm, 'const App = ')
-            .replace(/^export\s+/gm, '')
-            .replace(/export\s+default\s+/g, '')
-            .replace(/export\s+{\s*\w+\s*(,\s*\w+)*\s*}\s*;?/g, '');
-
-        // If there's still no App definition, try to find the main component
-        if (!appCode.includes('const App') && !appCode.includes('function App')) {
-            // Try to find any function component and rename it to App
-            appCode = appCode.replace(/^(const|function)\s+(\w+)\s*=/m, 'const App =');
-        }
+        // Remove export statements carefully to avoid "App already declared"
+        // Case 1: "export default function App" -> "function App"
+        appCode = appCode.replace(/export\s+default\s+function\s+App/g, 'function App');
+        // Case 2: "export default function SomeName" -> "function App" 
+        appCode = appCode.replace(/export\s+default\s+function\s+(\w+)/g, 'function App');
+        // Case 3: "export default App" at end -> remove it
+        appCode = appCode.replace(/export\s+default\s+App\s*;?\s*$/gm, '');
+        // Case 4: Any remaining "export default" -> remove
+        appCode = appCode.replace(/export\s+default\s+/g, '');
+        // Case 5: Named exports -> remove
+        appCode = appCode.replace(/^export\s+(?!default)/gm, '');
+        appCode = appCode.replace(/export\s+{\s*[^}]*\s*}\s*;?/g, '');
 
         return `<!DOCTYPE html>
 <html lang="en">
