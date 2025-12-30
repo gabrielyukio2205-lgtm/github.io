@@ -107,6 +107,12 @@
         themeBtn.addEventListener('click', toggleTheme);
         fullscreenBtn.addEventListener('click', openFullscreen);
 
+        // StackBlitz deploy
+        const stackblitzBtn = document.getElementById('stackblitzBtn');
+        if (stackblitzBtn) {
+            stackblitzBtn.addEventListener('click', openInStackBlitz);
+        }
+
         // Mode toggle
         htmlModeBtn.addEventListener('click', () => setMode('html'));
         reactModeBtn.addEventListener('click', () => setMode('react'));
@@ -1169,6 +1175,88 @@ root.render(<App />);
 
     // Initialize Monaco on load
     initMonaco();
+
+    // ========== STACKBLITZ DEPLOY ==========
+    function openInStackBlitz() {
+        if (currentMode !== 'react' || Object.keys(currentFiles).length === 0) {
+            alert('Gere um projeto React primeiro!');
+            return;
+        }
+
+        // Prepare files for StackBlitz format
+        const files = {};
+        Object.entries(currentFiles).forEach(([name, content]) => {
+            // StackBlitz wants paths without leading slash
+            const cleanName = name.startsWith('/') ? name.slice(1) : name;
+            files[cleanName] = content;
+        });
+
+        // Ensure package.json exists
+        if (!files['package.json']) {
+            files['package.json'] = JSON.stringify({
+                name: 'jade-webdev-project',
+                version: '1.0.0',
+                private: true,
+                dependencies: {
+                    react: '^18.2.0',
+                    'react-dom': '^18.2.0'
+                },
+                scripts: {
+                    dev: 'vite',
+                    build: 'vite build',
+                    preview: 'vite preview'
+                },
+                devDependencies: {
+                    vite: '^5.0.0',
+                    '@vitejs/plugin-react': '^4.2.0'
+                }
+            }, null, 2);
+        }
+
+        // Add vite.config.js if missing
+        if (!files['vite.config.js']) {
+            files['vite.config.js'] = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})`;
+        }
+
+        // Create form for StackBlitz POST API
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://stackblitz.com/run';
+        form.target = '_blank';
+
+        // Add project[template]
+        const templateInput = document.createElement('input');
+        templateInput.type = 'hidden';
+        templateInput.name = 'project[template]';
+        templateInput.value = 'node';
+        form.appendChild(templateInput);
+
+        // Add project[title]
+        const titleInput = document.createElement('input');
+        titleInput.type = 'hidden';
+        titleInput.name = 'project[title]';
+        titleInput.value = 'Jade WebDev Project';
+        form.appendChild(titleInput);
+
+        // Add files
+        Object.entries(files).forEach(([filename, content]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `project[files][${filename}]`;
+            input.value = content;
+            form.appendChild(input);
+        });
+
+        // Submit
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
 
     init();
 })();

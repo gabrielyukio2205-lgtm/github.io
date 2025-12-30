@@ -1036,3 +1036,16 @@ body {
 .terminal-container .xterm {
     padding: 8px;
 }
+
+/* StackBlitz Button */
+.stackblitz-btn {
+    background: linear-gradient(135deg, #1389fd, #0969da) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.stackblitz-btn:hover {
+    background: linear-gradient(135deg, #0969da, #0550ae) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(19, 137, 253, 0.3);
+}
