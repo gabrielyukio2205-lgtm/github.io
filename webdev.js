@@ -1296,5 +1296,107 @@ export default defineConfig({
         document.body.removeChild(form);
     }
 
+    // ========== HUGGINGFACE DEPLOY ==========
+    function openHfDeployModal() {
+        if (currentMode === 'html' && !currentCode) {
+            alert('Gere um site primeiro!');
+            return;
+        }
+        if (currentMode === 'react' && Object.keys(currentFiles).length === 0) {
+            alert('Gere um projeto primeiro!');
+            return;
+        }
+
+        // Auto-generate space name
+        const timestamp = Date.now().toString(36);
+        document.getElementById('hfSpaceNameInput').value = `jade-site-${timestamp}`;
+        document.getElementById('hfTokenInput').value = '';
+        document.getElementById('hfDeployModal').classList.remove('hidden');
+    }
+
+    function closeHfDeployModal() {
+        document.getElementById('hfDeployModal').classList.add('hidden');
+    }
+
+    async function deployToHuggingFace() {
+        const token = document.getElementById('hfTokenInput').value.trim();
+        const spaceName = document.getElementById('hfSpaceNameInput').value.trim();
+
+        if (!token) {
+            alert('Por favor, insira seu token do HuggingFace');
+            return;
+        }
+        if (!spaceName) {
+            alert('Por favor, insira um nome para o Space');
+            return;
+        }
+
+        // Validate space name (no special chars except -)
+        if (!/^[a-zA-Z0-9-]+$/.test(spaceName)) {
+            alert('Nome do Space só pode conter letras, números e hífens');
+            return;
+        }
+
+        // Prepare files
+        const files = {};
+        if (currentMode === 'html') {
+            files['index.html'] = currentCode;
+        } else {
+            // For React, include all files
+            Object.entries(currentFiles).forEach(([name, content]) => {
+                const cleanName = name.startsWith('/') ? name.slice(1) : name;
+                files[cleanName] = content;
+            });
+        }
+
+        // Show loading
+        const deployBtn = document.getElementById('confirmHfDeploy');
+        const originalText = deployBtn.textContent;
+        deployBtn.textContent = '⏳ Deploying...';
+        deployBtn.disabled = true;
+
+        try {
+            const response = await fetch(`${API_URL.replace('/chat', '')}/webdev/deploy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, files, space_name: spaceName })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                closeHfDeployModal();
+
+                // Show success with link
+                const openSpace = confirm(
+                    `✅ Deploy concluído!\n\n` +
+                    `Seu site está em:\n${result.url}\n\n` +
+                    `Abrir agora?`
+                );
+                if (openSpace) {
+                    window.open(result.url, '_blank');
+                }
+            } else {
+                alert(`❌ Erro no deploy:\n${result.error}`);
+            }
+        } catch (error) {
+            alert(`❌ Erro de conexão:\n${error.message}`);
+        } finally {
+            deployBtn.textContent = originalText;
+            deployBtn.disabled = false;
+        }
+    }
+
+    // HF Deploy event listeners
+    const hfDeployBtn = document.getElementById('hfDeployBtn');
+    const closeHfModalBtn = document.getElementById('closeHfModal');
+    const cancelHfDeployBtn = document.getElementById('cancelHfDeploy');
+    const confirmHfDeployBtn = document.getElementById('confirmHfDeploy');
+
+    if (hfDeployBtn) hfDeployBtn.addEventListener('click', openHfDeployModal);
+    if (closeHfModalBtn) closeHfModalBtn.addEventListener('click', closeHfDeployModal);
+    if (cancelHfDeployBtn) cancelHfDeployBtn.addEventListener('click', closeHfDeployModal);
+    if (confirmHfDeployBtn) confirmHfDeployBtn.addEventListener('click', deployToHuggingFace);
+
     init();
 })();

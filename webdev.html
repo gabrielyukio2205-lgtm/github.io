@@ -256,6 +256,9 @@
                     </svg>
                     StackBlitz
                 </button>
+                <button id="hfDeployBtn" class="action-btn hf-deploy-btn" title="Deploy to HuggingFace Space">
+                    🤗 HF Space
+                </button>
             </div>
         </div>
 
@@ -360,6 +363,36 @@
                     Copiar
                 </button>
                 <pre id="codeDisplay"><code></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- HuggingFace Deploy Modal -->
+    <div id="hfDeployModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content deploy-modal">
+            <div class="modal-header">
+                <h3>🤗 Deploy to HuggingFace Space</h3>
+                <button class="close-btn" id="closeHfModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>HuggingFace Token</label>
+                    <input type="password" id="hfTokenInput" placeholder="hf_xxxxxxxxxxxxx">
+                    <small>
+                        <a href="https://huggingface.co/settings/tokens" target="_blank">
+                            Gere seu token aqui
+                        </a> (precisa de permissão write)
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Nome do Space</label>
+                    <input type="text" id="hfSpaceNameInput" placeholder="meu-site-incrivel">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelHfDeploy" class="btn-secondary">Cancelar</button>
+                <button id="confirmHfDeploy" class="btn-primary">🚀 Deploy</button>
             </div>
         </div>
     </div>

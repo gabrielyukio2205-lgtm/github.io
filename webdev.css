@@ -1049,3 +1049,118 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(19, 137, 253, 0.3);
 }
+
+/* HuggingFace Deploy Button */
+.hf-deploy-btn {
+    background: linear-gradient(135deg, #FFD21E, #FF9D00) !important;
+    color: #1a1a1a !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+.hf-deploy-btn:hover {
+    background: linear-gradient(135deg, #FF9D00, #FF7A00) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 157, 0, 0.3);
+}
+
+/* Deploy Modal */
+.deploy-modal {
+    max-width: 450px;
+}
+
+.deploy-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.deploy-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.deploy-modal .modal-body {
+    padding: 20px;
+}
+
+.deploy-modal .form-group {
+    margin-bottom: 16px;
+}
+
+.deploy-modal .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.deploy-modal .form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--surface-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.deploy-modal .form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.deploy-modal .form-group small {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.deploy-modal .form-group small a {
+    color: var(--primary-color);
+}
+
+.deploy-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.deploy-modal .btn-secondary {
+    padding: 10px 20px;
+    background: var(--surface-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.deploy-modal .btn-secondary:hover {
+    background: var(--surface-color);
+}
+
+.deploy-modal .btn-primary {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #FFD21E, #FF9D00);
+    border: none;
+    border-radius: 8px;
+    color: #1a1a1a;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.deploy-modal .btn-primary:hover {
+    background: linear-gradient(135deg, #FF9D00, #FF7A00);
+}
+
+.deploy-modal .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
