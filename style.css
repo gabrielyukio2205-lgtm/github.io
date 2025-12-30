@@ -1403,3 +1403,27 @@ code {
   font-size: 0.75rem;
   color: var(--text-tertiary);
 }
+
+/* --- INLINE ATTACHMENT CHIPS (in messages) --- */
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.pdf-chip-inline {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.image-chip {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.3);
+}

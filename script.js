@@ -632,6 +632,33 @@
         return el;
     }
 
+    function appendMessageWithAttachment(sender, textContent, attachmentHTML) {
+        const isUser = sender === 'Você';
+        const senderClass = isUser ? 'user' : 'bot';
+
+        const el = document.createElement('div');
+        el.className = `message ${senderClass}`;
+
+        const avatarHTML = isUser
+            ? `<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`
+            : `<div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></div>`;
+
+        el.innerHTML = `
+            ${avatarHTML}
+            <div class="content">
+                <div class="sender-name">${sender}</div>
+                ${attachmentHTML}
+                <div class="text">${escapeHtml(textContent)}</div>
+            </div>
+        `;
+
+        chatbox.appendChild(el);
+        chatbox.scrollTop = chatbox.scrollHeight;
+        saveMessageToCurrentChat(sender, textContent);
+
+        return el;
+    }
+
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -827,16 +854,36 @@
         let agentName = 'J.A.D.E.';
         if (currentAgent === 'scholar') agentName = 'Scholar Graph';
         if (currentAgent === 'heavy') agentName = 'Jade Heavy';
+        // Build user message with attachments
+        let displayMsg = message;
+        let attachmentHTML = '';
 
+        // Check for image
         if (imageInput.files.length > 0) {
-            const msgText = `${message || ''} [Imagem Anexada]`;
-            appendMessage('Você', msgText);
+            displayMsg = message || 'Descreva a imagem em detalhes.';
+            attachmentHTML = `<div class="attachment-chip image-chip">📷 Imagem anexada</div>`;
             image_base64 = await fileToBase64(imageInput.files[0]);
             clearImagePreview();
+        }
+
+        // Check for PDF context
+        if (pdfTextContext && pdfFilename) {
+            const pdfName = pdfFilename.textContent || 'documento.pdf';
+            attachmentHTML = `<div class="attachment-chip pdf-chip-inline">📄 ${pdfName}</div>`;
+        }
+
+        // Append message with attachment if any
+        if (attachmentHTML) {
+            appendMessageWithAttachment('Você', displayMsg, attachmentHTML);
         } else {
-            appendMessage('Você', message);
+            appendMessage('Você', displayMsg);
         }
         userInput.value = '';
+
+        // Hide PDF chip from input bar (text was already attached to message)
+        if (pdfTextContext && pdfChipContainer) {
+            pdfChipContainer.classList.add('hidden');
+        }
 
         const jadeTypingMessage = appendMessage(agentName, '', true, false);
 
