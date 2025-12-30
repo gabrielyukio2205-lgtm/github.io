@@ -1372,7 +1372,7 @@ export default defineConfig({
         deployBtn.disabled = true;
 
         try {
-            const response = await fetch(`${API_URL.replace('/chat', '')}/webdev/deploy`, {
+            const response = await fetch(`${PROXY_BASE_URL}/webdev/deploy`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, files, space_name: spaceName })
