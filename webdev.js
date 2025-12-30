@@ -226,7 +226,13 @@
         Object.entries(rawFiles || {}).forEach(([name, code]) => {
             if (!name) return;
             const normalized = name.startsWith('/') ? name : `/${name}`;
-            const content = typeof code === 'string' ? code : (code && code.code) ? code.code : '';
+            const content = typeof code === 'string'
+                ? code
+                : (code && code.code) ? code.code
+                    : (code && code.content) ? code.content
+                        : (code && code.contents) ? code.contents
+                            : (code && typeof code === 'object') ? JSON.stringify(code, null, 2)
+                                : '';
             files[normalized] = content;
         });
 
@@ -291,6 +297,34 @@ root.render(<App />);
         const base = { react: '18.2.0', 'react-dom': '18.2.0' };
         const pkgDeps = extractDependenciesFromPackage(currentFiles);
         return Object.assign({}, base, pkgDeps, currentDependencies);
+    }
+
+    function buildPackageJson(dependencies) {
+        const payload = {
+            name: 'jade-sandpack',
+            version: '0.0.0',
+            private: true,
+            dependencies
+        };
+        return JSON.stringify(payload, null, 2);
+    }
+
+    function ensurePackageJson(files, dependencies) {
+        const pkgPath = files['/package.json'] ? '/package.json' : (files['package.json'] ? 'package.json' : null);
+        if (pkgPath) {
+            const content = files[pkgPath];
+            if (typeof content !== 'string' || !content.trim()) {
+                files[pkgPath] = buildPackageJson(dependencies);
+                return;
+            }
+            try {
+                JSON.parse(content);
+            } catch (error) {
+                files[pkgPath] = buildPackageJson(dependencies);
+            }
+        } else {
+            files['/package.json'] = buildPackageJson(dependencies);
+        }
     }
 
     function getSandpackEntry(files) {
@@ -594,35 +628,82 @@ root.render(<App />);
     }
 
     async function renderReactPreview() {
-        const SandpackClient = await loadSandpackClient();
-        if (!SandpackClient) {
-            showSandpackError('Sandpack failed to load. Check CDN access (esm.sh/jsdelivr/unpkg).');
-            return;
+        // Simpler approach: use Babel standalone + React CDN instead of Sandpack
+        // Sandpack CDN imports are unreliable (404 errors)
+
+        const html = buildReactHtml();
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+
+        previewFrame.src = url;
+        previewFrame.classList.remove('hidden');
+        sandpackContainer.classList.add('hidden');
+
+        // Hide loading after iframe loads
+        previewFrame.onload = () => {
+            hideLoading();
+        };
+
+        // Fallback timeout
+        setTimeout(() => {
+            if (!loadingOverlay.classList.contains('hidden')) {
+                hideLoading();
+            }
+        }, 3000);
+    }
+
+    function buildReactHtml() {
+        // Get app code (prefer App.jsx/js)
+        const appKey = Object.keys(currentFiles).find(k =>
+            k.includes('App.jsx') || k.includes('App.js')
+        );
+        let appCode = currentFiles[appKey] || buildDefaultApp();
+
+        // Get styles
+        let stylesCode = '';
+        const styleKey = Object.keys(currentFiles).find(k => k.endsWith('.css'));
+        if (styleKey) {
+            stylesCode = currentFiles[styleKey];
         }
 
-        const files = normalizeSandpackFiles(currentFiles);
-        const dependencies = resolveDependencies();
-        const entry = getSandpackEntry(files);
+        // Clean up imports (remove everything before the component)
+        appCode = appCode
+            .replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')
+            .replace(/^import\s+['"].*?['"];?\s*$/gm, '')
+            .trim();
 
-        sandpackContainer.classList.remove('hidden');
-        previewFrame.classList.add('hidden');
-
-        const frame = buildSandpackFrame();
-
-        try {
-            sandpackClient = new SandpackClient(frame, {
-                template: 'react',
-                files,
-                dependencies,
-                entry
-            });
-        } catch (error) {
-            console.error('Sandpack init error:', error);
-            showSandpackError('Failed to start preview.');
-            return;
+        // If code starts with "export default" function/class, wrap it
+        if (appCode.startsWith('export default')) {
+            appCode = appCode.replace('export default', 'const App =');
         }
 
-        scheduleSandpackHide();
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        ${stylesCode}
+    </style>
+</head>
+<body class="bg-slate-900 text-white">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } = React;
+
+        ${appCode}
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>`;
     }
 
     // Handle messages from iframe (for auto-fix)
