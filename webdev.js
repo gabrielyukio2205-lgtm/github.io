@@ -9,7 +9,15 @@
     // API Configuration
     const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
     const API_URL = `${PROXY_BASE_URL}/webdev/generate`;
-    const SANDPACK_IMPORT_URL = 'https://esm.sh/@codesandbox/sandpack-client@2';
+    const SANDPACK_IMPORT_URLS = [
+        'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/+esm',
+        'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.js?module'
+    ];
+    const SANDPACK_UMD_URLS = [
+        'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.js',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.js'
+    ];
 
     // State
     let currentMode = 'html'; // 'html' or 'react'
@@ -286,15 +294,43 @@ root.render(<App />);
     async function loadSandpackClient() {
         if (sandpackCtor) return sandpackCtor;
         if (!sandpackImportPromise) {
-            sandpackImportPromise = import(SANDPACK_IMPORT_URL)
-                .then((mod) => mod.SandpackClient || mod.default || null)
-                .catch((error) => {
-                    console.error('Failed to load Sandpack client', error);
-                    return null;
-                });
+            sandpackImportPromise = (async () => {
+                for (const url of SANDPACK_IMPORT_URLS) {
+                    try {
+                        const mod = await import(url);
+                        const ctor = mod && (mod.SandpackClient || mod.default);
+                        if (ctor) return ctor;
+                    } catch (error) {
+                        console.warn('Sandpack import failed', url, error);
+                    }
+                }
+
+                for (const url of SANDPACK_UMD_URLS) {
+                    try {
+                        await loadScript(url);
+                        const ctor = window.SandpackClient || (window.sandpack && window.sandpack.SandpackClient);
+                        if (ctor) return ctor;
+                    } catch (error) {
+                        console.warn('Sandpack script failed', url, error);
+                    }
+                }
+
+                return null;
+            })();
         }
         sandpackCtor = await sandpackImportPromise;
         return sandpackCtor;
+    }
+
+    function loadScript(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+            document.head.appendChild(script);
+        });
     }
 
     function buildSandpackFrame() {
@@ -525,7 +561,7 @@ root.render(<App />);
     async function renderReactPreview() {
         const SandpackClient = await loadSandpackClient();
         if (!SandpackClient) {
-            showSandpackError('Sandpack failed to load. Check your connection.');
+            showSandpackError('Sandpack failed to load. Check CDN access (esm.sh/jsdelivr/unpkg).');
             return;
         }
 
