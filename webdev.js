@@ -12,11 +12,13 @@
     const SANDPACK_IMPORT_URLS = [
         'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/+esm',
-        'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.js?module'
+        'https://cdn.skypack.dev/@codesandbox/sandpack-client@2'
     ];
     const SANDPACK_UMD_URLS = [
-        'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.js',
-        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.js'
+        'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.umd.js',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.umd.js',
+        'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.umd.min.js',
+        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.umd.min.js'
     ];
 
     // State
@@ -300,6 +302,9 @@ root.render(<App />);
                         const mod = await import(url);
                         const ctor = mod && (mod.SandpackClient || mod.default);
                         if (ctor) return ctor;
+                        if (mod) {
+                            console.warn('Sandpack module missing SandpackClient', url, Object.keys(mod));
+                        }
                     } catch (error) {
                         console.warn('Sandpack import failed', url, error);
                     }
