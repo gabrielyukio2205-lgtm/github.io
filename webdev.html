@@ -176,25 +176,106 @@
                     <span class="hint" data-prompt="Dashboard com sidebar e stats">📊 Dashboard</span>
                 </div>
 
-                <!-- Model Selector Dropdown -->
-                <div class="model-dropdown">
-                    <select id="modelSelect">
-                        <optgroup label="⚡ Modelos Rápidos">
-                            <option value="kimi-k2">⚡ Kimi K2</option>
-                            <option value="qwen-coder">💻 Qwen Coder</option>
-                            <option value="gpt-4o-mini">🤖 GPT-4o Mini</option>
-                        </optgroup>
-                        <optgroup label="🎯 Alta Qualidade">
-                            <option value="claude-sonnet">🎭 Claude Sonnet</option>
-                            <option value="qwen3-coder">🧠 Qwen 3 Coder</option>
-                            <option value="mimo">🔮 MiMo (Xiaomi)</option>
-                            <option value="deepseek-coder">🔍 DeepSeek</option>
-                        </optgroup>
-                        <optgroup label="🚀 Multi-Agent">
-                            <option value="compound">🧬 Compound Básico</option>
-                            <option value="compound_pro">⭐ Compound PRO</option>
-                        </optgroup>
-                    </select>
+                <!-- Model Selector - Custom Dropdown -->
+                <div class="model-selector" id="modelSelector">
+                    <button class="model-trigger" id="modelTrigger" type="button">
+                        <svg class="model-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        <span class="model-name" id="selectedModelName">Qwen 3 235B</span>
+                        <span class="model-badge fast" id="selectedModelBadge">Rapido</span>
+                        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <input type="hidden" id="modelSelect" value="qwen-3-235b">
+
+                    <div class="model-menu" id="modelMenu">
+                        <!-- Fast Models -->
+                        <div class="model-category">
+                            <div class="category-header">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg>
+                                Rapidos
+                            </div>
+                            <div class="model-option" data-value="qwen-3-235b" data-name="Qwen 3 235B"
+                                data-badge="Cerebras">
+                                <span class="option-name">Qwen 3 235B</span>
+                                <span class="option-provider">Cerebras</span>
+                            </div>
+                            <div class="model-option" data-value="gpt-oss-120b" data-name="GPT OSS 120B"
+                                data-badge="Cerebras">
+                                <span class="option-name">GPT OSS 120B</span>
+                                <span class="option-provider">Cerebras</span>
+                            </div>
+                            <div class="model-option" data-value="kimi-k2" data-name="Kimi K2" data-badge="Groq">
+                                <span class="option-name">Kimi K2</span>
+                                <span class="option-provider">Groq</span>
+                            </div>
+                        </div>
+
+                        <!-- High Quality -->
+                        <div class="model-category">
+                            <div class="category-header">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
+                                </svg>
+                                Alta Qualidade
+                            </div>
+                            <div class="model-option" data-value="devstral" data-name="Devstral" data-badge="Mistral">
+                                <span class="option-name">Devstral</span>
+                                <span class="option-provider">Mistral</span>
+                            </div>
+                            <div class="model-option" data-value="mimo-v2" data-name="MiMo V2" data-badge="Free">
+                                <span class="option-name">MiMo V2 Flash</span>
+                                <span class="option-provider free">Gratis</span>
+                            </div>
+                            <div class="model-option" data-value="deepseek-nex" data-name="DeepSeek Nex"
+                                data-badge="Free">
+                                <span class="option-name">DeepSeek V3.1 Nex</span>
+                                <span class="option-provider free">Gratis</span>
+                            </div>
+                            <div class="model-option" data-value="kimi-k2-thinking" data-name="Kimi Thinking"
+                                data-badge="OpenRouter">
+                                <span class="option-name">Kimi K2 Thinking</span>
+                                <span class="option-provider">OpenRouter</span>
+                            </div>
+                        </div>
+
+                        <!-- Compound Pipelines -->
+                        <div class="model-category compound">
+                            <div class="category-header">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path d="M12 1v6m0 6v10" />
+                                    <path d="M21 12h-6m-6 0H1" />
+                                </svg>
+                                Multi-Agent
+                            </div>
+                            <div class="model-option" data-value="compound_flash" data-name="Compound Flash"
+                                data-badge="Pipeline">
+                                <span class="option-name">Compound Flash</span>
+                                <span class="option-provider pipeline">3 agentes</span>
+                            </div>
+                            <div class="model-option" data-value="compound_pro" data-name="Compound PRO"
+                                data-badge="Pipeline">
+                                <span class="option-name">Compound PRO</span>
+                                <span class="option-provider pipeline">4 agentes</span>
+                            </div>
+                            <div class="model-option" data-value="compound_ultra" data-name="Compound Ultra"
+                                data-badge="Pipeline">
+                                <span class="option-name">Compound Ultra</span>
+                                <span class="option-provider ultra">Recursivo + Tools</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button id="generateBtn" class="generate-btn">
@@ -398,6 +479,7 @@
     </div>
 
     <script type="module" src="webdev.js"></script>
+    <script src="model-selector.js"></script>
 </body>
 
 </html>
