@@ -684,11 +684,8 @@ root.render(<App />);
     }
 
     function buildReactHtml() {
-        // Get app code (prefer App.jsx/js)
-        const appKey = Object.keys(currentFiles).find(k =>
-            k.includes('App.jsx') || k.includes('App.js')
-        );
-        let appCode = currentFiles[appKey] || buildDefaultApp();
+        // Collect all component code from .jsx/.js files (except main.jsx)
+        let allComponentsCode = '';
 
         // Get styles
         let stylesCode = '';
@@ -697,24 +694,54 @@ root.render(<App />);
             stylesCode = currentFiles[styleKey];
         }
 
-        // Clean up imports (remove everything before the component)
-        appCode = appCode
-            .replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')
-            .replace(/^import\s+['"].*?['"];?\s*$/gm, '')
-            .trim();
+        // Helper to clean component code
+        function cleanComponentCode(code, isMainApp = false) {
+            let cleaned = code
+                // Remove all imports
+                .replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')
+                .replace(/^import\s+['"].*?['"];?\s*$/gm, '')
+                .trim();
 
-        // Remove export statements carefully to avoid "App already declared"
-        // Case 1: "export default function App" -> "function App"
-        appCode = appCode.replace(/export\s+default\s+function\s+App/g, 'function App');
-        // Case 2: "export default function SomeName" -> "function App" 
-        appCode = appCode.replace(/export\s+default\s+function\s+(\w+)/g, 'function App');
-        // Case 3: "export default App" at end -> remove it
-        appCode = appCode.replace(/export\s+default\s+App\s*;?\s*$/gm, '');
-        // Case 4: Any remaining "export default" -> remove
-        appCode = appCode.replace(/export\s+default\s+/g, '');
-        // Case 5: Named exports -> remove
-        appCode = appCode.replace(/^export\s+(?!default)/gm, '');
-        appCode = appCode.replace(/export\s+{\s*[^}]*\s*}\s*;?/g, '');
+            if (isMainApp) {
+                // For App component: ensure it's named "App"
+                cleaned = cleaned.replace(/export\s+default\s+function\s+App/g, 'function App');
+                cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function App');
+            } else {
+                // For other components: just remove "export default"
+                cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function $1');
+            }
+
+            // Remove remaining exports
+            cleaned = cleaned.replace(/export\s+default\s+\w+\s*;?\s*$/gm, '');
+            cleaned = cleaned.replace(/export\s+default\s+/g, '');
+            cleaned = cleaned.replace(/^export\s+(?!default)/gm, '');
+            cleaned = cleaned.replace(/export\s+{\s*[^}]*\s*}\s*;?/g, '');
+
+            return cleaned;
+        }
+
+        // First, add all non-App components (dependencies first)
+        const componentFiles = Object.keys(currentFiles).filter(k => {
+            const isJsx = k.endsWith('.jsx') || k.endsWith('.js');
+            const isNotMain = !k.includes('main.jsx') && !k.includes('main.js');
+            const isNotApp = !k.includes('App.jsx') && !k.includes('App.js');
+            const isNotConfig = !k.includes('config') && !k.includes('package.json');
+            return isJsx && isNotMain && isNotApp && isNotConfig;
+        });
+
+        // Add each component
+        componentFiles.forEach(key => {
+            const componentCode = cleanComponentCode(currentFiles[key], false);
+            if (componentCode.trim()) {
+                allComponentsCode += `\n// --- ${key} ---\n${componentCode}\n`;
+            }
+        });
+
+        // Then add App component last (so it can use the other components)
+        const appKey = Object.keys(currentFiles).find(k =>
+            k.includes('App.jsx') || k.includes('App.js')
+        );
+        const appCode = appKey ? cleanComponentCode(currentFiles[appKey], true) : buildDefaultApp();
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -735,6 +762,8 @@ root.render(<App />);
     <div id="root"></div>
     <script type="text/babel" data-presets="react">
         const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext, Fragment } = React;
+
+        ${allComponentsCode}
 
         ${appCode}
 
