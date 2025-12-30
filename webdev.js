@@ -703,9 +703,17 @@ root.render(<App />);
             .replace(/^import\s+['"].*?['"];?\s*$/gm, '')
             .trim();
 
-        // If code starts with "export default" function/class, wrap it
-        if (appCode.startsWith('export default')) {
-            appCode = appCode.replace('export default', 'const App =');
+        // Remove all export statements to prevent "exports is not defined" error
+        appCode = appCode
+            .replace(/^export\s+default\s+/gm, 'const App = ')
+            .replace(/^export\s+/gm, '')
+            .replace(/export\s+default\s+/g, '')
+            .replace(/export\s+{\s*\w+\s*(,\s*\w+)*\s*}\s*;?/g, '');
+
+        // If there's still no App definition, try to find the main component
+        if (!appCode.includes('const App') && !appCode.includes('function App')) {
+            // Try to find any function component and rename it to App
+            appCode = appCode.replace(/^(const|function)\s+(\w+)\s*=/m, 'const App =');
         }
 
         return `<!DOCTYPE html>
@@ -714,10 +722,10 @@ root.render(<App />);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>React Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin><\/script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin><\/script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
     <style>
         body { margin: 0; padding: 0; }
         ${stylesCode}
@@ -725,14 +733,14 @@ root.render(<App />);
 </head>
 <body class="bg-slate-900 text-white">
     <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } = React;
+    <script type="text/babel" data-presets="react">
+        const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext, Fragment } = React;
 
         ${appCode}
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
+    <\/script>
 </body>
 </html>`;
     }
