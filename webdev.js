@@ -1358,11 +1358,10 @@ export default defineConfig({
         if (currentMode === 'html') {
             files['index.html'] = currentCode;
         } else {
-            // For React, include all files
-            Object.entries(currentFiles).forEach(([name, content]) => {
-                const cleanName = name.startsWith('/') ? name.slice(1) : name;
-                files[cleanName] = content;
-            });
+            // For React, build a single HTML file with Babel (like the preview)
+            // HF Static Spaces can't process .jsx files, so we bundle everything
+            const reactHtml = buildReactHtml();
+            files['index.html'] = reactHtml;
         }
 
         // Show loading
