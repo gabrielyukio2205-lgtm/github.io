@@ -47,6 +47,12 @@
     let thinkingModeEnabled = false;
     const thinkingBtn = document.getElementById('thinkingBtn');
 
+    // Model Selector State (Jade High = GLM 4.7, Jade Flash = Cerebras)
+    let currentJadeModel = 'high'; // 'high' or 'flash'
+    const modelDropdownBtn = document.getElementById('model-dropdown-btn');
+    const modelDropdownMenu = document.getElementById('model-dropdown-menu');
+    const currentModelName = document.getElementById('current-model-name');
+
     // Sidebar Elements
     const sidebar = document.getElementById('sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
@@ -117,6 +123,22 @@
         // PDF/OCR Button
         if (pdfBtn) pdfBtn.addEventListener('click', () => pdfInput.click());
         if (pdfInput) pdfInput.addEventListener('change', handlePdfSelection);
+
+        // Model Dropdown Events
+        if (modelDropdownBtn) {
+            modelDropdownBtn.addEventListener('click', toggleModelDropdown);
+        }
+        if (modelDropdownMenu) {
+            modelDropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => selectModel(item.dataset.model));
+            });
+        }
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (modelDropdownMenu && !e.target.closest('#model-selector')) {
+                modelDropdownMenu.classList.add('hidden');
+            }
+        });
 
         // Sidebar Events
         toggleSidebarBtn.addEventListener('click', toggleSidebar);
@@ -856,9 +878,10 @@
                     user_input: finalMessage,
                     image_base64: image_base64,
                     user_id: masterUserId,
-                    agent_type: currentAgent, // ENVIA 'jade', 'scholar' ou 'heavy'
-                    web_search: webSearchEnabled && currentAgent === 'jade', // Só ativa busca no modo J.A.D.E.
-                    thinking_mode: thinkingModeEnabled && currentAgent === 'jade' // Só ativa thinking no modo J.A.D.E.
+                    agent_type: currentAgent,
+                    jade_model: currentJadeModel, // 'high' (GLM 4.7) or 'flash' (Cerebras)
+                    web_search: webSearchEnabled && currentAgent === 'jade',
+                    thinking_mode: thinkingModeEnabled && currentAgent === 'jade'
                 })
             });
 
@@ -1005,6 +1028,33 @@
         if (pdfChipContainer) {
             pdfChipContainer.classList.add('hidden');
         }
+    }
+
+    // --- Model Dropdown Functions ---
+    function toggleModelDropdown(e) {
+        e.stopPropagation();
+        if (modelDropdownMenu) {
+            modelDropdownMenu.classList.toggle('hidden');
+        }
+    }
+
+    function selectModel(model) {
+        currentJadeModel = model;
+
+        // Update button text
+        if (currentModelName) {
+            currentModelName.textContent = model === 'high' ? 'Jade High' : 'Jade Flash';
+        }
+
+        // Update active state in dropdown
+        if (modelDropdownMenu) {
+            modelDropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.model === model);
+            });
+            modelDropdownMenu.classList.add('hidden');
+        }
+
+        console.log(`🎯 Modelo alterado para: ${model === 'high' ? 'GLM 4.7 (High)' : 'Cerebras (Flash)'}`);
     }
 
     setupEventListeners();

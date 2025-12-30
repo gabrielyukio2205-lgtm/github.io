@@ -135,6 +135,30 @@
                         <h1 id="header-title">J.A.D.E.</h1>
                         <span class="status-badge">Beta</span>
                     </div>
+                    <!-- Model Selector (ChatGPT style) -->
+                    <div id="model-selector" class="model-dropdown">
+                        <button id="model-dropdown-btn" class="model-btn">
+                            <span id="current-model-name">Jade High</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div id="model-dropdown-menu" class="dropdown-menu hidden">
+                            <button class="dropdown-item active" data-model="high">
+                                <div class="model-info">
+                                    <span class="model-name">Jade High</span>
+                                    <span class="model-desc">GLM 4.7 • Mais inteligente</span>
+                                </div>
+                            </button>
+                            <button class="dropdown-item" data-model="flash">
+                                <div class="model-info">
+                                    <span class="model-name">Jade Flash</span>
+                                    <span class="model-desc">Cerebras • Mais rápido</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="controls">
