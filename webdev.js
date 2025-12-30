@@ -13,14 +13,12 @@
         'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/+esm',
         'https://cdn.skypack.dev/@codesandbox/sandpack-client@2',
-        'https://esm.sh/@codesandbox/sandpack-client@2/clients/iframe?bundle',
-        'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/clients/iframe/+esm',
-        'https://esm.sh/@codesandbox/sandpack-client@2/clients/static?bundle',
         'https://esm.sh/@codesandbox/sandpack-client@1?bundle',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@1/+esm',
-        'https://esm.sh/@codesandbox/sandpack-client@1/clients/iframe?bundle'
+        'https://cdn.skypack.dev/@codesandbox/sandpack-client@1'
     ];
     const SANDPACK_UMD_URLS = [
+        'https://sandpack.codesandbox.io/sandpack-client.js',
         'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.umd.js',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/dist/index.umd.js',
         'https://unpkg.com/@codesandbox/sandpack-client@2/dist/index.umd.min.js',
@@ -39,6 +37,7 @@
     let sandpackClient = null;
     let sandpackImportPromise = null;
     let sandpackCtor = null;
+    let reactPreviewMode = 'sandpack';
 
     // Agentic auto-fix state
     const MAX_FIX_ATTEMPTS = 3;
@@ -175,6 +174,7 @@
         sandpackContainer.classList.add('hidden');
         sandpackContainer.innerHTML = '';
         sandpackClient = null;
+        reactPreviewMode = 'sandpack';
         refineSection.classList.add('hidden');
         fileList.innerHTML = '';
     }
@@ -195,7 +195,7 @@
         const pkgRaw = files['package.json'] || files['/package.json'];
         if (!pkgRaw) return {};
         try {
-            const pkg = JSON.parse(pkgRaw);
+            const pkg = typeof pkgRaw === 'string' ? JSON.parse(pkgRaw) : pkgRaw;
             if (pkg && typeof pkg.dependencies === 'object') {
                 return pkg.dependencies;
             }
@@ -226,13 +226,17 @@
         Object.entries(rawFiles || {}).forEach(([name, code]) => {
             if (!name) return;
             const normalized = name.startsWith('/') ? name : `/${name}`;
-            const content = typeof code === 'string'
+            let content = typeof code === 'string'
                 ? code
                 : (code && code.code) ? code.code
                     : (code && code.content) ? code.content
                         : (code && code.contents) ? code.contents
                             : (code && typeof code === 'object') ? JSON.stringify(code, null, 2)
                                 : '';
+
+            if (typeof code === 'object' && code !== null && typeof content === 'string') {
+                rawFiles[name] = content;
+            }
             files[normalized] = content;
         });
 
@@ -339,6 +343,17 @@ root.render(<App />);
         if (sandpackCtor) return sandpackCtor;
         if (!sandpackImportPromise) {
             sandpackImportPromise = (async () => {
+                for (const url of SANDPACK_UMD_URLS) {
+                    try {
+                        await loadScript(url);
+                        const ctor = resolveSandpackCtor(window) ||
+                            (window.sandpack && resolveSandpackCtor(window.sandpack));
+                        if (ctor) return ctor;
+                    } catch (error) {
+                        console.warn('Sandpack script failed', url, error);
+                    }
+                }
+
                 for (const url of SANDPACK_IMPORT_URLS) {
                     try {
                         const mod = await import(url);
@@ -349,17 +364,6 @@ root.render(<App />);
                         }
                     } catch (error) {
                         console.warn('Sandpack import failed', url, error);
-                    }
-                }
-
-                for (const url of SANDPACK_UMD_URLS) {
-                    try {
-                        await loadScript(url);
-                        const ctor = resolveSandpackCtor(window) ||
-                            (window.sandpack && resolveSandpackCtor(window.sandpack));
-                        if (ctor) return ctor;
-                    } catch (error) {
-                        console.warn('Sandpack script failed', url, error);
                     }
                 }
 
@@ -628,8 +632,48 @@ root.render(<App />);
     }
 
     async function renderReactPreview() {
-        // Simpler approach: use Babel standalone + React CDN instead of Sandpack
-        // Sandpack CDN imports are unreliable (404 errors)
+        const SandpackClient = await loadSandpackClient();
+        if (!SandpackClient) {
+            renderReactFallback('Sandpack falhou. Usando preview simples.');
+            return;
+        }
+
+        const files = normalizeSandpackFiles(currentFiles);
+        const dependencies = resolveDependencies();
+        ensurePackageJson(files, dependencies);
+
+        if (files['/package.json']) {
+            currentFiles['package.json'] = files['/package.json'];
+        }
+
+        reactPreviewMode = 'sandpack';
+        sandpackContainer.classList.remove('hidden');
+        previewFrame.classList.add('hidden');
+
+        const frame = buildSandpackFrame();
+        const entry = getSandpackEntry(files);
+
+        try {
+            sandpackClient = new SandpackClient(frame, {
+                template: 'react',
+                files,
+                dependencies,
+                entry
+            });
+        } catch (error) {
+            console.error('Sandpack init error:', error);
+            renderReactFallback('Sandpack falhou. Usando preview simples.');
+            return;
+        }
+
+        scheduleSandpackHide();
+    }
+
+    function renderReactFallback(message) {
+        reactPreviewMode = 'iframe';
+        if (message) {
+            showSandpackError(message);
+        }
 
         const html = buildReactHtml();
         const blob = new Blob([html], { type: 'text/html' });
@@ -639,12 +683,10 @@ root.render(<App />);
         previewFrame.classList.remove('hidden');
         sandpackContainer.classList.add('hidden');
 
-        // Hide loading after iframe loads
         previewFrame.onload = () => {
             hideLoading();
         };
 
-        // Fallback timeout
         setTimeout(() => {
             if (!loadingOverlay.classList.contains('hidden')) {
                 hideLoading();
@@ -790,8 +832,13 @@ root.render(<App />);
     function showPreview() {
         emptyState.classList.add('hidden');
         if (currentMode === 'react') {
-            sandpackContainer.classList.remove('hidden');
-            previewFrame.classList.add('hidden');
+            if (reactPreviewMode === 'iframe') {
+                sandpackContainer.classList.add('hidden');
+                previewFrame.classList.remove('hidden');
+            } else {
+                sandpackContainer.classList.remove('hidden');
+                previewFrame.classList.add('hidden');
+            }
         } else {
             sandpackContainer.classList.add('hidden');
             previewFrame.classList.remove('hidden');
@@ -927,7 +974,9 @@ root.render(<App />);
         }
 
         if (currentMode === 'react') {
-            const iframe = sandpackContainer.querySelector('iframe');
+            const iframe = reactPreviewMode === 'iframe'
+                ? previewFrame
+                : sandpackContainer.querySelector('iframe');
             if (iframe && iframe.src) {
                 window.open(iframe.src, '_blank');
             } else {
