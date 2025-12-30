@@ -1357,9 +1357,6 @@ export default defineConfig({
         // we'll use CodeSandbox as an intermediary (which Vercel can import)
         // OR we can open the Vercel deploy page with instructions
 
-        // Alternative: Open CodeSandbox first (which has Vercel integration)
-        const codesandboxUrl = createCodeSandboxUrl(files);
-
         // Show instructions modal or redirect
         const useCodeSandbox = confirm(
             '🚀 Deploy to Vercel\n\n' +
@@ -1369,7 +1366,7 @@ export default defineConfig({
         );
 
         if (useCodeSandbox) {
-            window.open(codesandboxUrl, '_blank');
+            openInCodeSandbox(files);
         }
     }
 
@@ -1448,8 +1445,6 @@ export default defineConfig({
 })`;
             }
 
-            const codesandboxUrl = createCodeSandboxUrl(files);
-
             const useCodeSandbox = confirm(
                 '🌐 Deploy to Netlify\n\n' +
                 'Para projetos React, vou abrir seu projeto no CodeSandbox primeiro.\n' +
@@ -1458,26 +1453,37 @@ export default defineConfig({
             );
 
             if (useCodeSandbox) {
-                window.open(codesandboxUrl, '_blank');
+                openInCodeSandbox(files);
             }
         }
     }
 
-    // ========== CODESANDBOX HELPER ==========
-    function createCodeSandboxUrl(files) {
-        // CodeSandbox uses a special URL format with base64 encoded parameters
-        const parameters = {
-            files: {}
-        };
+    // ========== CODESANDBOX HELPER (POST Form Method) ==========
+    function openInCodeSandbox(files) {
+        // CodeSandbox POST API - similar to StackBlitz
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://codesandbox.io/api/v1/sandboxes/define';
+        form.target = '_blank';
+
+        // Build the parameters object in the format CodeSandbox expects
+        const parameters = { files: {} };
 
         Object.entries(files).forEach(([name, content]) => {
             parameters.files[name] = { content };
         });
 
-        // Encode for URL
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(parameters))));
+        // Add the parameters as a hidden field
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'parameters';
+        input.value = JSON.stringify(parameters);
+        form.appendChild(input);
 
-        return `https://codesandbox.io/api/v1/sandboxes/define?parameters=${encoded}`;
+        // Submit
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
     }
 
     // Add event listeners for new deploy buttons
