@@ -1,6 +1,6 @@
 /**
  * Model Selector - Custom Dropdown
- * Handles model selection with smooth animations
+ * Uses fixed positioning to escape stacking context issues
  */
 
 (function () {
@@ -15,10 +15,36 @@
 
     if (!modelTrigger || !modelMenu) return;
 
+    // Position menu using fixed positioning to escape stacking context
+    function positionMenu() {
+        const rect = modelTrigger.getBoundingClientRect();
+        modelMenu.style.position = 'fixed';
+        modelMenu.style.top = (rect.bottom + 8) + 'px';
+        modelMenu.style.left = rect.left + 'px';
+        modelMenu.style.width = Math.max(rect.width, 280) + 'px';
+        modelMenu.style.right = 'auto';
+    }
+
     // Toggle dropdown
     modelTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        modelSelector.classList.toggle('open');
+        const isOpen = modelSelector.classList.toggle('open');
+        if (isOpen) {
+            positionMenu();
+        }
+    });
+
+    // Reposition on scroll/resize when open
+    window.addEventListener('scroll', () => {
+        if (modelSelector.classList.contains('open')) {
+            positionMenu();
+        }
+    }, true);
+
+    window.addEventListener('resize', () => {
+        if (modelSelector.classList.contains('open')) {
+            positionMenu();
+        }
     });
 
     // Select model option
@@ -56,7 +82,7 @@
 
     // Close on outside click
     document.addEventListener('click', (e) => {
-        if (!modelSelector.contains(e.target)) {
+        if (!modelSelector.contains(e.target) && !modelMenu.contains(e.target)) {
             modelSelector.classList.remove('open');
         }
     });
