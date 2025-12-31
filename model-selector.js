@@ -1,6 +1,6 @@
 /**
  * Model Selector - Custom Dropdown
- * Uses fixed positioning to escape stacking context issues
+ * Appends menu to body to escape ALL stacking contexts
  */
 
 (function () {
@@ -15,22 +15,44 @@
 
     if (!modelTrigger || !modelMenu) return;
 
-    // Position menu using fixed positioning to escape stacking context
+    // Move menu to body to escape all stacking contexts
+    document.body.appendChild(modelMenu);
+
+    // Apply critical styles
+    modelMenu.style.position = 'fixed';
+    modelMenu.style.zIndex = '99999';
+
+    // Position menu below trigger
     function positionMenu() {
         const rect = modelTrigger.getBoundingClientRect();
-        modelMenu.style.position = 'fixed';
         modelMenu.style.top = (rect.bottom + 8) + 'px';
         modelMenu.style.left = rect.left + 'px';
-        modelMenu.style.width = Math.max(rect.width, 280) + 'px';
-        modelMenu.style.right = 'auto';
+        modelMenu.style.minWidth = Math.max(rect.width, 280) + 'px';
+    }
+
+    // Open/close dropdown
+    function openMenu() {
+        positionMenu();
+        modelSelector.classList.add('open');
+        modelMenu.style.opacity = '1';
+        modelMenu.style.visibility = 'visible';
+        modelMenu.style.transform = 'translateY(0)';
+    }
+
+    function closeMenu() {
+        modelSelector.classList.remove('open');
+        modelMenu.style.opacity = '0';
+        modelMenu.style.visibility = 'hidden';
+        modelMenu.style.transform = 'translateY(-8px)';
     }
 
     // Toggle dropdown
     modelTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isOpen = modelSelector.classList.toggle('open');
-        if (isOpen) {
-            positionMenu();
+        if (modelSelector.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
         }
     });
 
@@ -54,7 +76,7 @@
             const name = option.dataset.name;
             const badge = option.dataset.badge;
 
-            // Update hidden input (used by existing code)
+            // Update hidden input
             modelSelect.value = value;
 
             // Update trigger display
@@ -76,21 +98,21 @@
             option.classList.add('selected');
 
             // Close dropdown
-            modelSelector.classList.remove('open');
+            closeMenu();
         });
     });
 
     // Close on outside click
     document.addEventListener('click', (e) => {
         if (!modelSelector.contains(e.target) && !modelMenu.contains(e.target)) {
-            modelSelector.classList.remove('open');
+            closeMenu();
         }
     });
 
     // Close on Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            modelSelector.classList.remove('open');
+            closeMenu();
         }
     });
 
@@ -100,4 +122,7 @@
     if (initialOption) {
         initialOption.classList.add('selected');
     }
+
+    // Initial state - closed
+    closeMenu();
 })();
