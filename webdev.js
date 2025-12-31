@@ -679,107 +679,125 @@ root.render(<App />);
     }
 
 
+
     function buildReactHtml() {
-        // Collect all component code from .jsx/.js files (except main.jsx)
-        let allComponentsCode = '';
+        // ESM.sh + Import Maps approach - much more robust than Babel Standalone
+        // This allows imports to work natively without regex manipulation
 
         // Get styles
         let stylesCode = '';
-        const styleKey = Object.keys(currentFiles).find(k => k.endsWith('.css'));
-        if (styleKey) {
-            stylesCode = currentFiles[styleKey];
-        }
+        const styleKeys = Object.keys(currentFiles).filter(k => k.endsWith('.css'));
+        styleKeys.forEach(key => {
+            stylesCode += currentFiles[key] + '\n';
+        });
 
-        // Helper to clean component code
-        function cleanComponentCode(code, isMainApp = false) {
-            let cleaned = code
-                // Remove all imports (various formats)
-                .replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')  // import X from "Y"
-                .replace(/^import\s+['"].*?['"];?\s*$/gm, '')            // import "Y"
-                .replace(/^import\s+\w+\s*$/gm, '')                       // import React (incomplete)
-                .replace(/^import\s+\w+\s*;?\s*$/gm, '')                  // import React;
-                .replace(/^import\s*\{[^}]*\}\s*from\s+['"].*?['"];?\s*$/gm, '') // import { X } from "Y"
-                .replace(/^import\s+\*\s+as\s+\w+\s+from\s+['"].*?['"];?\s*$/gm, '') // import * as X from "Y"
-                .trim();
-
-            if (isMainApp) {
-                // For App component: ensure it's named "App" (handle various formats)
-                // export default function App
-                cleaned = cleaned.replace(/export\s+default\s+function\s+App/g, 'function App');
-                cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function App');
-                // const App = () => ... or const App = function...
-                cleaned = cleaned.replace(/export\s+default\s+/g, '');
-                // If there's no function App, check for const App = 
-                if (!cleaned.includes('function App') && !cleaned.includes('const App')) {
-                    // Try to find any component declaration and rename to App
-                    cleaned = cleaned.replace(/^const\s+(\w+)\s*=\s*\(/gm, 'const App = (');
-                    cleaned = cleaned.replace(/^function\s+(\w+)\s*\(/gm, 'function App(');
-                }
-            } else {
-                // For other components: just remove "export default"
-                cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function $1');
-                cleaned = cleaned.replace(/export\s+default\s+/g, '');
+        // Build dynamic import map based on dependencies
+        const deps = resolveDependencies();
+        const importMap = {
+            imports: {
+                "react": "https://esm.sh/react@18?dev",
+                "react/": "https://esm.sh/react@18/",
+                "react-dom": "https://esm.sh/react-dom@18?dev",
+                "react-dom/": "https://esm.sh/react-dom@18/",
+                "react-dom/client": "https://esm.sh/react-dom@18/client?dev"
             }
+        };
 
-            // Remove remaining exports
-            cleaned = cleaned.replace(/export\s+default\s+\w+\s*;?\s*$/gm, '');
-            cleaned = cleaned.replace(/^export\s+(?!default)/gm, '');
-            cleaned = cleaned.replace(/export\s+{\s*[^}]*\s*}\s*;?/g, '');
+        // Add other dependencies to import map
+        Object.keys(deps).forEach(dep => {
+            if (dep !== 'react' && dep !== 'react-dom') {
+                const version = deps[dep] || 'latest';
+                const cleanVersion = version.replace(/[\^~>=<]/g, '');
+                importMap.imports[dep] = `https://esm.sh/${dep}@${cleanVersion}?dev`;
+                importMap.imports[dep + '/'] = `https://esm.sh/${dep}@${cleanVersion}/`;
+            }
+        });
 
-            return cleaned;
+        // Helper to check if file should be included as a component
+        function isComponentFile(filename) {
+            const ext = filename.split('.').pop();
+            const basename = filename.split('/').pop().toLowerCase();
+            return (ext === 'jsx' || ext === 'js') &&
+                !basename.includes('main') &&
+                !basename.includes('config') &&
+                !basename.includes('vite') &&
+                basename !== 'package.json';
         }
 
-
-
-        // Helper to check if file is App.jsx/js
+        // Helper to check if file is the main App
         function isAppFile(filename) {
             const basename = filename.split('/').pop();
             return basename === 'App.jsx' || basename === 'App.js';
         }
 
-        // Helper to check if file should be excluded
-        function shouldExclude(filename) {
-            const basename = filename.split('/').pop();
-            const lowerName = filename.toLowerCase();
-            return basename === 'main.jsx' ||
-                basename === 'main.js' ||
-                lowerName.includes('config') ||
-                basename === 'package.json' ||
-                basename === 'vite-env.d.ts';
+        // Clean component code - simpler approach, just handle exports
+        function cleanForInline(code, componentName = null) {
+            let cleaned = code;
+
+            // Remove import statements (ESM.sh handles them, but we're inlining)
+            cleaned = cleaned.replace(/^import\s+.*?['"].*?['"];?\s*$/gm, '');
+            cleaned = cleaned.replace(/^import\s+['"].*?['"];?\s*$/gm, '');
+
+            // Handle export default function Name
+            cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function $1');
+
+            // Handle export default const/arrow
+            cleaned = cleaned.replace(/export\s+default\s+/g, '');
+
+            // Remove named exports
+            cleaned = cleaned.replace(/^export\s+(?!default)/gm, '');
+            cleaned = cleaned.replace(/export\s+{\s*[^}]*\s*};?/g, '');
+
+            // If this is App and there's no function App or const App, try to fix
+            if (componentName === 'App') {
+                if (!cleaned.includes('function App') && !cleaned.includes('const App')) {
+                    // Try to rename the first function/const to App
+                    cleaned = cleaned.replace(/^(function|const)\s+(\w+)/, '$1 App');
+                }
+            }
+
+            return cleaned.trim();
         }
 
-        // First, add all non-App components (dependencies first)
-        const componentFiles = Object.keys(currentFiles).filter(k => {
-            const isJsx = k.endsWith('.jsx') || k.endsWith('.js');
-            return isJsx && !isAppFile(k) && !shouldExclude(k);
+        // Collect all component code
+        let allCode = '';
+        const componentFiles = Object.keys(currentFiles).filter(isComponentFile);
+
+        // Sort: other components first, then App last
+        componentFiles.sort((a, b) => {
+            if (isAppFile(a)) return 1;
+            if (isAppFile(b)) return -1;
+            return a.localeCompare(b);
         });
 
-        console.log('📦 Component files found:', componentFiles);
+        console.log('📦 Component files (sorted):', componentFiles);
 
-        // Add each component
         componentFiles.forEach(key => {
-            const componentCode = cleanComponentCode(currentFiles[key], false);
-            if (componentCode.trim()) {
-                console.log(`📄 Adding component: ${key}`);
-                allComponentsCode += `\n// --- ${key} ---\n${componentCode}\n`;
+            const isApp = isAppFile(key);
+            const code = cleanForInline(currentFiles[key], isApp ? 'App' : null);
+            if (code.trim()) {
+                console.log(`📄 Adding ${isApp ? 'App' : 'component'}: ${key}`);
+                allCode += `\n// --- ${key} ---\n${code}\n`;
             }
         });
 
-        // Then add App component last (so it can use the other components)
-        const appKey = Object.keys(currentFiles).find(k => isAppFile(k));
-        console.log('🎯 App file:', appKey);
-
-        if (appKey) {
-            console.log('📄 Raw App code (first 500 chars):', currentFiles[appKey].substring(0, 500));
+        // Ensure we have an App component
+        if (!allCode.includes('function App') && !allCode.includes('const App')) {
+            console.warn('⚠️ No App component found, adding default');
+            allCode += `
+function App() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+            <div className="text-center">
+                <h1 className="text-3xl font-bold mb-3">React App</h1>
+                <p className="text-slate-300">No App component was found.</p>
+            </div>
+        </div>
+    );
+}`;
         }
 
-        const appCode = appKey ? cleanComponentCode(currentFiles[appKey], true) : buildDefaultApp();
-
-        console.log('✨ Cleaned App code (first 500 chars):', appCode.substring(0, 500));
-        console.log('🔍 Has function App:', appCode.includes('function App'));
-        console.log('🔍 Has const App:', appCode.includes('const App'));
-
-
+        // Build the HTML with Import Maps + Babel for JSX transform only
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -787,9 +805,6 @@ root.render(<App />);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>React Preview</title>
     <script src="https://cdn.tailwindcss.com"><\/script>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin><\/script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin><\/script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
     <style>
         body { margin: 0; padding: 0; }
         ${stylesCode}
@@ -797,19 +812,83 @@ root.render(<App />);
 </head>
 <body class="bg-slate-900 text-white">
     <div id="root"></div>
+    
+    <!-- Import Map for ESM.sh -->
+    <script type="importmap">
+${JSON.stringify(importMap, null, 8)}
+    <\/script>
+    
+    <!-- React UMD for Babel compatibility -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin><\/script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin><\/script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+    
     <script type="text/babel" data-presets="react">
-        const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext, Fragment } = React;
+        // React hooks from global React (UMD)
+        const { useState, useEffect, useRef, useCallback, useMemo, useReducer, createContext, useContext, Fragment, memo, forwardRef, lazy, Suspense } = React;
+        
+        // Error boundary for better error messages
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+            componentDidCatch(error, errorInfo) {
+                console.error('React Error:', error, errorInfo);
+                window.parent.postMessage({ type: 'react-error', error: error.toString() }, '*');
+            }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="p-6 bg-red-900/50 border border-red-500 rounded-lg m-4">
+                            <h2 className="text-red-400 font-bold mb-2">⚠️ Render Error</h2>
+                            <pre className="text-sm text-red-300 whitespace-pre-wrap">{this.state.error?.toString()}</pre>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
+        }
 
-        ${allComponentsCode}
+        // ========== COMPONENTS ==========
+        ${allCode}
+        // ========== END COMPONENTS ==========
 
-        ${appCode}
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // Mount the app
+        try {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(
+                <ErrorBoundary>
+                    <App />
+                </ErrorBoundary>
+            );
+            // Signal success to parent
+            window.parent.postMessage({ type: 'react-success' }, '*');
+        } catch (error) {
+            console.error('Mount error:', error);
+            window.parent.postMessage({ type: 'react-error', error: error.toString() }, '*');
+            document.getElementById('root').innerHTML = '<div class="p-6 text-red-400"><h2>Mount Error</h2><pre>' + error.toString() + '</pre></div>';
+        }
+    <\/script>
+    
+    <!-- Babel error handler -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Global error:', message, error);
+            window.parent.postMessage({ 
+                type: 'react-error', 
+                error: message + (lineno ? ' (line ' + lineno + ')' : '')
+            }, '*');
+            return true;
+        };
     <\/script>
 </body>
 </html>`;
     }
+
 
     // Handle messages from iframe (for auto-fix)
     function handleIframeMessage(event) {
