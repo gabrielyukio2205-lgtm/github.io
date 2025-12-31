@@ -7,8 +7,11 @@
     'use strict';
 
     // API Configuration
+    const HF_SPACE_URL = 'https://madras1-jade-port.hf.space';
     const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
-    const API_URL = `${PROXY_BASE_URL}/webdev/generate`;
+    // Use HuggingFace directly for WebDev (avoids proxy timeout on Compound PRO)
+    const API_URL = `${HF_SPACE_URL}/webdev/generate`;
+
     const SANDPACK_IMPORT_URLS = [
         'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
         'https://cdn.jsdelivr.net/npm/@codesandbox/sandpack-client@2/+esm',
