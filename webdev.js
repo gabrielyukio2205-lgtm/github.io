@@ -656,35 +656,141 @@ root.render(<App />);
     }
 
     async function renderReactPreview() {
-        // Sandpack CDNs are completely broken (404s, parsing errors)
-        // Use direct Babel + React CDN approach instead
-        renderReactFallback();
+        // StackBlitz is the only reliable way to preview React
+        // Babel inline is too fragile with LLM-generated code
+        showStackBlitzPreview();
     }
 
-    function renderReactFallback(message) {
-        reactPreviewMode = 'iframe';
-        if (message) {
-            showSandpackError(message);
-        }
+    function showStackBlitzPreview() {
+        reactPreviewMode = 'stackblitz';
 
-        const html = buildReactHtml();
-        const blob = new Blob([html], { type: 'text/html' });
+        // Show a nice message in the preview area with auto-open to StackBlitz
+        const previewHtml = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Preview</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+        p {
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+        }
+        .files {
+            margin-top: 2rem;
+            text-align: left;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .files h3 {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .file-tag {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">⚛️</div>
+        <h1>Projeto React Gerado!</h1>
+        <p>Para executar o projeto React, clique no botão abaixo para abrir no StackBlitz (ambiente de desenvolvimento completo).</p>
+        <button class="btn" onclick="window.parent.postMessage({type: 'open-stackblitz'}, '*')">
+            ⚡ Abrir no StackBlitz
+        </button>
+        <div class="files">
+            <h3>📁 Arquivos gerados:</h3>
+            <div class="file-list" id="fileList"></div>
+        </div>
+    </div>
+    <script>
+        const files = ${JSON.stringify(Object.keys(currentFiles))};
+        const fileList = document.getElementById('fileList');
+        files.forEach(f => {
+            const tag = document.createElement('span');
+            tag.className = 'file-tag';
+            tag.textContent = f;
+            fileList.appendChild(tag);
+        });
+    </script>
+</body>
+</html>`;
+
+        const blob = new Blob([previewHtml], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
 
         previewFrame.src = url;
         previewFrame.classList.remove('hidden');
         sandpackContainer.classList.add('hidden');
 
-        previewFrame.onload = () => {
-            hideLoading();
-        };
-
-        setTimeout(() => {
-            if (!loadingOverlay.classList.contains('hidden')) {
-                hideLoading();
+        // Listen for the button click from iframe
+        window.addEventListener('message', function handleStackBlitzClick(event) {
+            if (event.data && event.data.type === 'open-stackblitz') {
+                openInStackBlitz();
+                window.removeEventListener('message', handleStackBlitzClick);
             }
-        }, 3000);
+        });
+
+        hideLoading();
     }
+
 
     function buildReactHtml() {
         // Collect all component code from .jsx/.js files (except main.jsx)
