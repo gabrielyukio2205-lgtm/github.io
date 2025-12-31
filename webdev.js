@@ -768,7 +768,17 @@ root.render(<App />);
         // Then add App component last (so it can use the other components)
         const appKey = Object.keys(currentFiles).find(k => isAppFile(k));
         console.log('🎯 App file:', appKey);
+
+        if (appKey) {
+            console.log('📄 Raw App code (first 500 chars):', currentFiles[appKey].substring(0, 500));
+        }
+
         const appCode = appKey ? cleanComponentCode(currentFiles[appKey], true) : buildDefaultApp();
+
+        console.log('✨ Cleaned App code (first 500 chars):', appCode.substring(0, 500));
+        console.log('🔍 Has function App:', appCode.includes('function App'));
+        console.log('🔍 Has const App:', appCode.includes('const App'));
+
 
         return `<!DOCTYPE html>
 <html lang="en">
