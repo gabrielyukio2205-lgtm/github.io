@@ -710,22 +710,32 @@ root.render(<App />);
                 .trim();
 
             if (isMainApp) {
-                // For App component: ensure it's named "App"
+                // For App component: ensure it's named "App" (handle various formats)
+                // export default function App
                 cleaned = cleaned.replace(/export\s+default\s+function\s+App/g, 'function App');
                 cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function App');
+                // const App = () => ... or const App = function...
+                cleaned = cleaned.replace(/export\s+default\s+/g, '');
+                // If there's no function App, check for const App = 
+                if (!cleaned.includes('function App') && !cleaned.includes('const App')) {
+                    // Try to find any component declaration and rename to App
+                    cleaned = cleaned.replace(/^const\s+(\w+)\s*=\s*\(/gm, 'const App = (');
+                    cleaned = cleaned.replace(/^function\s+(\w+)\s*\(/gm, 'function App(');
+                }
             } else {
                 // For other components: just remove "export default"
                 cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function $1');
+                cleaned = cleaned.replace(/export\s+default\s+/g, '');
             }
 
             // Remove remaining exports
             cleaned = cleaned.replace(/export\s+default\s+\w+\s*;?\s*$/gm, '');
-            cleaned = cleaned.replace(/export\s+default\s+/g, '');
             cleaned = cleaned.replace(/^export\s+(?!default)/gm, '');
             cleaned = cleaned.replace(/export\s+{\s*[^}]*\s*}\s*;?/g, '');
 
             return cleaned;
         }
+
 
 
         // Helper to check if file is App.jsx/js
