@@ -700,9 +700,13 @@ root.render(<App />);
         // Helper to clean component code
         function cleanComponentCode(code, isMainApp = false) {
             let cleaned = code
-                // Remove all imports
-                .replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')
-                .replace(/^import\s+['"].*?['"];?\s*$/gm, '')
+                // Remove all imports (various formats)
+                .replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')  // import X from "Y"
+                .replace(/^import\s+['"].*?['"];?\s*$/gm, '')            // import "Y"
+                .replace(/^import\s+\w+\s*$/gm, '')                       // import React (incomplete)
+                .replace(/^import\s+\w+\s*;?\s*$/gm, '')                  // import React;
+                .replace(/^import\s*\{[^}]*\}\s*from\s+['"].*?['"];?\s*$/gm, '') // import { X } from "Y"
+                .replace(/^import\s+\*\s+as\s+\w+\s+from\s+['"].*?['"];?\s*$/gm, '') // import * as X from "Y"
                 .trim();
 
             if (isMainApp) {
@@ -722,6 +726,7 @@ root.render(<App />);
 
             return cleaned;
         }
+
 
         // Helper to check if file is App.jsx/js
         function isAppFile(filename) {
