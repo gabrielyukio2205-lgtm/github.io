@@ -734,25 +734,46 @@ root.render(<App />);
         function cleanForInline(code, componentName = null) {
             let cleaned = code;
 
-            // Remove import statements (ESM.sh handles them, but we're inlining)
-            cleaned = cleaned.replace(/^import\s+.*?['"].*?['"];?\s*$/gm, '');
-            cleaned = cleaned.replace(/^import\s+['"].*?['"];?\s*$/gm, '');
+            // Remove import statements line by line (more precise)
+            // Match: import X from "Y"; import "Y"; import { X } from "Y"; import * as X from "Y"
+            cleaned = cleaned.replace(/^import\s+(?:[\w*{}\s,]+\s+from\s+)?['"][^'"]+['"];?\s*$/gm, '');
 
-            // Handle export default function Name
+            // Handle export default function Name -> function Name
             cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function $1');
 
-            // Handle export default const/arrow
+            // Handle: export default (props) => ... or export default () => ...
+            // Need to wrap in const App = 
+            if (componentName === 'App') {
+                // If there's export default followed by arrow function
+                cleaned = cleaned.replace(/export\s+default\s+(\([^)]*\)\s*=>)/g, 'const App = $1');
+                cleaned = cleaned.replace(/export\s+default\s+(props\s*=>)/g, 'const App = $1');
+            }
+
+            // Handle export default const/arrow (generic)
             cleaned = cleaned.replace(/export\s+default\s+/g, '');
 
-            // Remove named exports
+            // Remove named exports: export const, export function, export { }
             cleaned = cleaned.replace(/^export\s+(?!default)/gm, '');
-            cleaned = cleaned.replace(/export\s+{\s*[^}]*\s*};?/g, '');
+            cleaned = cleaned.replace(/export\s+\{[^}]*\};?/g, '');
 
-            // If this is App and there's no function App or const App, try to fix
+            // If this is supposed to be App and there's no function App or const App, try to fix
             if (componentName === 'App') {
-                if (!cleaned.includes('function App') && !cleaned.includes('const App')) {
-                    // Try to rename the first function/const to App
-                    cleaned = cleaned.replace(/^(function|const)\s+(\w+)/, '$1 App');
+                const hasApp = /\b(function|const|let|var)\s+App\b/.test(cleaned);
+                if (!hasApp) {
+                    // Try to find the first component declaration and rename to App
+                    // Look for: function SomeName( or const SomeName = 
+                    const funcMatch = cleaned.match(/^(function)\s+(\w+)\s*\(/m);
+                    const constMatch = cleaned.match(/^(const|let|var)\s+(\w+)\s*=/m);
+
+                    if (funcMatch && funcMatch[2] !== 'App') {
+                        const oldName = funcMatch[2];
+                        cleaned = cleaned.replace(new RegExp(`\\bfunction\\s+${oldName}\\b`), 'function App');
+                        console.log(`🔄 Renamed function ${oldName} to App`);
+                    } else if (constMatch && constMatch[2] !== 'App') {
+                        const oldName = constMatch[2];
+                        cleaned = cleaned.replace(new RegExp(`\\b(const|let|var)\\s+${oldName}\\b`), '$1 App');
+                        console.log(`🔄 Renamed ${constMatch[1]} ${oldName} to App`);
+                    }
                 }
             }
 
@@ -774,10 +795,19 @@ root.render(<App />);
 
         componentFiles.forEach(key => {
             const isApp = isAppFile(key);
-            const code = cleanForInline(currentFiles[key], isApp ? 'App' : null);
+            const rawCode = currentFiles[key];
+            const code = cleanForInline(rawCode, isApp ? 'App' : null);
             if (code.trim()) {
                 console.log(`📄 Adding ${isApp ? 'App' : 'component'}: ${key}`);
+                if (isApp) {
+                    console.log('📝 Raw App code (first 300):', rawCode.substring(0, 300));
+                    console.log('✨ Cleaned App code (first 300):', code.substring(0, 300));
+                    console.log('🔍 Has function App:', code.includes('function App'));
+                    console.log('🔍 Has const App:', code.includes('const App'));
+                }
                 allCode += `\n// --- ${key} ---\n${code}\n`;
+            } else {
+                console.warn(`⚠️ Empty code after cleaning: ${key}`);
             }
         });
 
