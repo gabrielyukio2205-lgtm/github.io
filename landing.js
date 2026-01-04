@@ -1,5 +1,5 @@
-// Landing Page - Particle Text Effect
-// Particles form "J.A.D.E." text - Gemini 3 style
+// Landing Page - Neural Mesh Background
+// 3D wave mesh with connected lines - portfolio style
 
 (function () {
     'use strict';
@@ -8,188 +8,165 @@
     if (!canvas) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(
-        window.innerWidth / -2, window.innerWidth / 2,
-        window.innerHeight / 2, window.innerHeight / -2,
-        1, 1000
-    );
-    camera.position.z = 500;
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 8);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Colors
-    const colors = [0x4285f4, 0xea4335, 0xfbbc04, 0x34a853, 0x9333ea, 0x06b6d4, 0xf97316, 0x6366f1, 0xec4899];
+    // Create mesh grid
+    const gridWidth = 60;
+    const gridHeight = 30;
+    const spacing = 0.4;
+    const points = [];
+    const originalPositions = [];
 
-    // Create text canvas to sample positions
-    function getTextPositions(text) {
-        const textCanvas = document.createElement('canvas');
-        const ctx = textCanvas.getContext('2d');
+    for (let j = 0; j < gridHeight; j++) {
+        for (let i = 0; i < gridWidth; i++) {
+            const x = (i - gridWidth / 2) * spacing;
+            const z = (j - gridHeight / 2) * spacing;
+            const y = 0;
+            points.push(new THREE.Vector3(x, y, z));
+            originalPositions.push({ x, y, z });
+        }
+    }
 
-        const fontSize = Math.min(window.innerWidth * 0.15, 200);
-        ctx.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
-        const textWidth = ctx.measureText(text).width;
+    // Create lines connecting the grid
+    const lineGeometry = new THREE.BufferGeometry();
+    const linePositions = [];
+    const lineColors = [];
 
-        textCanvas.width = textWidth + 40;
-        textCanvas.height = fontSize * 1.4;
+    function updateLines() {
+        linePositions.length = 0;
+        lineColors.length = 0;
 
-        ctx.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(text, textCanvas.width / 2, textCanvas.height / 2);
+        for (let j = 0; j < gridHeight; j++) {
+            for (let i = 0; i < gridWidth; i++) {
+                const idx = j * gridWidth + i;
+                const p = points[idx];
 
-        const imageData = ctx.getImageData(0, 0, textCanvas.width, textCanvas.height);
-        const positions = [];
-        const gap = 3;
+                // Connect to right neighbor
+                if (i < gridWidth - 1) {
+                    const rightIdx = j * gridWidth + (i + 1);
+                    const pr = points[rightIdx];
+                    linePositions.push(p.x, p.y, p.z, pr.x, pr.y, pr.z);
 
-        for (let y = 0; y < textCanvas.height; y += gap) {
-            for (let x = 0; x < textCanvas.width; x += gap) {
-                const i = (y * textCanvas.width + x) * 4;
-                if (imageData.data[i + 3] > 128) {
-                    positions.push({
-                        x: x - textCanvas.width / 2,
-                        y: -(y - textCanvas.height / 2)
-                    });
+                    // Color gradient based on height
+                    const h1 = (p.y + 1) / 2;
+                    const h2 = (pr.y + 1) / 2;
+                    lineColors.push(0.4 + h1 * 0.3, 0.2 + h1 * 0.2, 0.9, 0.4 + h2 * 0.3, 0.2 + h2 * 0.2, 0.9);
+                }
+
+                // Connect to bottom neighbor
+                if (j < gridHeight - 1) {
+                    const bottomIdx = (j + 1) * gridWidth + i;
+                    const pb = points[bottomIdx];
+                    linePositions.push(p.x, p.y, p.z, pb.x, pb.y, pb.z);
+
+                    const h1 = (p.y + 1) / 2;
+                    const h2 = (pb.y + 1) / 2;
+                    lineColors.push(0.4 + h1 * 0.3, 0.2 + h1 * 0.2, 0.9, 0.4 + h2 * 0.3, 0.2 + h2 * 0.2, 0.9);
                 }
             }
         }
 
-        return { positions, width: textCanvas.width, height: textCanvas.height };
+        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
     }
 
-    const textData = getTextPositions('J.A.D.E.');
-    const particles = [];
-
-    // Create particle texture
-    const particleCanvas = document.createElement('canvas');
-    particleCanvas.width = 32;
-    particleCanvas.height = 32;
-    const pctx = particleCanvas.getContext('2d');
-    const gradient = pctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-    gradient.addColorStop(0, 'rgba(255,255,255,1)');
-    gradient.addColorStop(0.5, 'rgba(255,255,255,0.5)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0)');
-    pctx.fillStyle = gradient;
-    pctx.beginPath();
-    pctx.arc(16, 16, 16, 0, Math.PI * 2);
-    pctx.fill();
-    const particleTexture = new THREE.CanvasTexture(particleCanvas);
-
-    // Create particles for text
-    const offsetY = -50; // Move text up a bit from center
-
-    textData.positions.forEach((pos, i) => {
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const material = new THREE.SpriteMaterial({
-            map: particleTexture,
-            color: color,
-            transparent: true,
-            opacity: 0.9,
-            blending: THREE.AdditiveBlending
-        });
-
-        const sprite = new THREE.Sprite(material);
-
-        // Start from random positions
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 300 + Math.random() * 500;
-
-        sprite.position.x = Math.cos(angle) * radius;
-        sprite.position.y = Math.sin(angle) * radius + offsetY;
-        sprite.position.z = 0;
-
-        const size = 4 + Math.random() * 4;
-        sprite.scale.set(size, size, 1);
-
-        sprite.userData = {
-            targetX: pos.x,
-            targetY: pos.y + offsetY,
-            startX: sprite.position.x,
-            startY: sprite.position.y,
-            delay: i * 0.001,
-            phase: Math.random() * Math.PI * 2
-        };
-
-        particles.push(sprite);
-        scene.add(sprite);
+    const lineMaterial = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.7,
+        linewidth: 1
     });
 
-    // Extra floating particles
-    for (let i = 0; i < 80; i++) {
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const material = new THREE.SpriteMaterial({
-            map: particleTexture,
-            color: color,
-            transparent: true,
-            opacity: 0.4,
-            blending: THREE.AdditiveBlending
-        });
+    updateLines();
+    const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
+    lineMesh.rotation.x = -Math.PI * 0.4;
+    lineMesh.position.y = -2;
+    scene.add(lineMesh);
 
-        const sprite = new THREE.Sprite(material);
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 200 + Math.random() * 400;
+    // Add points at intersections
+    const pointsGeometry = new THREE.BufferGeometry();
+    const pointPositions = new Float32Array(points.length * 3);
+    const pointColors = new Float32Array(points.length * 3);
 
-        sprite.position.x = Math.cos(angle) * radius;
-        sprite.position.y = Math.sin(angle) * radius + offsetY;
-        sprite.position.z = 0;
+    points.forEach((p, i) => {
+        pointPositions[i * 3] = p.x;
+        pointPositions[i * 3 + 1] = p.y;
+        pointPositions[i * 3 + 2] = p.z;
+        pointColors[i * 3] = 0.4;
+        pointColors[i * 3 + 1] = 0.3;
+        pointColors[i * 3 + 2] = 1;
+    });
 
-        const size = 3 + Math.random() * 3;
-        sprite.scale.set(size, size, 1);
+    pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
+    pointsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(pointColors, 3));
 
-        sprite.userData = {
-            isExtra: true,
-            angle: angle,
-            radius: radius,
-            speed: 0.0005 + Math.random() * 0.001,
-            floatAmp: 20 + Math.random() * 40,
-            phase: Math.random() * Math.PI * 2
-        };
+    const pointsMaterial = new THREE.PointsMaterial({
+        size: 3,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+    });
 
-        particles.push(sprite);
-        scene.add(sprite);
-    }
+    const pointsMesh = new THREE.Points(pointsGeometry, pointsMaterial);
+    pointsMesh.rotation.x = -Math.PI * 0.4;
+    pointsMesh.position.y = -2;
+    scene.add(pointsMesh);
 
     // Mouse
     let mouseX = 0, mouseY = 0;
     document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
-        mouseY = -(e.clientY - window.innerHeight / 2) * 0.05;
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
     });
 
     // Animation
     let time = 0;
-    let progress = 0;
 
     function animate() {
         requestAnimationFrame(animate);
-        time += 0.016;
-        progress = Math.min(progress + 0.005, 1);
+        time += 0.01;
 
-        const ease = 1 - Math.pow(1 - progress, 4); // Ease out quart
+        // Wave animation
+        for (let j = 0; j < gridHeight; j++) {
+            for (let i = 0; i < gridWidth; i++) {
+                const idx = j * gridWidth + i;
+                const orig = originalPositions[idx];
 
-        particles.forEach(p => {
-            const d = p.userData;
+                // Multiple wave layers
+                const wave1 = Math.sin(orig.x * 0.5 + time) * 0.3;
+                const wave2 = Math.sin(orig.z * 0.3 + time * 0.7) * 0.2;
+                const wave3 = Math.sin((orig.x + orig.z) * 0.2 + time * 1.2) * 0.15;
 
-            if (d.isExtra) {
-                d.angle += d.speed;
-                p.position.x = Math.cos(d.angle) * d.radius + mouseX;
-                p.position.y = Math.sin(d.angle) * d.radius + offsetY + Math.sin(time + d.phase) * d.floatAmp + mouseY;
-                p.material.opacity = 0.3 + Math.sin(time * 2 + d.phase) * 0.2;
-            } else {
-                // Lerp to target
-                const t = Math.max(0, Math.min(1, (ease - d.delay * 10) / (1 - d.delay * 10)));
-                p.position.x = d.startX + (d.targetX - d.startX) * t + mouseX * 0.3;
-                p.position.y = d.startY + (d.targetY - d.startY) * t + mouseY * 0.3;
+                points[idx].y = wave1 + wave2 + wave3;
 
-                // Subtle float
-                p.position.x += Math.sin(time * 2 + d.phase) * 2;
-                p.position.y += Math.cos(time * 1.5 + d.phase) * 2;
+                // Update point positions
+                pointPositions[idx * 3 + 1] = points[idx].y;
 
-                p.material.opacity = 0.7 + Math.sin(time + d.phase) * 0.2;
+                // Update point colors based on height
+                const h = (points[idx].y + 1) / 2;
+                pointColors[idx * 3] = 0.3 + h * 0.4;
+                pointColors[idx * 3 + 1] = 0.2 + h * 0.3;
+                pointColors[idx * 3 + 2] = 0.8 + h * 0.2;
             }
-        });
+        }
+
+        pointsGeometry.attributes.position.needsUpdate = true;
+        pointsGeometry.attributes.color.needsUpdate = true;
+        updateLines();
+        lineGeometry.attributes.position.needsUpdate = true;
+        lineGeometry.attributes.color.needsUpdate = true;
+
+        // Camera movement based on mouse
+        camera.position.x = mouseX * 0.5;
+        camera.position.y = 2 + mouseY * 0.3;
+        camera.lookAt(0, 0, 0);
 
         renderer.render(scene, camera);
     }
@@ -198,10 +175,7 @@
 
     // Resize
     window.addEventListener('resize', () => {
-        camera.left = window.innerWidth / -2;
-        camera.right = window.innerWidth / 2;
-        camera.top = window.innerHeight / 2;
-        camera.bottom = window.innerHeight / -2;
+        camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
