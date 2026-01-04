@@ -196,29 +196,79 @@
                         </svg>
                         Notas
                     </h2>
-                    <div class="block-type-selector">
-                        <button class="add-block-btn" id="add-block-btn" title="Adicionar bloco">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            <span>Adicionar</span>
-                        </button>
-                        <div class="block-menu hidden" id="block-menu">
-                            <button class="block-menu-item" data-type="text">📝 Texto</button>
-                            <button class="block-menu-item" data-type="heading">📌 Título</button>
-                            <button class="block-menu-item" data-type="bullet">• Lista</button>
-                            <button class="block-menu-item" data-type="todo">☑️ Checklist</button>
-                            <button class="block-menu-item" data-type="divider">― Divisor</button>
-                        </div>
-                    </div>
+                    <button class="add-block-header-btn" id="add-first-block-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Novo bloco</span>
+                    </button>
                 </div>
                 <div id="blocks-container" class="blocks-container">
                     <!-- Blocks will be rendered here -->
                     <div class="empty-blocks">
-                        <p>Clique em "Adicionar" para criar suas anotações</p>
+                        <div class="empty-icon">📝</div>
+                        <p>Suas anotações aparecerão aqui</p>
+                        <div class="hint">
+                            Clique <kbd>Novo bloco</kbd> ou digite <kbd>/</kbd> para comandos
+                        </div>
                     </div>
+                </div>
+                <!-- Slash Command Menu (hidden by default) -->
+                <div id="slash-menu" class="slash-menu hidden">
+                    <div class="slash-menu-section">Básicos</div>
+                    <button class="slash-menu-item" data-type="text">
+                        <div class="menu-icon">📝</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Texto</div>
+                            <div class="menu-desc">Parágrafo simples</div>
+                        </div>
+                    </button>
+                    <button class="slash-menu-item" data-type="heading">
+                        <div class="menu-icon">📌</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Título</div>
+                            <div class="menu-desc">Título grande</div>
+                        </div>
+                    </button>
+                    <button class="slash-menu-item" data-type="heading2">
+                        <div class="menu-icon">📎</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Subtítulo</div>
+                            <div class="menu-desc">Título médio</div>
+                        </div>
+                    </button>
+                    <div class="slash-menu-section">Listas</div>
+                    <button class="slash-menu-item" data-type="bullet">
+                        <div class="menu-icon">•</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Lista</div>
+                            <div class="menu-desc">Lista com marcadores</div>
+                        </div>
+                    </button>
+                    <button class="slash-menu-item" data-type="todo">
+                        <div class="menu-icon">☑️</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Checklist</div>
+                            <div class="menu-desc">Lista de tarefas</div>
+                        </div>
+                    </button>
+                    <div class="slash-menu-section">Outros</div>
+                    <button class="slash-menu-item" data-type="quote">
+                        <div class="menu-icon">💬</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Citação</div>
+                            <div class="menu-desc">Bloco de destaque</div>
+                        </div>
+                    </button>
+                    <button class="slash-menu-item" data-type="divider">
+                        <div class="menu-icon">―</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Divisor</div>
+                            <div class="menu-desc">Linha horizontal</div>
+                        </div>
+                    </button>
                 </div>
             </section>
 

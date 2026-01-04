@@ -1034,11 +1034,14 @@ function renderBlocks() {
             </div>
         ` : '';
 
-        const placeholder = {
-            text: 'Digite algo...',
+        const placeholders = {
+            text: 'Comece a escrever ou digite / para comandos...',
             heading: 'Título...',
-            bullet: 'Item da lista...',
-            todo: 'Tarefa...'
+            heading2: 'Subtítulo...',
+            bullet: 'Item...',
+            todo: 'Tarefa...',
+            quote: 'Citação...',
+            code: 'Código...'
         };
 
         return `
@@ -1048,7 +1051,7 @@ function renderBlocks() {
                 <div class="block-content" 
                      contenteditable="true" 
                      data-id="${block.id}"
-                     data-placeholder="${placeholder[block.type] || 'Digite...'}"
+                     data-placeholder="${placeholders[block.type] || 'Digite...'}"
                 >${block.content || ''}</div>
                 <div class="block-actions">
                     <button class="block-action-btn delete" data-id="${block.id}" title="Excluir">
@@ -1109,15 +1112,47 @@ function deleteBlock(blockId) {
 function handleBlockInput(e) {
     const blockId = e.target.dataset.id;
     const block = state.blocks.find(b => b.id === blockId);
+    const text = e.target.innerText;
+
     if (block) {
-        block.content = e.target.innerText;
+        block.content = text;
         saveBlocksLocally();
+    }
+
+    // Check for slash command
+    if (text === '/') {
+        showSlashMenu(e.target);
+    } else {
+        hideSlashMenu();
     }
 }
 
 function handleBlockKeydown(e) {
-    // Enter creates new block of same type
+    // Escape closes slash menu
+    if (e.key === 'Escape') {
+        hideSlashMenu();
+        return;
+    }
+
+    // Arrow keys navigate slash menu
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const menu = document.getElementById('slash-menu');
+        if (!menu.classList.contains('hidden')) {
+            e.preventDefault();
+            navigateSlashMenu(e.key === 'ArrowDown' ? 1 : -1);
+            return;
+        }
+    }
+
+    // Enter selects slash menu item or creates new block
     if (e.key === 'Enter' && !e.shiftKey) {
+        const menu = document.getElementById('slash-menu');
+        if (!menu.classList.contains('hidden')) {
+            e.preventDefault();
+            selectSlashMenuItem();
+            return;
+        }
+
         e.preventDefault();
         const blockId = e.target.dataset.id;
         const block = state.blocks.find(b => b.id === blockId);
@@ -1143,9 +1178,76 @@ function toggleTodo(blockId) {
     }
 }
 
-function toggleBlockMenu() {
-    const menu = document.getElementById('block-menu');
-    menu.classList.toggle('hidden');
+// ========== Slash Menu ==========
+let slashMenuTarget = null;
+let slashMenuIndex = 0;
+
+function showSlashMenu(targetEl) {
+    const menu = document.getElementById('slash-menu');
+    const rect = targetEl.getBoundingClientRect();
+    const container = document.querySelector('.notes-section');
+    const containerRect = container.getBoundingClientRect();
+
+    // Position below the input
+    menu.style.left = `${rect.left - containerRect.left}px`;
+    menu.style.top = `${rect.bottom - containerRect.top + 4}px`;
+
+    menu.classList.remove('hidden');
+    slashMenuTarget = targetEl;
+    slashMenuIndex = 0;
+    updateSlashMenuSelection();
+}
+
+function hideSlashMenu() {
+    const menu = document.getElementById('slash-menu');
+    menu.classList.add('hidden');
+    slashMenuTarget = null;
+}
+
+function navigateSlashMenu(direction) {
+    const items = document.querySelectorAll('.slash-menu-item');
+    slashMenuIndex = Math.max(0, Math.min(items.length - 1, slashMenuIndex + direction));
+    updateSlashMenuSelection();
+}
+
+function updateSlashMenuSelection() {
+    const items = document.querySelectorAll('.slash-menu-item');
+    items.forEach((item, i) => {
+        item.classList.toggle('active', i === slashMenuIndex);
+    });
+
+    // Scroll into view
+    const activeItem = items[slashMenuIndex];
+    if (activeItem) {
+        activeItem.scrollIntoView({ block: 'nearest' });
+    }
+}
+
+function selectSlashMenuItem() {
+    const items = document.querySelectorAll('.slash-menu-item');
+    const selectedItem = items[slashMenuIndex];
+
+    if (selectedItem && slashMenuTarget) {
+        const type = selectedItem.dataset.type;
+        const blockId = slashMenuTarget.dataset.id;
+        const block = state.blocks.find(b => b.id === blockId);
+
+        if (block) {
+            // Change block type and clear content (remove the /)
+            block.type = type;
+            block.content = '';
+            saveBlocksLocally();
+            renderBlocks();
+
+            // Focus the updated block
+            setTimeout(() => {
+                const blockEl = document.querySelector(`.block-content[data-id="${blockId}"]`);
+                if (blockEl) blockEl.focus();
+            }, 50);
+        }
+    }
+
+    hideSlashMenu();
 }
 
 // ========== Initialize ==========
@@ -1159,24 +1261,26 @@ function init() {
     renderSources();
     renderBlocks();
 
-    // Block menu events
-    document.getElementById('add-block-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleBlockMenu();
+    // Header add block button
+    document.getElementById('add-first-block-btn').addEventListener('click', () => {
+        addBlock('text');
     });
 
-    document.querySelectorAll('.block-menu-item').forEach(item => {
-        item.addEventListener('click', () => addBlock(item.dataset.type));
+    // Slash menu item clicks
+    document.querySelectorAll('.slash-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            slashMenuIndex = Array.from(document.querySelectorAll('.slash-menu-item')).indexOf(item);
+            selectSlashMenuItem();
+        });
     });
 
-    // Close block menu when clicking outside
+    // Close slash menu when clicking outside
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.block-type-selector')) {
-            document.getElementById('block-menu').classList.add('hidden');
+        if (!e.target.closest('.slash-menu') && !e.target.closest('.block-content')) {
+            hideSlashMenu();
         }
     });
 }
 
 // Start the app
 document.addEventListener('DOMContentLoaded', init);
-
