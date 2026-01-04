@@ -22,6 +22,27 @@ const state = {
 // Save user ID
 localStorage.setItem('scholar_user_id', state.userId);
 
+// ========== Local Storage Helpers ==========
+function saveSourcesLocally() {
+    localStorage.setItem('scholar_sources', JSON.stringify(state.sources));
+    localStorage.setItem('scholar_selected', JSON.stringify(state.selectedSources));
+}
+
+function loadSourcesLocally() {
+    try {
+        const savedSources = localStorage.getItem('scholar_sources');
+        const savedSelected = localStorage.getItem('scholar_selected');
+        if (savedSources) {
+            state.sources = JSON.parse(savedSources);
+        }
+        if (savedSelected) {
+            state.selectedSources = JSON.parse(savedSelected);
+        }
+    } catch (e) {
+        console.error('Error loading local sources:', e);
+    }
+}
+
 // ========== DOM Elements ==========
 const elements = {
     // Theme
@@ -210,6 +231,7 @@ function toggleSourceSelection(sourceId) {
     } else {
         state.selectedSources.splice(idx, 1);
     }
+    saveSourcesLocally();
     renderSources();
 }
 
@@ -226,6 +248,7 @@ async function deleteSource(sourceId) {
         if (data.success) {
             state.sources = state.sources.filter(s => s.id !== sourceId);
             state.selectedSources = state.selectedSources.filter(id => id !== sourceId);
+            saveSourcesLocally();
             renderSources();
         }
     } catch (error) {
@@ -234,16 +257,24 @@ async function deleteSource(sourceId) {
 }
 
 async function loadSources() {
+    // First load from localStorage (for offline/fast startup)
+    loadSourcesLocally();
+    renderSources();
+
+    // Then try to sync with server
     try {
         const response = await fetch(`${API_BASE}/scholar/sources?user_id=${state.userId}`);
         const data = await response.json();
 
-        if (data.success) {
-            state.sources = data.sources || [];
+        if (data.success && data.sources && data.sources.length > 0) {
+            // Merge server sources with local (server is source of truth)
+            state.sources = data.sources;
+            saveSourcesLocally();
             renderSources();
         }
     } catch (error) {
-        console.error('Error loading sources:', error);
+        console.error('Error loading sources from server:', error);
+        // Keep local sources if server fails
     }
 }
 
@@ -342,6 +373,7 @@ async function addSource() {
                 preview: data.preview
             });
             state.selectedSources.push(data.source_id);
+            saveSourcesLocally();
             renderSources();
             resetSourceModal();
         } else {
