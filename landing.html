@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.D.E. - Just an Artificially Designed Entity</title>
+    <meta name="description"
+        content="J.A.D.E. é sua assistente de IA multimodal avançada. Chat, visão, voz, memória e ferramentas especializadas.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="landing.css">
+</head>
+
+<body>
+    <!-- WebGL Background -->
+    <canvas id="webgl-bg"></canvas>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-brand">
+            <span class="logo">💎</span>
+            <span class="brand-name">J.A.D.E.</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#apps">Apps</a>
+            <a href="about.html">Sobre</a>
+            <a href="login.html" class="nav-cta">Entrar</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse"></span>
+                <span>Powered by Advanced AI</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-line">Meet</span>
+                <span class="title-main">J.A.D.E.</span>
+            </h1>
+            <p class="hero-subtitle">Just an Artificially Designed Entity</p>
+            <p class="hero-desc">
+                Sua assistente de IA multimodal com visão, voz, memória persistente
+                e ferramentas especializadas para estudo, código e criação.
+            </p>
+            <div class="hero-cta">
+                <a href="login.html" class="btn-primary">
+                    <span>Começar Agora</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="#features" class="btn-secondary">Ver Features</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="chat-preview">
+                <div class="chat-header">
+                    <div class="chat-dot"></div>
+                    <span>J.A.D.E. Chat</span>
+                </div>
+                <div class="chat-messages">
+                    <div class="msg user">Olá, quem é você?</div>
+                    <div class="msg bot">
+                        <span class="typing">
+                            Sou J.A.D.E., sua assistente de IA multimodal. Posso ajudar com texto, imagens, código e
+                            muito mais.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="section-header">
+            <span class="section-badge">Recursos</span>
+            <h2>Tudo que você precisa em uma única plataforma</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Chat Multimodal</h3>
+                <p>Converse com texto, imagens e voz. Memória persistente que lembra de você.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>Memória Inteligente</h3>
+                <p>Sistema ShoreStone com vetores e curadoria automática de contexto.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Busca Web</h3>
+                <p>Pesquisa em tempo real via Tavily para informações atualizadas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎤</div>
+                <h3>Voz Natural</h3>
+                <p>Text-to-speech com vozes neurais Edge TTS em português.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Apps Section -->
+    <section id="apps" class="apps">
+        <div class="section-header">
+            <span class="section-badge">Ecossistema</span>
+            <h2>Apps Especializados</h2>
+        </div>
+        <div class="apps-grid">
+            <a href="scholar.html" class="app-card scholar">
+                <div class="app-icon">📚</div>
+                <h3>Scholar NoteBook</h3>
+                <p>Upload PDFs, gere resumos, quizzes, flashcards e mapas mentais.</p>
+            </a>
+            <a href="webdev.html" class="app-card webdev">
+                <div class="app-icon">💻</div>
+                <h3>Web Dev</h3>
+                <p>Gere código HTML/CSS/React com preview ao vivo.</p>
+            </a>
+            <a href="imagegen.html" class="app-card imagegen">
+                <div class="app-icon">🎨</div>
+                <h3>Image Gen</h3>
+                <p>Crie imagens com IA usando modelos de difusão.</p>
+            </a>
+            <a href="anything.html" class="app-card anything">
+                <div class="app-icon">🌐</div>
+                <h3>Chat Anything</h3>
+                <p>Acesse 100+ modelos via OpenRouter.</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>Pronto para começar?</h2>
+            <p>Entre com sua conta GitHub e explore o poder da IA.</p>
+            <a href="login.html" class="btn-primary large">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+                <span>Entrar com GitHub</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo">💎</span>
+                <span>J.A.D.E.</span>
+            </div>
+            <div class="footer-links">
+                <a href="about.html">Sobre</a>
+                <a href="https://github.com/gabrielyukio2205-lgtm" target="_blank">GitHub</a>
+                <a href="apps.html">Apps</a>
+            </div>
+            <p class="footer-copy">© 2026 ShoreStone. Desenvolvido por Gabriel Yogi.</p>
+        </div>
+    </footer>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="landing.js"></script>
+</body>
+
+</html>
