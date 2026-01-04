@@ -250,9 +250,16 @@
         if (mobileBtn) mobileBtn.addEventListener('click', toggleSidebar);
 
         // ========== AUTH ==========
+        console.log('🔍 Full URL:', window.location.href);
+        console.log('🔍 Search params:', window.location.search);
+
         const urlParams = new URLSearchParams(window.location.search);
         const tokenParam = urlParams.get('token');
+
+        console.log('🔍 Token from URL:', tokenParam ? tokenParam.substring(0, 30) + '...' : 'NONE');
+
         if (tokenParam) {
+            console.log('✅ Saving token to localStorage');
             localStorage.setItem('jade_token', tokenParam);
             // Clean URL
             window.history.replaceState({}, document.title, window.location.pathname);
