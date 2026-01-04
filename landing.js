@@ -53,10 +53,14 @@
                     const pr = points[rightIdx];
                     linePositions.push(p.x, p.y, p.z, pr.x, pr.y, pr.z);
 
-                    // Color gradient based on height
+                    // Dark blue/cyan gradient suited for black background
                     const h1 = (p.y + 1) / 2;
                     const h2 = (pr.y + 1) / 2;
-                    lineColors.push(0.4 + h1 * 0.3, 0.2 + h1 * 0.2, 0.9, 0.4 + h2 * 0.3, 0.2 + h2 * 0.2, 0.9);
+                    // RGB: Less red, less green, high blue
+                    lineColors.push(
+                        0.1 + h1 * 0.1, 0.1 + h1 * 0.2, 0.6 + h1 * 0.4,
+                        0.1 + h2 * 0.1, 0.1 + h2 * 0.2, 0.6 + h2 * 0.4
+                    );
                 }
 
                 // Connect to bottom neighbor
@@ -67,7 +71,10 @@
 
                     const h1 = (p.y + 1) / 2;
                     const h2 = (pb.y + 1) / 2;
-                    lineColors.push(0.4 + h1 * 0.3, 0.2 + h1 * 0.2, 0.9, 0.4 + h2 * 0.3, 0.2 + h2 * 0.2, 0.9);
+                    lineColors.push(
+                        0.1 + h1 * 0.1, 0.1 + h1 * 0.2, 0.6 + h1 * 0.4,
+                        0.1 + h2 * 0.1, 0.1 + h2 * 0.2, 0.6 + h2 * 0.4
+                    );
                 }
             }
         }
@@ -79,7 +86,7 @@
     const lineMaterial = new THREE.LineBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.2, // Much more subtle
         linewidth: 1
     });
 
@@ -98,19 +105,19 @@
         pointPositions[i * 3] = p.x;
         pointPositions[i * 3 + 1] = p.y;
         pointPositions[i * 3 + 2] = p.z;
-        pointColors[i * 3] = 0.4;
-        pointColors[i * 3 + 1] = 0.3;
-        pointColors[i * 3 + 2] = 1;
+        pointColors[i * 3] = 0.2;
+        pointColors[i * 3 + 1] = 0.4;
+        pointColors[i * 3 + 2] = 1.0;
     });
 
     pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
     pointsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(pointColors, 3));
 
     const pointsMaterial = new THREE.PointsMaterial({
-        size: 3,
+        size: 2, // Smaller points
         vertexColors: true,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.4,
         sizeAttenuation: true
     });
 
@@ -151,9 +158,9 @@
 
                 // Update point colors based on height
                 const h = (points[idx].y + 1) / 2;
-                pointColors[idx * 3] = 0.3 + h * 0.4;
-                pointColors[idx * 3 + 1] = 0.2 + h * 0.3;
-                pointColors[idx * 3 + 2] = 0.8 + h * 0.2;
+                pointColors[idx * 3] = 0.1 + h * 0.1;
+                pointColors[idx * 3 + 1] = 0.2 + h * 0.2;
+                pointColors[idx * 3 + 2] = 0.6 + h * 0.4;
             }
         }
 
