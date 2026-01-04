@@ -4,9 +4,8 @@
  */
 
 // ========== Configuration ==========
-const API_BASE = window.location.hostname === 'localhost'
-    ? 'http://localhost:7860'
-    : '';  // Same origin in production
+const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+const API_BASE = PROXY_BASE_URL;
 
 // ========== State Management ==========
 const state = {
@@ -216,8 +215,11 @@ function toggleSourceSelection(sourceId) {
 
 async function deleteSource(sourceId) {
     try {
-        const response = await fetch(`${API_BASE}/scholar/source/${sourceId}?user_id=${state.userId}`, {
-            method: 'DELETE'
+        // Use POST since proxy only supports GET/POST
+        const response = await fetch(`${API_BASE}/scholar/source/${sourceId}/delete?user_id=${state.userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: state.userId })
         });
 
         const data = await response.json();
