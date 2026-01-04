@@ -80,6 +80,14 @@
                         <span class="status-badge">Ferramentas J.A.D.E.</span>
                     </div>
                 </div>
+                <div class="header-right" id="user-section">
+                    <a href="login.html" class="login-btn" id="login-btn">Entrar</a>
+                    <div class="user-info" id="user-info" style="display: none;">
+                        <img src="" alt="" class="user-avatar" id="user-avatar">
+                        <span id="user-name"></span>
+                        <button class="logout-btn" id="logout-btn" title="Sair">✕</button>
+                    </div>
+                </div>
             </header>
 
             <main id="apps-container">
@@ -219,7 +227,11 @@
     </div>
 
     <script>
-        // Sidebar toggle - igual à página principal
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:7860'
+            : 'https://madras1-jade-port.hf.space';
+
+        // Sidebar toggle
         const toggleBtn = document.getElementById('toggle-sidebar-btn');
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
@@ -234,18 +246,124 @@
             }
         }
 
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', toggleSidebar);
+        if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+        if (mobileBtn) mobileBtn.addEventListener('click', toggleSidebar);
+
+        // ========== AUTH ==========
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenParam = urlParams.get('token');
+        if (tokenParam) {
+            localStorage.setItem('jade_token', tokenParam);
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
-        if (mobileBtn) {
-            mobileBtn.addEventListener('click', toggleSidebar);
+
+        async function checkAuth() {
+            const token = localStorage.getItem('jade_token');
+            const loginBtn = document.getElementById('login-btn');
+            const userInfo = document.getElementById('user-info');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+
+            if (!token) {
+                loginBtn.style.display = 'block';
+                userInfo.style.display = 'none';
+                return null;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.authenticated && data.user) {
+                    loginBtn.style.display = 'none';
+                    userInfo.style.display = 'flex';
+                    userAvatar.src = data.user.avatar || '';
+                    userName.textContent = data.user.name || data.user.login;
+                    return data.user;
+                }
+            } catch (e) {
+                console.error('Auth check failed:', e);
+            }
+
+            loginBtn.style.display = 'block';
+            userInfo.style.display = 'none';
+            return null;
         }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('jade_token');
+            window.location.reload();
+        });
+
+        // Check auth on load
+        checkAuth();
     </script>
 
     <style>
-        /* Show mobile menu when sidebar is closed on desktop */
         body.sidebar-closed #mobile-menu-btn {
             display: flex !important;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .login-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-info span {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: #ef4444;
         }
     </style>
 </body>
