@@ -1,5 +1,5 @@
 // Landing Page - Particle Text Effect
-// Particles form the text "J.A.D.E."
+// Particles form "J.A.D.E." text - Gemini 3 style
 
 (function () {
     'use strict';
@@ -7,86 +7,84 @@
     const canvas = document.getElementById('webgl-bg');
     if (!canvas) return;
 
-    // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const camera = new THREE.OrthographicCamera(
+        window.innerWidth / -2, window.innerWidth / 2,
+        window.innerHeight / 2, window.innerHeight / -2,
+        1, 1000
+    );
+    camera.position.z = 500;
 
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x0a0a0f, 1);
 
     // Colors
-    const colors = [0x4285f4, 0xea4335, 0xfbbc04, 0x34a853, 0x9333ea, 0x06b6d4];
+    const colors = [0x4285f4, 0xea4335, 0xfbbc04, 0x34a853, 0x9333ea, 0x06b6d4, 0xf97316, 0x6366f1, 0xec4899];
 
-    // Create particle texture
-    function createParticleTexture() {
-        const size = 64;
-        const ctx = document.createElement('canvas').getContext('2d');
-        ctx.canvas.width = size;
-        ctx.canvas.height = size;
+    // Create text canvas to sample positions
+    function getTextPositions(text) {
+        const textCanvas = document.createElement('canvas');
+        const ctx = textCanvas.getContext('2d');
 
-        const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-        gradient.addColorStop(0, 'rgba(255,255,255,1)');
-        gradient.addColorStop(0.3, 'rgba(255,255,255,0.8)');
-        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        const fontSize = Math.min(window.innerWidth * 0.15, 200);
+        ctx.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
+        const textWidth = ctx.measureText(text).width;
 
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, size, size);
-
-        const texture = new THREE.Texture(ctx.canvas);
-        texture.needsUpdate = true;
-        return texture;
-    }
-
-    const particleTexture = createParticleTexture();
-
-    // Get text positions
-    function getTextPositions(text, fontSize) {
-        const ctx2d = document.createElement('canvas').getContext('2d');
-        ctx2d.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
-        const metrics = ctx2d.measureText(text);
-
-        const w = Math.ceil(metrics.width) + 60;
-        const h = Math.ceil(fontSize * 1.5) + 60;
-
-        const offCanvas = document.createElement('canvas');
-        offCanvas.width = w;
-        offCanvas.height = h;
-        const ctx = offCanvas.getContext('2d');
+        textCanvas.width = textWidth + 40;
+        textCanvas.height = fontSize * 1.4;
 
         ctx.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(text, w / 2, h / 2);
+        ctx.fillText(text, textCanvas.width / 2, textCanvas.height / 2);
 
-        const imageData = ctx.getImageData(0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, textCanvas.width, textCanvas.height);
         const positions = [];
+        const gap = 3;
 
-        for (let y = 0; y < h; y += 4) {
-            for (let x = 0; x < w; x += 4) {
-                const i = (y * w + x) * 4;
+        for (let y = 0; y < textCanvas.height; y += gap) {
+            for (let x = 0; x < textCanvas.width; x += gap) {
+                const i = (y * textCanvas.width + x) * 4;
                 if (imageData.data[i + 3] > 128) {
                     positions.push({
-                        x: x - w / 2,
-                        y: y - h / 2
+                        x: x - textCanvas.width / 2,
+                        y: -(y - textCanvas.height / 2)
                     });
                 }
             }
         }
-        return positions;
+
+        return { positions, width: textCanvas.width, height: textCanvas.height };
     }
 
-    // Create particles
-    const textPositions = getTextPositions('J.A.D.E.', 80);
+    const textData = getTextPositions('J.A.D.E.');
     const particles = [];
 
-    // Main text particles
-    textPositions.slice(0, 400).forEach((pos, i) => {
+    // Create particle texture
+    const particleCanvas = document.createElement('canvas');
+    particleCanvas.width = 32;
+    particleCanvas.height = 32;
+    const pctx = particleCanvas.getContext('2d');
+    const gradient = pctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    pctx.fillStyle = gradient;
+    pctx.beginPath();
+    pctx.arc(16, 16, 16, 0, Math.PI * 2);
+    pctx.fill();
+    const particleTexture = new THREE.CanvasTexture(particleCanvas);
+
+    // Create particles for text
+    const offsetY = -50; // Move text up a bit from center
+
+    textData.positions.forEach((pos, i) => {
+        const color = colors[Math.floor(Math.random() * colors.length)];
         const material = new THREE.SpriteMaterial({
             map: particleTexture,
-            color: colors[i % colors.length],
+            color: color,
             transparent: true,
             opacity: 0.9,
             blending: THREE.AdditiveBlending
@@ -94,122 +92,116 @@
 
         const sprite = new THREE.Sprite(material);
 
-        // Random start position
-        sprite.position.set(
-            (Math.random() - 0.5) * 30,
-            (Math.random() - 0.5) * 30,
-            (Math.random() - 0.5) * 10
-        );
+        // Start from random positions
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 300 + Math.random() * 500;
+
+        sprite.position.x = Math.cos(angle) * radius;
+        sprite.position.y = Math.sin(angle) * radius + offsetY;
+        sprite.position.z = 0;
+
+        const size = 4 + Math.random() * 4;
+        sprite.scale.set(size, size, 1);
 
         sprite.userData = {
-            targetX: pos.x * 0.04,
-            targetY: pos.y * 0.04,
-            targetZ: 0,
+            targetX: pos.x,
+            targetY: pos.y + offsetY,
             startX: sprite.position.x,
             startY: sprite.position.y,
-            startZ: sprite.position.z,
-            delay: i * 2,
-            duration: 150
+            delay: i * 0.001,
+            phase: Math.random() * Math.PI * 2
         };
 
-        sprite.scale.set(0.15, 0.15, 1);
         particles.push(sprite);
         scene.add(sprite);
     });
 
     // Extra floating particles
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 80; i++) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
         const material = new THREE.SpriteMaterial({
             map: particleTexture,
-            color: colors[i % colors.length],
+            color: color,
             transparent: true,
-            opacity: 0.3,
+            opacity: 0.4,
             blending: THREE.AdditiveBlending
         });
 
         const sprite = new THREE.Sprite(material);
-        sprite.position.set(
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 15,
-            (Math.random() - 0.5) * 5
-        );
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 200 + Math.random() * 400;
+
+        sprite.position.x = Math.cos(angle) * radius;
+        sprite.position.y = Math.sin(angle) * radius + offsetY;
+        sprite.position.z = 0;
+
+        const size = 3 + Math.random() * 3;
+        sprite.scale.set(size, size, 1);
 
         sprite.userData = {
             isExtra: true,
-            baseX: sprite.position.x,
-            baseY: sprite.position.y,
-            baseZ: sprite.position.z,
-            speed: 0.01 + Math.random() * 0.02,
-            amp: 0.5 + Math.random() * 1,
+            angle: angle,
+            radius: radius,
+            speed: 0.0005 + Math.random() * 0.001,
+            floatAmp: 20 + Math.random() * 40,
             phase: Math.random() * Math.PI * 2
         };
 
-        sprite.scale.set(0.08, 0.08, 1);
         particles.push(sprite);
         scene.add(sprite);
     }
 
-    // Position camera
-    camera.position.z = 8;
-
-    // Mouse tracking
+    // Mouse
     let mouseX = 0, mouseY = 0;
     document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        mouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+        mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
+        mouseY = -(e.clientY - window.innerHeight / 2) * 0.05;
     });
 
     // Animation
-    let frame = 0;
+    let time = 0;
+    let progress = 0;
 
     function animate() {
         requestAnimationFrame(animate);
-        frame++;
+        time += 0.016;
+        progress = Math.min(progress + 0.005, 1);
 
-        particles.forEach((p) => {
-            const data = p.userData;
+        const ease = 1 - Math.pow(1 - progress, 4); // Ease out quart
 
-            if (data.isExtra) {
-                // Floating particles
-                p.position.x = data.baseX + Math.sin(frame * data.speed + data.phase) * data.amp;
-                p.position.y = data.baseY + Math.cos(frame * data.speed * 0.7 + data.phase) * data.amp;
-                p.position.z = data.baseZ + Math.sin(frame * data.speed * 0.5) * 0.5;
-                p.material.opacity = 0.2 + Math.sin(frame * 0.05 + data.phase) * 0.15;
+        particles.forEach(p => {
+            const d = p.userData;
+
+            if (d.isExtra) {
+                d.angle += d.speed;
+                p.position.x = Math.cos(d.angle) * d.radius + mouseX;
+                p.position.y = Math.sin(d.angle) * d.radius + offsetY + Math.sin(time + d.phase) * d.floatAmp + mouseY;
+                p.material.opacity = 0.3 + Math.sin(time * 2 + d.phase) * 0.2;
             } else {
-                // Text particles with delay
-                const elapsed = Math.max(0, frame - data.delay);
-                const progress = Math.min(elapsed / data.duration, 1);
-                const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                // Lerp to target
+                const t = Math.max(0, Math.min(1, (ease - d.delay * 10) / (1 - d.delay * 10)));
+                p.position.x = d.startX + (d.targetX - d.startX) * t + mouseX * 0.3;
+                p.position.y = d.startY + (d.targetY - d.startY) * t + mouseY * 0.3;
 
-                // Interpolate with slight wobble
-                const wobble = Math.sin(frame * 0.05 + data.phase) * 0.1 * (1 - progress);
+                // Subtle float
+                p.position.x += Math.sin(time * 2 + d.phase) * 2;
+                p.position.y += Math.cos(time * 1.5 + d.phase) * 2;
 
-                p.position.x = data.startX + (data.targetX + mouseX * 0.2 + wobble - data.startX) * ease;
-                p.position.y = data.startY + (data.targetY + mouseY * 0.2 - data.startY) * ease;
-                p.position.z = data.startZ + (data.targetZ - data.startZ) * ease;
-
-                // Fade in
-                p.material.opacity = progress * 0.8;
-
-                // Pulse
-                const pulse = 1 + Math.sin(frame * 0.1 + data.phase) * 0.1;
-                p.scale.set(0.15 * pulse, 0.15 * pulse, 1);
+                p.material.opacity = 0.7 + Math.sin(time + d.phase) * 0.2;
             }
         });
-
-        // Camera follows mouse slightly
-        camera.position.x = mouseX * 0.3;
-        camera.position.y = mouseY * 0.3;
-        camera.lookAt(0, 0, 0);
 
         renderer.render(scene, camera);
     }
 
     animate();
 
-    // Resize handler
+    // Resize
     window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.left = window.innerWidth / -2;
+        camera.right = window.innerWidth / 2;
+        camera.top = window.innerHeight / 2;
+        camera.bottom = window.innerHeight / -2;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
@@ -217,26 +209,18 @@
     // Scroll animations
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
-            }
+            if (entry.isIntersecting) entry.target.classList.add('animate-in');
         });
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.feature-card, .app-card, .section-header').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease';
+        el.style.transition = 'opacity 0.6s, transform 0.6s';
         observer.observe(el);
     });
 
     const style = document.createElement('style');
-    style.textContent = `
-        .animate-in {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-        }
-    `;
+    style.textContent = '.animate-in { opacity: 1 !important; transform: translateY(0) !important; }';
     document.head.appendChild(style);
-
 })();
