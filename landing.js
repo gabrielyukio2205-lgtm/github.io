@@ -9,19 +9,18 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 2, 8);
+    camera.position.set(0, 3, 10);
     camera.lookAt(0, 0, 0);
 
-    // FIXED: Use solid black background instead of alpha to prevent accumulation
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setClearColor(0x0a0a0f, 1); // Solid dark background matching CSS
+    renderer.setClearColor(0x0a0a0f, 1);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Create mesh grid
-    const gridWidth = 60;
-    const gridHeight = 30;
-    const spacing = 0.4;
+    // REDUCED grid density for clearer visibility
+    const gridWidth = 40;
+    const gridHeight = 25;
+    const spacing = 0.6;
     const points = [];
     const originalPositions = [];
 
@@ -35,12 +34,11 @@
         }
     }
 
-    // Pre-calculate line count for buffer allocation
+    // Pre-calculate line count
     const horizontalLines = gridWidth * (gridHeight - 1);
     const verticalLines = (gridWidth - 1) * gridHeight;
     const totalLines = horizontalLines + verticalLines;
 
-    // Create lines connecting the grid - FIXED: Pre-allocate buffers
     const linePositions = new Float32Array(totalLines * 6);
     const lineColors = new Float32Array(totalLines * 6);
 
@@ -69,15 +67,16 @@
                     linePositions[base + 4] = pr.y;
                     linePositions[base + 5] = pr.z;
 
-                    // FIXED: Much more subtle colors - cyan/blue tint
-                    const h1 = (p.y + 1) / 2;
-                    const h2 = (pr.y + 1) / 2;
-                    lineColors[base] = 0.05 + h1 * 0.1;      // Very low red
-                    lineColors[base + 1] = 0.15 + h1 * 0.2;  // Low green
-                    lineColors[base + 2] = 0.3 + h1 * 0.3;   // Medium blue
-                    lineColors[base + 3] = 0.05 + h2 * 0.1;
-                    lineColors[base + 4] = 0.15 + h2 * 0.2;
-                    lineColors[base + 5] = 0.3 + h2 * 0.3;
+                    // Subtle cyan/indigo colors - visible but not overwhelming
+                    const h1 = (p.y + 0.8) / 1.6;
+                    const h2 = (pr.y + 0.8) / 1.6;
+                    // Base: dark indigo, peaks: brighter cyan
+                    lineColors[base] = 0.15 + h1 * 0.15;     // R
+                    lineColors[base + 1] = 0.2 + h1 * 0.25;  // G
+                    lineColors[base + 2] = 0.4 + h1 * 0.35;  // B
+                    lineColors[base + 3] = 0.15 + h2 * 0.15;
+                    lineColors[base + 4] = 0.2 + h2 * 0.25;
+                    lineColors[base + 5] = 0.4 + h2 * 0.35;
 
                     lineIdx++;
                 }
@@ -95,21 +94,20 @@
                     linePositions[base + 4] = pb.y;
                     linePositions[base + 5] = pb.z;
 
-                    const h1 = (p.y + 1) / 2;
-                    const h2 = (pb.y + 1) / 2;
-                    lineColors[base] = 0.05 + h1 * 0.1;
-                    lineColors[base + 1] = 0.15 + h1 * 0.2;
-                    lineColors[base + 2] = 0.3 + h1 * 0.3;
-                    lineColors[base + 3] = 0.05 + h2 * 0.1;
-                    lineColors[base + 4] = 0.15 + h2 * 0.2;
-                    lineColors[base + 5] = 0.3 + h2 * 0.3;
+                    const h1 = (p.y + 0.8) / 1.6;
+                    const h2 = (pb.y + 0.8) / 1.6;
+                    lineColors[base] = 0.15 + h1 * 0.15;
+                    lineColors[base + 1] = 0.2 + h1 * 0.25;
+                    lineColors[base + 2] = 0.4 + h1 * 0.35;
+                    lineColors[base + 3] = 0.15 + h2 * 0.15;
+                    lineColors[base + 4] = 0.2 + h2 * 0.25;
+                    lineColors[base + 5] = 0.4 + h2 * 0.35;
 
                     lineIdx++;
                 }
             }
         }
 
-        // FIXED: Just mark as needing update, don't recreate attributes
         lineGeometry.attributes.position.needsUpdate = true;
         lineGeometry.attributes.color.needsUpdate = true;
     }
@@ -117,17 +115,17 @@
     const lineMaterial = new THREE.LineBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.6,  // Good visibility
         linewidth: 1
     });
 
     updateLines();
     const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
-    lineMesh.rotation.x = -Math.PI * 0.4;
-    lineMesh.position.y = -2;
+    lineMesh.rotation.x = -Math.PI * 0.45;
+    lineMesh.position.y = -3;
     scene.add(lineMesh);
 
-    // Add points at intersections - FIXED: Pre-allocate buffers
+    // Points at intersections - more visible
     const pointPositions = new Float32Array(points.length * 3);
     const pointColors = new Float32Array(points.length * 3);
 
@@ -135,10 +133,10 @@
         pointPositions[i * 3] = p.x;
         pointPositions[i * 3 + 1] = p.y;
         pointPositions[i * 3 + 2] = p.z;
-        // FIXED: More subtle point colors
-        pointColors[i * 3] = 0.1;
-        pointColors[i * 3 + 1] = 0.3;
-        pointColors[i * 3 + 2] = 0.7;
+        // Bright cyan points
+        pointColors[i * 3] = 0.3;
+        pointColors[i * 3 + 1] = 0.5;
+        pointColors[i * 3 + 2] = 0.9;
     });
 
     const pointsGeometry = new THREE.BufferGeometry();
@@ -146,19 +144,19 @@
     pointsGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
 
     const pointsMaterial = new THREE.PointsMaterial({
-        size: 2,
+        size: 3,
         vertexColors: true,
         transparent: true,
-        opacity: 0.5,
+        opacity: 0.7,
         sizeAttenuation: true
     });
 
     const pointsMesh = new THREE.Points(pointsGeometry, pointsMaterial);
-    pointsMesh.rotation.x = -Math.PI * 0.4;
-    pointsMesh.position.y = -2;
+    pointsMesh.rotation.x = -Math.PI * 0.45;
+    pointsMesh.position.y = -3;
     scene.add(pointsMesh);
 
-    // Mouse
+    // Mouse interaction
     let mouseX = 0, mouseY = 0;
     document.addEventListener('mousemove', (e) => {
         mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -170,29 +168,29 @@
 
     function animate() {
         requestAnimationFrame(animate);
-        time += 0.01;
+        time += 0.008;
 
-        // Wave animation
+        // Smoother wave animation
         for (let j = 0; j < gridHeight; j++) {
             for (let i = 0; i < gridWidth; i++) {
                 const idx = j * gridWidth + i;
                 const orig = originalPositions[idx];
 
-                // Multiple wave layers
-                const wave1 = Math.sin(orig.x * 0.5 + time) * 0.3;
-                const wave2 = Math.sin(orig.z * 0.3 + time * 0.7) * 0.2;
-                const wave3 = Math.sin((orig.x + orig.z) * 0.2 + time * 1.2) * 0.15;
+                // Gentle waves
+                const wave1 = Math.sin(orig.x * 0.4 + time) * 0.4;
+                const wave2 = Math.sin(orig.z * 0.25 + time * 0.6) * 0.3;
+                const wave3 = Math.cos((orig.x + orig.z) * 0.15 + time * 0.8) * 0.2;
 
                 points[idx].y = wave1 + wave2 + wave3;
 
                 // Update point positions
                 pointPositions[idx * 3 + 1] = points[idx].y;
 
-                // Update point colors based on height - FIXED: subtle colors
+                // Dynamic point colors based on height
                 const h = (points[idx].y + 1) / 2;
-                pointColors[idx * 3] = 0.05 + h * 0.1;
-                pointColors[idx * 3 + 1] = 0.2 + h * 0.2;
-                pointColors[idx * 3 + 2] = 0.4 + h * 0.4;
+                pointColors[idx * 3] = 0.2 + h * 0.2;
+                pointColors[idx * 3 + 1] = 0.4 + h * 0.3;
+                pointColors[idx * 3 + 2] = 0.7 + h * 0.3;
             }
         }
 
@@ -200,9 +198,9 @@
         pointsGeometry.attributes.color.needsUpdate = true;
         updateLines();
 
-        // Camera movement based on mouse
-        camera.position.x = mouseX * 0.5;
-        camera.position.y = 2 + mouseY * 0.3;
+        // Subtle camera movement
+        camera.position.x = mouseX * 0.8;
+        camera.position.y = 3 + mouseY * 0.4;
         camera.lookAt(0, 0, 0);
 
         renderer.render(scene, camera);
@@ -210,14 +208,14 @@
 
     animate();
 
-    // Resize
+    // Resize handler
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Scroll animations
+    // Scroll animations for content
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('animate-in');
