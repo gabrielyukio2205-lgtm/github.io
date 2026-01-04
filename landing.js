@@ -1,5 +1,5 @@
-// Landing Page - WebGL Background Animation
-// Neural mesh / particle network effect using Three.js
+// Landing Page - Gemini-style Particle Burst Animation
+// Colorful particles orbiting/dispersing from center with J.A.D.E. text
 
 (function () {
     'use strict';
@@ -19,131 +19,144 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Particles
-    const particleCount = 150;
+    // Colors palette (Gemini-like)
+    const colors = [
+        0x4285f4, // Blue
+        0xea4335, // Red
+        0xfbbc04, // Yellow
+        0x34a853, // Green
+        0x9333ea, // Purple
+        0x06b6d4, // Cyan
+        0xf97316, // Orange
+        0x6366f1, // Indigo (main J.A.D.E. color)
+    ];
+
+    // Particle system for burst effect
+    const particleCount = 300;
     const particles = [];
-    const particleGeometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = [];
 
-    // Initialize particles
+    // Create particles as individual sprites for better control
+    const particleTexture = createParticleTexture();
+
     for (let i = 0; i < particleCount; i++) {
-        const x = (Math.random() - 0.5) * 20;
-        const y = (Math.random() - 0.5) * 20;
-        const z = (Math.random() - 0.5) * 10 - 5;
-
-        positions[i * 3] = x;
-        positions[i * 3 + 1] = y;
-        positions[i * 3 + 2] = z;
-
-        particles.push({ x, y, z, index: i });
-        velocities.push({
-            x: (Math.random() - 0.5) * 0.01,
-            y: (Math.random() - 0.5) * 0.01,
-            z: (Math.random() - 0.5) * 0.005
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const material = new THREE.SpriteMaterial({
+            map: particleTexture,
+            color: color,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
         });
+
+        const sprite = new THREE.Sprite(material);
+
+        // Initial position - start from center
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.5 + Math.random() * 2;
+        const height = (Math.random() - 0.5) * 2;
+
+        sprite.position.set(
+            Math.cos(angle) * radius,
+            height,
+            Math.sin(angle) * radius - 5
+        );
+
+        // Store animation properties
+        sprite.userData = {
+            angle: angle,
+            radius: radius,
+            baseY: height,
+            speed: 0.2 + Math.random() * 0.3,
+            amplitude: 0.3 + Math.random() * 0.5,
+            phase: Math.random() * Math.PI * 2,
+            scale: 0.03 + Math.random() * 0.05,
+            expanding: true,
+            maxRadius: 3 + Math.random() * 3,
+            orbitSpeed: (Math.random() - 0.5) * 0.02
+        };
+
+        sprite.scale.set(sprite.userData.scale, sprite.userData.scale, 1);
+
+        particles.push(sprite);
+        scene.add(sprite);
     }
 
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    // Create circular particle texture
+    function createParticleTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
 
-    // Particle material
-    const particleMaterial = new THREE.PointsMaterial({
-        color: 0x6366f1,
-        size: 0.08,
-        transparent: true,
-        opacity: 0.8,
-        sizeAttenuation: true
-    });
+        const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
-    const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
-    scene.add(particleSystem);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 64, 64);
 
-    // Lines (connections)
-    const lineGeometry = new THREE.BufferGeometry();
-    const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x6366f1,
-        transparent: true,
-        opacity: 0.15
-    });
-
-    const linePositions = new Float32Array(particleCount * particleCount * 6);
-    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-
-    const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
-    scene.add(lines);
+        const texture = new THREE.CanvasTexture(canvas);
+        return texture;
+    }
 
     camera.position.z = 8;
 
     // Mouse interaction
     let mouseX = 0;
     let mouseY = 0;
+    let targetMouseX = 0;
+    let targetMouseY = 0;
 
     document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
     });
+
+    // Time
+    let time = 0;
 
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
+        time += 0.016;
 
-        const positionsArray = particleSystem.geometry.attributes.position.array;
+        // Smooth mouse
+        mouseX += (targetMouseX - mouseX) * 0.05;
+        mouseY += (targetMouseY - mouseY) * 0.05;
 
-        // Update particle positions
-        for (let i = 0; i < particleCount; i++) {
-            positionsArray[i * 3] += velocities[i].x;
-            positionsArray[i * 3 + 1] += velocities[i].y;
-            positionsArray[i * 3 + 2] += velocities[i].z;
+        // Update particles - Gemini-like orbital/burst motion
+        particles.forEach((particle, i) => {
+            const data = particle.userData;
 
-            // Boundary check - wrap around
-            if (positionsArray[i * 3] > 10) positionsArray[i * 3] = -10;
-            if (positionsArray[i * 3] < -10) positionsArray[i * 3] = 10;
-            if (positionsArray[i * 3 + 1] > 10) positionsArray[i * 3 + 1] = -10;
-            if (positionsArray[i * 3 + 1] < -10) positionsArray[i * 3 + 1] = 10;
-            if (positionsArray[i * 3 + 2] > 5) positionsArray[i * 3 + 2] = -10;
-            if (positionsArray[i * 3 + 2] < -10) positionsArray[i * 3 + 2] = 5;
+            // Orbital motion
+            data.angle += data.orbitSpeed;
 
-            particles[i].x = positionsArray[i * 3];
-            particles[i].y = positionsArray[i * 3 + 1];
-            particles[i].z = positionsArray[i * 3 + 2];
-        }
+            // Breathing/expanding effect
+            const breathe = Math.sin(time * data.speed + data.phase) * 0.3;
+            const currentRadius = data.radius + breathe;
 
-        particleSystem.geometry.attributes.position.needsUpdate = true;
+            // Position
+            particle.position.x = Math.cos(data.angle) * currentRadius;
+            particle.position.y = data.baseY + Math.sin(time * data.speed * 0.5 + data.phase) * data.amplitude;
+            particle.position.z = Math.sin(data.angle) * currentRadius - 5;
 
-        // Update lines (connect nearby particles)
-        const linePositionsArray = lines.geometry.attributes.position.array;
-        let lineIndex = 0;
-        const maxDistance = 2.5;
+            // Subtle mouse interaction
+            particle.position.x += mouseX * 0.3;
+            particle.position.y += mouseY * 0.3;
 
-        for (let i = 0; i < particleCount; i++) {
-            for (let j = i + 1; j < particleCount; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const dz = particles[i].z - particles[j].z;
-                const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            // Pulse opacity
+            particle.material.opacity = 0.4 + Math.sin(time * 2 + data.phase) * 0.3;
 
-                if (distance < maxDistance && lineIndex < linePositionsArray.length - 6) {
-                    linePositionsArray[lineIndex++] = particles[i].x;
-                    linePositionsArray[lineIndex++] = particles[i].y;
-                    linePositionsArray[lineIndex++] = particles[i].z;
-                    linePositionsArray[lineIndex++] = particles[j].x;
-                    linePositionsArray[lineIndex++] = particles[j].y;
-                    linePositionsArray[lineIndex++] = particles[j].z;
-                }
-            }
-        }
+            // Scale pulse
+            const scalePulse = data.scale * (1 + Math.sin(time * 1.5 + data.phase) * 0.2);
+            particle.scale.set(scalePulse, scalePulse, 1);
+        });
 
-        // Clear remaining lines
-        for (let i = lineIndex; i < linePositionsArray.length; i++) {
-            linePositionsArray[i] = 0;
-        }
-
-        lines.geometry.attributes.position.needsUpdate = true;
-
-        // Camera subtle movement based on mouse
-        camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.02;
-        camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.02;
-        camera.lookAt(scene.position);
+        // Camera subtle movement
+        camera.position.x = mouseX * 0.3;
+        camera.position.y = mouseY * 0.3;
+        camera.lookAt(0, 0, -5);
 
         renderer.render(scene, camera);
     }

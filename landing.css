@@ -95,16 +95,71 @@ body {
     font-weight: 600 !important;
 }
 
-/* Hero Section */
-.hero {
+/* Hero Section - Gemini Style Centered */
+.hero.hero-centered {
     min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 4rem;
+    text-align: center;
     padding: 8rem 5%;
-    max-width: 1400px;
-    margin: 0 auto;
+    position: relative;
+}
+
+.hero-content.centered {
+    max-width: 800px;
+    z-index: 10;
+}
+
+.hero-title-main {
+    font-size: 6rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #4285f4, #34a853, #fbbc04, #ea4335, #9333ea, #6366f1);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.hero-tagline {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+}
+
+.hero-desc.centered {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+}
+
+.hero-cta.centered {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .hero-badge {
