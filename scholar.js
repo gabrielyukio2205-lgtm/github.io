@@ -14,6 +14,7 @@ const state = {
     currentNotebook: 'default',
     sources: [],          // [{id, type, name, preview, notebookId}]
     selectedSources: [],  // IDs of selected sources
+    blocks: [],           // [{id, type, content, completed?, notebookId}]
     chatHistory: [],
     currentQuiz: null,
     quizIndex: 0,
@@ -75,6 +76,26 @@ function loadSourcesLocally() {
 
 function getSourcesForCurrentNotebook() {
     return state.sources.filter(s => !s.notebookId || s.notebookId === state.currentNotebook);
+}
+
+// ========== Blocks Storage ==========
+function saveBlocksLocally() {
+    localStorage.setItem('scholar_blocks', JSON.stringify(state.blocks));
+}
+
+function loadBlocksLocally() {
+    try {
+        const saved = localStorage.getItem('scholar_blocks');
+        if (saved) {
+            state.blocks = JSON.parse(saved);
+        }
+    } catch (e) {
+        console.error('Error loading blocks:', e);
+    }
+}
+
+function getBlocksForCurrentNotebook() {
+    return state.blocks.filter(b => !b.notebookId || b.notebookId === state.currentNotebook);
 }
 
 // ========== DOM Elements ==========
@@ -940,6 +961,7 @@ function selectNotebook(notebookId) {
     saveSourcesLocally();
     renderNotebooks();
     renderSources();
+    renderBlocks();
 
     // Update title to be editable
     const currentNb = state.notebooks.find(n => n.id === state.currentNotebook);
@@ -956,8 +978,9 @@ function deleteNotebook(notebookId) {
     // Remove notebook
     state.notebooks = state.notebooks.filter(n => n.id !== notebookId);
 
-    // Remove sources from this notebook
+    // Remove sources and blocks from this notebook
     state.sources = state.sources.filter(s => s.notebookId !== notebookId);
+    state.blocks = state.blocks.filter(b => b.notebookId !== notebookId);
 
     // Switch to default if we deleted the current one
     if (state.currentNotebook === notebookId) {
@@ -966,19 +989,194 @@ function deleteNotebook(notebookId) {
 
     saveNotebooksLocally();
     saveSourcesLocally();
+    saveBlocksLocally();
     renderNotebooks();
     renderSources();
+    renderBlocks();
+}
+
+// ========== Block Editor ==========
+function renderBlocks() {
+    const blocksContainer = document.getElementById('blocks-container');
+    const notebookBlocks = getBlocksForCurrentNotebook();
+
+    if (notebookBlocks.length === 0) {
+        blocksContainer.innerHTML = `
+            <div class="empty-blocks">
+                <p>Clique em "Adicionar" para criar suas anotações</p>
+            </div>
+        `;
+        return;
+    }
+
+    blocksContainer.innerHTML = notebookBlocks.map(block => {
+        const completedClass = block.completed ? 'completed' : '';
+
+        if (block.type === 'divider') {
+            return `
+                <div class="block-item divider" data-id="${block.id}">
+                    <hr>
+                    <div class="block-actions">
+                        <button class="block-action-btn delete" data-id="${block.id}" title="Excluir">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const checkbox = block.type === 'todo' ? `
+            <div class="todo-checkbox" data-id="${block.id}">
+                ${block.completed ? '✓' : ''}
+            </div>
+        ` : '';
+
+        const placeholder = {
+            text: 'Digite algo...',
+            heading: 'Título...',
+            bullet: 'Item da lista...',
+            todo: 'Tarefa...'
+        };
+
+        return `
+            <div class="block-item ${block.type} ${completedClass}" data-id="${block.id}">
+                <div class="block-handle">⋮⋮</div>
+                ${checkbox}
+                <div class="block-content" 
+                     contenteditable="true" 
+                     data-id="${block.id}"
+                     data-placeholder="${placeholder[block.type] || 'Digite...'}"
+                >${block.content || ''}</div>
+                <div class="block-actions">
+                    <button class="block-action-btn delete" data-id="${block.id}" title="Excluir">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Bind events
+    blocksContainer.querySelectorAll('.block-content').forEach(el => {
+        el.addEventListener('input', handleBlockInput);
+        el.addEventListener('keydown', handleBlockKeydown);
+    });
+
+    blocksContainer.querySelectorAll('.block-action-btn.delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteBlock(btn.dataset.id));
+    });
+
+    blocksContainer.querySelectorAll('.todo-checkbox').forEach(cb => {
+        cb.addEventListener('click', () => toggleTodo(cb.dataset.id));
+    });
+}
+
+function addBlock(type) {
+    const newBlock = {
+        id: `block_${Date.now()}`,
+        type: type,
+        content: '',
+        notebookId: state.currentNotebook,
+        completed: false
+    };
+
+    state.blocks.push(newBlock);
+    saveBlocksLocally();
+    renderBlocks();
+
+    // Focus the new block
+    setTimeout(() => {
+        const blockEl = document.querySelector(`.block-content[data-id="${newBlock.id}"]`);
+        if (blockEl) blockEl.focus();
+    }, 50);
+
+    // Hide menu
+    document.getElementById('block-menu').classList.add('hidden');
+}
+
+function deleteBlock(blockId) {
+    state.blocks = state.blocks.filter(b => b.id !== blockId);
+    saveBlocksLocally();
+    renderBlocks();
+}
+
+function handleBlockInput(e) {
+    const blockId = e.target.dataset.id;
+    const block = state.blocks.find(b => b.id === blockId);
+    if (block) {
+        block.content = e.target.innerText;
+        saveBlocksLocally();
+    }
+}
+
+function handleBlockKeydown(e) {
+    // Enter creates new block of same type
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const blockId = e.target.dataset.id;
+        const block = state.blocks.find(b => b.id === blockId);
+        if (block) {
+            addBlock(block.type);
+        }
+    }
+
+    // Backspace on empty block deletes it
+    if (e.key === 'Backspace' && e.target.innerText === '') {
+        e.preventDefault();
+        const blockId = e.target.dataset.id;
+        deleteBlock(blockId);
+    }
+}
+
+function toggleTodo(blockId) {
+    const block = state.blocks.find(b => b.id === blockId);
+    if (block) {
+        block.completed = !block.completed;
+        saveBlocksLocally();
+        renderBlocks();
+    }
+}
+
+function toggleBlockMenu() {
+    const menu = document.getElementById('block-menu');
+    menu.classList.toggle('hidden');
 }
 
 // ========== Initialize ==========
 function init() {
     initTheme();
     loadNotebooksLocally();
+    loadBlocksLocally();
     initEventListeners();
     loadSources();
     renderNotebooks();
     renderSources();
+    renderBlocks();
+
+    // Block menu events
+    document.getElementById('add-block-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleBlockMenu();
+    });
+
+    document.querySelectorAll('.block-menu-item').forEach(item => {
+        item.addEventListener('click', () => addBlock(item.dataset.type));
+    });
+
+    // Close block menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.block-type-selector')) {
+            document.getElementById('block-menu').classList.add('hidden');
+        }
+    });
 }
 
 // Start the app
 document.addEventListener('DOMContentLoaded', init);
+
