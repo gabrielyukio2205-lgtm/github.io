@@ -10,37 +10,71 @@ const API_BASE = PROXY_BASE_URL;
 // ========== State Management ==========
 const state = {
     userId: localStorage.getItem('scholar_user_id') || `user_${Date.now()}`,
+    notebooks: [],        // [{id, name, createdAt}]
     currentNotebook: 'default',
-    sources: [],          // [{id, type, name, preview}]
+    sources: [],          // [{id, type, name, preview, notebookId}]
     selectedSources: [],  // IDs of selected sources
     chatHistory: [],
     currentQuiz: null,
     quizIndex: 0,
-    quizXP: 0
+    quizXP: 0,
+    currentFlashcards: null,
+    flashcardIndex: 0,
+    showingAnswer: false
 };
 
 // Save user ID
 localStorage.setItem('scholar_user_id', state.userId);
 
 // ========== Local Storage Helpers ==========
+function saveNotebooksLocally() {
+    localStorage.setItem('scholar_notebooks', JSON.stringify(state.notebooks));
+}
+
+function loadNotebooksLocally() {
+    try {
+        const saved = localStorage.getItem('scholar_notebooks');
+        if (saved) {
+            state.notebooks = JSON.parse(saved);
+        }
+        // Ensure default notebook exists
+        if (!state.notebooks.find(n => n.id === 'default')) {
+            state.notebooks.unshift({ id: 'default', name: 'Meus Estudos', createdAt: Date.now() });
+            saveNotebooksLocally();
+        }
+    } catch (e) {
+        console.error('Error loading notebooks:', e);
+        state.notebooks = [{ id: 'default', name: 'Meus Estudos', createdAt: Date.now() }];
+    }
+}
+
 function saveSourcesLocally() {
     localStorage.setItem('scholar_sources', JSON.stringify(state.sources));
     localStorage.setItem('scholar_selected', JSON.stringify(state.selectedSources));
+    localStorage.setItem('scholar_current_notebook', state.currentNotebook);
 }
 
 function loadSourcesLocally() {
     try {
         const savedSources = localStorage.getItem('scholar_sources');
         const savedSelected = localStorage.getItem('scholar_selected');
+        const savedNotebook = localStorage.getItem('scholar_current_notebook');
         if (savedSources) {
             state.sources = JSON.parse(savedSources);
         }
         if (savedSelected) {
             state.selectedSources = JSON.parse(savedSelected);
         }
+        if (savedNotebook) {
+            state.currentNotebook = savedNotebook;
+        }
     } catch (e) {
         console.error('Error loading local sources:', e);
     }
+}
+
+function getSourcesForCurrentNotebook() {
+    return state.sources.filter(s => !s.notebookId || s.notebookId === state.currentNotebook);
 }
 
 // ========== DOM Elements ==========
@@ -141,7 +175,7 @@ function hideModal(modal) {
 }
 
 function updateSourcesCount() {
-    const count = state.sources.length;
+    const count = getSourcesForCurrentNotebook().length;
     elements.sourcesCount.textContent = `${count} fonte${count !== 1 ? 's' : ''}`;
 }
 
@@ -164,8 +198,11 @@ function getSourceIcon(type) {
 }
 
 function renderSources() {
+    // Filter sources for current notebook
+    const notebookSources = getSourcesForCurrentNotebook();
+
     // Render in sidebar
-    if (state.sources.length === 0) {
+    if (notebookSources.length === 0) {
         elements.sourcesList.innerHTML = `
             <div class="empty-state">
                 <span>Nenhuma fonte ainda</span>
@@ -173,7 +210,7 @@ function renderSources() {
             </div>
         `;
     } else {
-        elements.sourcesList.innerHTML = state.sources.map(source => `
+        elements.sourcesList.innerHTML = notebookSources.map(source => `
             <div class="source-item ${state.selectedSources.includes(source.id) ? 'selected' : ''}" 
                  data-id="${source.id}">
                 <span class="source-type">${getSourceIcon(source.type)}</span>
@@ -189,7 +226,7 @@ function renderSources() {
     }
 
     // Render in main grid
-    const cardsHtml = state.sources.map(source => `
+    const cardsHtml = notebookSources.map(source => `
         <div class="source-card ${state.selectedSources.includes(source.id) ? 'selected' : ''}" 
              data-id="${source.id}">
             <button class="icon-btn delete-btn" data-id="${source.id}" title="Remover">
@@ -370,7 +407,8 @@ async function addSource() {
                 id: data.source_id,
                 type: currentSourceType,
                 name: data.source_name,
-                preview: data.preview
+                preview: data.preview,
+                notebookId: state.currentNotebook
             });
             state.selectedSources.push(data.source_id);
             saveSourcesLocally();
@@ -474,30 +512,16 @@ function renderOutput(type, data) {
             return;
 
         case 'flashcards':
-            html = `
-                <div class="output-header">
-                    <h2>🃏 Flashcards Gerados</h2>
-                    <a href="data:application/octet-stream;base64,${data.file_base64}" 
-                       download="${data.filename}" 
-                       class="btn-primary">
-                        ⬇️ Baixar Deck Anki
-                    </a>
-                </div>
-                <div class="flashcards-preview">
-                    ${(data.cards || []).map((card, i) => `
-                        <div class="flashcard">
-                            <div class="flashcard-front">
-                                <span class="card-number">#${i + 1}</span>
-                                <p>${card.question}</p>
-                            </div>
-                            <div class="flashcard-back">
-                                <p>${card.answer}</p>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            break;
+            state.currentFlashcards = data.cards || [];
+            state.flashcardIndex = 0;
+            state.showingAnswer = false;
+
+            if (state.currentFlashcards.length > 0) {
+                renderFlashcardStudy(data.file_base64, data.filename);
+            } else {
+                alert('Não foi possível gerar flashcards.');
+            }
+            return;
 
         case 'mindmap':
             html = `
@@ -765,13 +789,190 @@ function initEventListeners() {
 
     // Quiz
     elements.nextQuestionBtn.addEventListener('click', nextQuestion);
+
+    // Notebooks - event delegation
+    document.getElementById('notebooks-list').addEventListener('click', (e) => {
+        const notebookItem = e.target.closest('.notebook-item');
+        const deleteBtn = e.target.closest('.delete-notebook');
+
+        if (deleteBtn) {
+            e.stopPropagation();
+            deleteNotebook(deleteBtn.dataset.id);
+        } else if (notebookItem) {
+            selectNotebook(notebookItem.dataset.id);
+        }
+    });
+
+    // New notebook button
+    document.getElementById('new-notebook-btn').addEventListener('click', createNotebook);
+}
+
+// ========== Flashcard Interactive Study ==========
+function renderFlashcardStudy(fileBase64, filename) {
+    const card = state.currentFlashcards[state.flashcardIndex];
+    const total = state.currentFlashcards.length;
+
+    elements.outputContent.innerHTML = `
+        <div class="output-header flashcard-header">
+            <h2>🃏 Estudar Flashcards</h2>
+            <div class="flashcard-actions">
+                ${fileBase64 ? `
+                    <a href="data:application/octet-stream;base64,${fileBase64}" 
+                       download="${filename}" 
+                       class="btn-secondary">
+                        ⬇️ Anki
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+        
+        <div class="flashcard-study">
+            <div class="flashcard-progress">
+                <span>Card ${state.flashcardIndex + 1} de ${total}</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${((state.flashcardIndex + 1) / total) * 100}%"></div>
+                </div>
+            </div>
+            
+            <div class="flashcard-interactive ${state.showingAnswer ? 'flipped' : ''}" id="study-card">
+                <div class="card-front">
+                    <span class="card-label">Pergunta</span>
+                    <p>${card.question}</p>
+                    <small>Clique para ver a resposta</small>
+                </div>
+                <div class="card-back">
+                    <span class="card-label">Resposta</span>
+                    <p>${card.answer}</p>
+                </div>
+            </div>
+            
+            <div class="flashcard-controls">
+                <button class="btn-secondary" id="prev-card" ${state.flashcardIndex === 0 ? 'disabled' : ''}>
+                    ← Anterior
+                </button>
+                <button class="btn-primary" id="flip-card">
+                    ${state.showingAnswer ? '🔄 Virar' : '👁️ Ver Resposta'}
+                </button>
+                <button class="btn-secondary" id="next-card" ${state.flashcardIndex >= total - 1 ? 'disabled' : ''}>
+                    Próximo →
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Bind events
+    document.getElementById('study-card').addEventListener('click', flipFlashcard);
+    document.getElementById('flip-card').addEventListener('click', flipFlashcard);
+    document.getElementById('prev-card').addEventListener('click', prevFlashcard);
+    document.getElementById('next-card').addEventListener('click', nextFlashcard);
+}
+
+function flipFlashcard() {
+    state.showingAnswer = !state.showingAnswer;
+    const card = document.getElementById('study-card');
+    card.classList.toggle('flipped', state.showingAnswer);
+    document.getElementById('flip-card').textContent = state.showingAnswer ? '🔄 Virar' : '👁️ Ver Resposta';
+}
+
+function prevFlashcard() {
+    if (state.flashcardIndex > 0) {
+        state.flashcardIndex--;
+        state.showingAnswer = false;
+        renderFlashcardStudy();
+    }
+}
+
+function nextFlashcard() {
+    if (state.flashcardIndex < state.currentFlashcards.length - 1) {
+        state.flashcardIndex++;
+        state.showingAnswer = false;
+        renderFlashcardStudy();
+    }
+}
+
+// ========== Notebooks Management ==========
+function renderNotebooks() {
+    const notebooksList = document.getElementById('notebooks-list');
+    notebooksList.innerHTML = state.notebooks.map(nb => `
+        <div class="notebook-item ${nb.id === state.currentNotebook ? 'active' : ''}" data-id="${nb.id}">
+            <span class="notebook-icon">📓</span>
+            <span class="notebook-name">${nb.name}</span>
+            ${nb.id !== 'default' ? `
+                <button class="icon-btn delete-notebook" data-id="${nb.id}" title="Excluir">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            ` : ''}
+        </div>
+    `).join('');
+
+    // Update title
+    const currentNb = state.notebooks.find(n => n.id === state.currentNotebook);
+    if (currentNb && elements.notebookTitle) {
+        elements.notebookTitle.textContent = currentNb.name;
+    }
+}
+
+function createNotebook() {
+    const name = prompt('Nome do novo notebook:');
+    if (!name || !name.trim()) return;
+
+    const newNotebook = {
+        id: `nb_${Date.now()}`,
+        name: name.trim(),
+        createdAt: Date.now()
+    };
+
+    state.notebooks.push(newNotebook);
+    saveNotebooksLocally();
+    selectNotebook(newNotebook.id);
+}
+
+function selectNotebook(notebookId) {
+    state.currentNotebook = notebookId;
+    state.selectedSources = []; // Clear selection when switching
+    saveSourcesLocally();
+    renderNotebooks();
+    renderSources();
+
+    // Update title to be editable
+    const currentNb = state.notebooks.find(n => n.id === state.currentNotebook);
+    if (currentNb && elements.notebookTitle) {
+        elements.notebookTitle.textContent = currentNb.name;
+    }
+}
+
+function deleteNotebook(notebookId) {
+    if (notebookId === 'default') return;
+
+    if (!confirm('Excluir este notebook e todas as suas fontes?')) return;
+
+    // Remove notebook
+    state.notebooks = state.notebooks.filter(n => n.id !== notebookId);
+
+    // Remove sources from this notebook
+    state.sources = state.sources.filter(s => s.notebookId !== notebookId);
+
+    // Switch to default if we deleted the current one
+    if (state.currentNotebook === notebookId) {
+        state.currentNotebook = 'default';
+    }
+
+    saveNotebooksLocally();
+    saveSourcesLocally();
+    renderNotebooks();
+    renderSources();
 }
 
 // ========== Initialize ==========
 function init() {
     initTheme();
+    loadNotebooksLocally();
     initEventListeners();
     loadSources();
+    renderNotebooks();
     renderSources();
 }
 

@@ -1201,3 +1201,150 @@ body.light-theme .gradient-orb {
         font-size: 1.5rem;
     }
 }
+
+/* ========== Flashcard Interactive Study ========== */
+.flashcard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.flashcard-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.flashcard-study {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+    padding: var(--space-lg);
+}
+
+.flashcard-progress {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.progress-bar {
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.flashcard-interactive {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 16 / 10;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.flashcard-interactive .card-front,
+.flashcard-interactive .card-back {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-xl);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    backface-visibility: hidden;
+    transition: transform 0.6s ease, border-color 0.3s ease;
+    text-align: center;
+}
+
+.flashcard-interactive:hover .card-front,
+.flashcard-interactive:hover .card-back {
+    border-color: var(--accent-primary);
+}
+
+.flashcard-interactive .card-front {
+    z-index: 2;
+}
+
+.flashcard-interactive .card-back {
+    transform: rotateY(180deg);
+    background: var(--bg-active);
+}
+
+.flashcard-interactive.flipped .card-front {
+    transform: rotateY(-180deg);
+}
+
+.flashcard-interactive.flipped .card-back {
+    transform: rotateY(0deg);
+}
+
+.flashcard-interactive .card-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.flashcard-interactive p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.flashcard-interactive small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.flashcard-controls {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+}
+
+.flashcard-controls button {
+    min-width: 120px;
+}
+
+.flashcard-controls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ========== Notebook Item Styles ========== */
+.notebook-item {
+    position: relative;
+}
+
+.notebook-item .delete-notebook {
+    opacity: 0;
+    transition: var(--transition-fast);
+    margin-left: auto;
+}
+
+.notebook-item:hover .delete-notebook {
+    opacity: 1;
+}
+
+.delete-notebook:hover {
+    color: var(--error);
+}
