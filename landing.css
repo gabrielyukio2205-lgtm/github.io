@@ -112,6 +112,11 @@ body {
     z-index: 10;
 }
 
+.particle-text-space {
+    height: 180px;
+    margin-bottom: 1rem;
+}
+
 .hero-title-main {
     font-size: 6rem;
     font-weight: 800;
