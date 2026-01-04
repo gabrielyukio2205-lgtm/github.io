@@ -1046,6 +1046,18 @@ body.light-theme .gradient-orb {
 /* Quiz Modal */
 .quiz-modal-content {
     max-width: 600px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.quiz-modal-content .modal-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.quiz-modal-content .modal-footer {
+    flex-shrink: 0;
 }
 
 .quiz-progress {
@@ -1087,6 +1099,8 @@ body.light-theme .gradient-orb {
     cursor: pointer;
     transition: var(--transition-fast);
     font-size: 0.95rem;
+    color: var(--text-primary);
+    font-family: inherit;
 }
 
 .quiz-option:hover:not(:disabled) {
@@ -1097,15 +1111,18 @@ body.light-theme .gradient-orb {
 .quiz-option.correct {
     border-color: var(--success);
     background: rgba(34, 197, 94, 0.15);
+    color: var(--success);
 }
 
 .quiz-option.incorrect {
     border-color: var(--error);
     background: rgba(239, 68, 68, 0.15);
+    color: var(--text-primary);
 }
 
 .quiz-option:disabled {
     cursor: default;
+    opacity: 0.8;
 }
 
 .quiz-feedback {
