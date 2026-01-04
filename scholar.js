@@ -582,16 +582,20 @@ function renderQuizQuestion() {
 
 function checkAnswer(selected, correct, explanation) {
     const buttons = elements.quizOptions.querySelectorAll('.quiz-option');
+
+    // Extract just the letter from correct answer (handles 'C)', 'C', 'C.' formats)
+    const correctLetter = typeof correct === 'string' ? correct.charAt(0).toUpperCase() : correct;
+
     buttons.forEach(btn => {
         btn.disabled = true;
-        if (btn.dataset.option === correct[0]) {
+        if (btn.dataset.option === correctLetter) {
             btn.classList.add('correct');
         } else if (btn.dataset.option === selected) {
             btn.classList.add('incorrect');
         }
     });
 
-    const isCorrect = selected === correct[0];
+    const isCorrect = selected === correctLetter;
 
     if (isCorrect) {
         state.quizXP += 100;
