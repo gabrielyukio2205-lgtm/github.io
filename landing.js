@@ -13,6 +13,7 @@
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setClearColor(0x000000, 0); // Fundo totalmente transparente
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
