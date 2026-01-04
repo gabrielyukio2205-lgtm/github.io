@@ -98,9 +98,20 @@
                     </svg>
                     <span>Sobre J.A.D.E.</span>
                 </a>
-                <div class="user-badge">
-                    <div class="user-avatar">U</div>
-                    <span>Usuário</span>
+                <div id="user-section" class="user-badge">
+                    <a href="login.html" id="login-link" class="user-badge"
+                        style="text-decoration: none; color: inherit;">
+                        <div class="user-avatar">?</div>
+                        <span>Entrar</span>
+                    </a>
+                    <div id="logged-user" style="display: none;">
+                        <img src="" alt="" id="user-avatar-img" class="user-avatar"
+                            style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                        <span id="user-name-text"></span>
+                        <button id="logout-btn"
+                            style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; margin-left: 4px;"
+                            title="Sair">✕</button>
+                    </div>
                 </div>
             </div>
         </aside>

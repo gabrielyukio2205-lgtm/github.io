@@ -178,12 +178,76 @@
     // --- Identity Management ---
 
     function getPersistentUserId() {
+        // First check if user is logged in via GitHub OAuth
+        const jwtToken = localStorage.getItem('jade_token');
+        if (jwtToken) {
+            try {
+                // Decode JWT to get user info (basic decode, not verified)
+                const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+                if (payload && payload.sub) {
+                    return 'github_' + payload.sub;
+                }
+            } catch (e) {
+                console.error('Failed to parse JWT', e);
+            }
+        }
+
+        // Fallback to local random ID
         let userId = localStorage.getItem('jade_master_user_id');
         if (!userId) {
             userId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             localStorage.setItem('jade_master_user_id', userId);
         }
         return userId;
+    }
+
+    // --- Auth Management ---
+
+    async function initAuth() {
+        const loginLink = document.getElementById('login-link');
+        const loggedUser = document.getElementById('logged-user');
+        const userAvatarImg = document.getElementById('user-avatar-img');
+        const userNameText = document.getElementById('user-name-text');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        if (!loginLink || !loggedUser) return;
+
+        const token = localStorage.getItem('jade_token');
+
+        if (!token) {
+            loginLink.style.display = 'flex';
+            loggedUser.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${PROXY_BASE_URL}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (data.authenticated && data.user) {
+                loginLink.style.display = 'none';
+                loggedUser.style.display = 'flex';
+                userAvatarImg.src = data.user.avatar || '';
+                userNameText.textContent = data.user.name || data.user.login;
+
+                // Logout handler
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        localStorage.removeItem('jade_token');
+                        window.location.reload();
+                    });
+                }
+            } else {
+                loginLink.style.display = 'flex';
+                loggedUser.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('Auth check failed:', e);
+            loginLink.style.display = 'flex';
+            loggedUser.style.display = 'none';
+        }
     }
 
     // --- Theme Management ---
@@ -298,6 +362,7 @@
 
     function init() {
         initTheme();
+        initAuth(); // Check if user is logged in
         loadConversations();
 
         updateAgentUI();
