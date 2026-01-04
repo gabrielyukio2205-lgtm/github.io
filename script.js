@@ -4,6 +4,7 @@
     // 1. URL DA API (Se estiver rodando local, mude para http://localhost:7860)
     // Se estiver no Hugging Face, use a URL direta do Space ou Proxy
     const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+    const AUTH_BASE_URL = 'https://madras1-jade-port.hf.space'; // Direct HF Space for auth
     const API_URL = `${PROXY_BASE_URL}/chat`;
     const OCR_URL = `${PROXY_BASE_URL}/ocr`;
 
@@ -221,7 +222,7 @@
         }
 
         try {
-            const res = await fetch(`${PROXY_BASE_URL}/auth/me`, {
+            const res = await fetch(`${AUTH_BASE_URL}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
