@@ -59,8 +59,8 @@
                 const i = (y * offCanvas.width + x) * 4;
                 if (imageData.data[i + 3] > 128) {
                     // Normalize positions to center
-                    const px = (x - offCanvas.width / 2) * 0.03;
-                    const py = -(y - offCanvas.height / 2) * 0.03;
+                    const px = (x - offCanvas.width / 2) * 0.04;
+                    const py = -(y - offCanvas.height / 2) * 0.04;
                     positions.push({ x: px, y: py, z: 0 });
                 }
             }
@@ -116,18 +116,18 @@
         const startRadius = 8 + Math.random() * 8;
         sprite.position.set(
             Math.cos(startAngle) * startRadius,
-            Math.sin(startAngle) * startRadius - 1,
-            (Math.random() - 0.5) * 3 - 5
+            Math.sin(startAngle) * startRadius + 1,
+            (Math.random() - 0.5) * 3
         );
 
         sprite.userData = {
             targetX: targetPos.x,
-            targetY: targetPos.y - 1, // Offset to center
-            targetZ: -5 + (Math.random() - 0.5) * 0.5,
+            targetY: targetPos.y + 1, // Offset to center
+            targetZ: (Math.random() - 0.5) * 0.5,
             currentX: sprite.position.x,
             currentY: sprite.position.y,
             currentZ: sprite.position.z,
-            scale: 0.04 + Math.random() * 0.02,
+            scale: 0.1 + Math.random() * 0.05,
             phase: Math.random() * Math.PI * 2,
             orbitOffset: (Math.random() - 0.5) * 0.3,
             speed: 0.02 + Math.random() * 0.02
@@ -157,8 +157,8 @@
 
         sprite.position.set(
             Math.cos(angle) * radius,
-            Math.sin(angle) * radius - 1,
-            (Math.random() - 0.5) * 4 - 5
+            Math.sin(angle) * radius + 1,
+            (Math.random() - 0.5) * 4
         );
 
         sprite.userData = {
@@ -169,7 +169,7 @@
             orbitSpeed: (Math.random() - 0.5) * 0.01,
             floatSpeed: 0.5 + Math.random() * 0.5,
             phase: Math.random() * Math.PI * 2,
-            scale: 0.02 + Math.random() * 0.03
+            scale: 0.05 + Math.random() * 0.05
         };
 
         sprite.scale.set(sprite.userData.scale, sprite.userData.scale, 1);
@@ -217,7 +217,7 @@
                 data.angle += data.orbitSpeed;
                 particle.position.x = Math.cos(data.angle) * data.radius;
                 particle.position.y = data.baseY + Math.sin(time * data.floatSpeed + data.phase) * 0.5;
-                particle.position.z = Math.sin(data.angle) * data.radius * 0.3 - 5;
+                particle.position.z = Math.sin(data.angle) * data.radius * 0.3;
 
                 // Mouse influence
                 particle.position.x += mouseX * 0.5;
@@ -247,7 +247,7 @@
         // Camera subtle movement
         camera.position.x = mouseX * 0.3;
         camera.position.y = mouseY * 0.3;
-        camera.lookAt(0, -1, -5);
+        camera.lookAt(0, 1, 0);
 
         renderer.render(scene, camera);
     }
