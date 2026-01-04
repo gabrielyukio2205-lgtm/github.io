@@ -12,8 +12,9 @@
     camera.position.set(0, 2, 8);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setClearColor(0x000000, 0); // Fundo totalmente transparente
+    // FIXED: Use solid black background instead of alpha to prevent accumulation
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setClearColor(0x0a0a0f, 1); // Solid dark background matching CSS
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -34,14 +35,21 @@
         }
     }
 
-    // Create lines connecting the grid
+    // Pre-calculate line count for buffer allocation
+    const horizontalLines = gridWidth * (gridHeight - 1);
+    const verticalLines = (gridWidth - 1) * gridHeight;
+    const totalLines = horizontalLines + verticalLines;
+
+    // Create lines connecting the grid - FIXED: Pre-allocate buffers
+    const linePositions = new Float32Array(totalLines * 6);
+    const lineColors = new Float32Array(totalLines * 6);
+
     const lineGeometry = new THREE.BufferGeometry();
-    const linePositions = [];
-    const lineColors = [];
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    lineGeometry.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
 
     function updateLines() {
-        linePositions.length = 0;
-        lineColors.length = 0;
+        let lineIdx = 0;
 
         for (let j = 0; j < gridHeight; j++) {
             for (let i = 0; i < gridWidth; i++) {
@@ -52,42 +60,64 @@
                 if (i < gridWidth - 1) {
                     const rightIdx = j * gridWidth + (i + 1);
                     const pr = points[rightIdx];
-                    linePositions.push(p.x, p.y, p.z, pr.x, pr.y, pr.z);
 
-                    // Dark blue/cyan gradient suited for black background
+                    const base = lineIdx * 6;
+                    linePositions[base] = p.x;
+                    linePositions[base + 1] = p.y;
+                    linePositions[base + 2] = p.z;
+                    linePositions[base + 3] = pr.x;
+                    linePositions[base + 4] = pr.y;
+                    linePositions[base + 5] = pr.z;
+
+                    // FIXED: Much more subtle colors - cyan/blue tint
                     const h1 = (p.y + 1) / 2;
                     const h2 = (pr.y + 1) / 2;
-                    // RGB: Less red, less green, high blue
-                    lineColors.push(
-                        0.1 + h1 * 0.1, 0.1 + h1 * 0.2, 0.6 + h1 * 0.4,
-                        0.1 + h2 * 0.1, 0.1 + h2 * 0.2, 0.6 + h2 * 0.4
-                    );
+                    lineColors[base] = 0.05 + h1 * 0.1;      // Very low red
+                    lineColors[base + 1] = 0.15 + h1 * 0.2;  // Low green
+                    lineColors[base + 2] = 0.3 + h1 * 0.3;   // Medium blue
+                    lineColors[base + 3] = 0.05 + h2 * 0.1;
+                    lineColors[base + 4] = 0.15 + h2 * 0.2;
+                    lineColors[base + 5] = 0.3 + h2 * 0.3;
+
+                    lineIdx++;
                 }
 
                 // Connect to bottom neighbor
                 if (j < gridHeight - 1) {
                     const bottomIdx = (j + 1) * gridWidth + i;
                     const pb = points[bottomIdx];
-                    linePositions.push(p.x, p.y, p.z, pb.x, pb.y, pb.z);
+
+                    const base = lineIdx * 6;
+                    linePositions[base] = p.x;
+                    linePositions[base + 1] = p.y;
+                    linePositions[base + 2] = p.z;
+                    linePositions[base + 3] = pb.x;
+                    linePositions[base + 4] = pb.y;
+                    linePositions[base + 5] = pb.z;
 
                     const h1 = (p.y + 1) / 2;
                     const h2 = (pb.y + 1) / 2;
-                    lineColors.push(
-                        0.1 + h1 * 0.1, 0.1 + h1 * 0.2, 0.6 + h1 * 0.4,
-                        0.1 + h2 * 0.1, 0.1 + h2 * 0.2, 0.6 + h2 * 0.4
-                    );
+                    lineColors[base] = 0.05 + h1 * 0.1;
+                    lineColors[base + 1] = 0.15 + h1 * 0.2;
+                    lineColors[base + 2] = 0.3 + h1 * 0.3;
+                    lineColors[base + 3] = 0.05 + h2 * 0.1;
+                    lineColors[base + 4] = 0.15 + h2 * 0.2;
+                    lineColors[base + 5] = 0.3 + h2 * 0.3;
+
+                    lineIdx++;
                 }
             }
         }
 
-        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-        lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+        // FIXED: Just mark as needing update, don't recreate attributes
+        lineGeometry.attributes.position.needsUpdate = true;
+        lineGeometry.attributes.color.needsUpdate = true;
     }
 
     const lineMaterial = new THREE.LineBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.2, // Much more subtle
+        opacity: 0.35,
         linewidth: 1
     });
 
@@ -97,8 +127,7 @@
     lineMesh.position.y = -2;
     scene.add(lineMesh);
 
-    // Add points at intersections
-    const pointsGeometry = new THREE.BufferGeometry();
+    // Add points at intersections - FIXED: Pre-allocate buffers
     const pointPositions = new Float32Array(points.length * 3);
     const pointColors = new Float32Array(points.length * 3);
 
@@ -106,19 +135,21 @@
         pointPositions[i * 3] = p.x;
         pointPositions[i * 3 + 1] = p.y;
         pointPositions[i * 3 + 2] = p.z;
-        pointColors[i * 3] = 0.2;
-        pointColors[i * 3 + 1] = 0.4;
-        pointColors[i * 3 + 2] = 1.0;
+        // FIXED: More subtle point colors
+        pointColors[i * 3] = 0.1;
+        pointColors[i * 3 + 1] = 0.3;
+        pointColors[i * 3 + 2] = 0.7;
     });
 
-    pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
-    pointsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(pointColors, 3));
+    const pointsGeometry = new THREE.BufferGeometry();
+    pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
+    pointsGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
 
     const pointsMaterial = new THREE.PointsMaterial({
-        size: 2, // Smaller points
+        size: 2,
         vertexColors: true,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.5,
         sizeAttenuation: true
     });
 
@@ -157,19 +188,17 @@
                 // Update point positions
                 pointPositions[idx * 3 + 1] = points[idx].y;
 
-                // Update point colors based on height
+                // Update point colors based on height - FIXED: subtle colors
                 const h = (points[idx].y + 1) / 2;
-                pointColors[idx * 3] = 0.1 + h * 0.1;
+                pointColors[idx * 3] = 0.05 + h * 0.1;
                 pointColors[idx * 3 + 1] = 0.2 + h * 0.2;
-                pointColors[idx * 3 + 2] = 0.6 + h * 0.4;
+                pointColors[idx * 3 + 2] = 0.4 + h * 0.4;
             }
         }
 
         pointsGeometry.attributes.position.needsUpdate = true;
         pointsGeometry.attributes.color.needsUpdate = true;
         updateLines();
-        lineGeometry.attributes.position.needsUpdate = true;
-        lineGeometry.attributes.color.needsUpdate = true;
 
         // Camera movement based on mouse
         camera.position.x = mouseX * 0.5;
