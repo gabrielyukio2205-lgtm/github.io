@@ -58,9 +58,9 @@
             for (let x = 0; x < offCanvas.width; x += gap) {
                 const i = (y * offCanvas.width + x) * 4;
                 if (imageData.data[i + 3] > 128) {
-                    // Normalize positions to center
-                    const px = (x - offCanvas.width / 2) * 0.04;
-                    const py = -(y - offCanvas.height / 2) * 0.04;
+                    // Normalize positions to center and adjust Y offset
+                    const px = (x - offCanvas.width / 2) * 0.025;
+                    const py = -(y - offCanvas.height / 2) * 0.025 + 2;
                     positions.push({ x: px, y: py, z: 0 });
                 }
             }
@@ -178,7 +178,8 @@
         scene.add(sprite);
     }
 
-    camera.position.z = 15;
+    camera.position.z = 12;
+    camera.position.y = -1;
 
     // Mouse interaction
     let mouseX = 0;
