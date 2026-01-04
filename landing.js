@@ -9,7 +9,7 @@
 
     // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
         canvas,
         alpha: true,
@@ -116,18 +116,18 @@
         const startRadius = 8 + Math.random() * 8;
         sprite.position.set(
             Math.cos(startAngle) * startRadius,
-            Math.sin(startAngle) * startRadius + 1,
-            (Math.random() - 0.5) * 3
+            Math.sin(startAngle) * startRadius,
+            (Math.random() - 0.5) * 2 - 8
         );
 
         sprite.userData = {
             targetX: targetPos.x,
-            targetY: targetPos.y + 1, // Offset to center
-            targetZ: (Math.random() - 0.5) * 0.5,
+            targetY: targetPos.y,
+            targetZ: (Math.random() - 0.5) * 0.3 - 8,
             currentX: sprite.position.x,
             currentY: sprite.position.y,
             currentZ: sprite.position.z,
-            scale: 0.1 + Math.random() * 0.05,
+            scale: 0.15 + Math.random() * 0.1,
             phase: Math.random() * Math.PI * 2,
             orbitOffset: (Math.random() - 0.5) * 0.3,
             speed: 0.02 + Math.random() * 0.02
@@ -157,8 +157,8 @@
 
         sprite.position.set(
             Math.cos(angle) * radius,
-            Math.sin(angle) * radius + 1,
-            (Math.random() - 0.5) * 4
+            Math.sin(angle) * radius,
+            (Math.random() - 0.5) * 3 - 8
         );
 
         sprite.userData = {
@@ -169,7 +169,7 @@
             orbitSpeed: (Math.random() - 0.5) * 0.01,
             floatSpeed: 0.5 + Math.random() * 0.5,
             phase: Math.random() * Math.PI * 2,
-            scale: 0.05 + Math.random() * 0.05
+            scale: 0.08 + Math.random() * 0.06
         };
 
         sprite.scale.set(sprite.userData.scale, sprite.userData.scale, 1);
@@ -178,7 +178,7 @@
         scene.add(sprite);
     }
 
-    camera.position.z = 10;
+    camera.position.z = 15;
 
     // Mouse interaction
     let mouseX = 0;
@@ -217,7 +217,7 @@
                 data.angle += data.orbitSpeed;
                 particle.position.x = Math.cos(data.angle) * data.radius;
                 particle.position.y = data.baseY + Math.sin(time * data.floatSpeed + data.phase) * 0.5;
-                particle.position.z = Math.sin(data.angle) * data.radius * 0.3;
+                particle.position.z = Math.sin(data.angle) * data.radius * 0.2 - 8;
 
                 // Mouse influence
                 particle.position.x += mouseX * 0.5;
@@ -247,7 +247,7 @@
         // Camera subtle movement
         camera.position.x = mouseX * 0.3;
         camera.position.y = mouseY * 0.3;
-        camera.lookAt(0, 1, 0);
+        camera.lookAt(0, 0, -8);
 
         renderer.render(scene, camera);
     }
