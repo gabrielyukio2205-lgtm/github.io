@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholar NoteBook | J.A.D.E.</title>
+    <link rel="stylesheet" href="scholar.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+
+<body>
+    <!-- Background Effects -->
+    <div class="background-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="app-layout">
+
+        <!-- Left Sidebar: Notebooks & Sources -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="apps.html" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <span class="logo-text">Scholar</span>
+                </div>
+                <button id="theme-toggle" class="icon-btn" title="Alternar tema">
+                    <svg id="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                    </svg>
+                    <svg id="moon-icon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Notebooks Section -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <span>Notebooks</span>
+                    <button id="new-notebook-btn" class="add-btn" title="Novo Notebook">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div id="notebooks-list" class="items-list">
+                    <div class="notebook-item active" data-id="default">
+                        <span class="notebook-icon">📓</span>
+                        <span class="notebook-name">Meus Estudos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sources Section -->
+            <div class="sidebar-section sources-section">
+                <div class="section-header">
+                    <span>Fontes</span>
+                    <button id="add-source-btn" class="add-btn" title="Adicionar Fonte">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div id="sources-list" class="items-list">
+                    <div class="empty-state">
+                        <span>Nenhuma fonte ainda</span>
+                        <small>Adicione PDFs, URLs ou tópicos</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="footer-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Chat J.A.D.E.</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Notebook Header -->
+            <header class="notebook-header">
+                <div class="notebook-title-section">
+                    <h1 id="notebook-title" contenteditable="true">Meus Estudos</h1>
+                    <span class="sources-count" id="sources-count">0 fontes</span>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-chat-btn" class="icon-btn" title="Toggle Chat">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Sources Grid -->
+            <section class="sources-grid-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    Fontes do Notebook
+                </h2>
+                <div id="sources-grid" class="sources-grid">
+                    <!-- Sources will be rendered here -->
+                    <div class="add-source-card" id="add-source-card">
+                        <div class="add-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span>Adicionar Fonte</span>
+                        <small>PDF, URL, YouTube ou Tópico</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Generation Tools -->
+            <section class="tools-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                        </polygon>
+                    </svg>
+                    Gerar Conteúdo
+                </h2>
+                <div class="tools-grid">
+                    <button class="tool-card" data-type="summary" disabled>
+                        <div class="tool-icon">📝</div>
+                        <span class="tool-name">Resumo</span>
+                        <small>Resumo estratégico</small>
+                    </button>
+                    <button class="tool-card" data-type="podcast" disabled>
+                        <div class="tool-icon">🎧</div>
+                        <span class="tool-name">Podcast</span>
+                        <small>Aula em áudio</small>
+                    </button>
+                    <button class="tool-card" data-type="quiz" disabled>
+                        <div class="tool-icon">🎮</div>
+                        <span class="tool-name">Quiz</span>
+                        <small>Teste seu conhecimento</small>
+                    </button>
+                    <button class="tool-card" data-type="flashcards" disabled>
+                        <div class="tool-icon">🃏</div>
+                        <span class="tool-name">Flashcards</span>
+                        <small>Deck Anki</small>
+                    </button>
+                    <button class="tool-card" data-type="mindmap" disabled>
+                        <div class="tool-icon">🗺️</div>
+                        <span class="tool-name">Mapa Mental</span>
+                        <small>Visualização</small>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Generated Content Area -->
+            <section class="output-section" id="output-section">
+                <div id="output-content" class="output-content">
+                    <!-- Generated content will be rendered here -->
+                    <div class="empty-output">
+                        <div class="empty-icon">✨</div>
+                        <h3>Adicione fontes e gere conteúdo</h3>
+                        <p>Suas fontes serão analisadas por IA para criar resumos, podcasts, quizzes e mais.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Chat Panel (Right Sidebar) -->
+        <aside class="chat-panel" id="chat-panel">
+            <div class="chat-header">
+                <h3>💬 Assistente de Estudos</h3>
+                <button id="close-chat-btn" class="icon-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="chat-message bot">
+                    <div class="message-content">
+                        Olá! Sou seu assistente de estudos. Adicione fontes ao seu notebook e faça perguntas sobre o
+                        conteúdo. Usarei RAG para encontrar as informações mais relevantes.
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <textarea id="chat-input" placeholder="Pergunte sobre suas fontes..." rows="1"></textarea>
+                <button id="send-chat-btn" class="send-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Add Source Modal -->
+    <div id="source-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Fonte</h2>
+                <button class="close-modal-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="source-type-tabs">
+                    <button class="tab-btn active" data-type="pdf">
+                        <span class="tab-icon">📄</span>
+                        <span>PDF</span>
+                    </button>
+                    <button class="tab-btn" data-type="url">
+                        <span class="tab-icon">🔗</span>
+                        <span>URL</span>
+                    </button>
+                    <button class="tab-btn" data-type="youtube">
+                        <span class="tab-icon">🎥</span>
+                        <span>YouTube</span>
+                    </button>
+                    <button class="tab-btn" data-type="topic">
+                        <span class="tab-icon">🔍</span>
+                        <span>Tópico</span>
+                    </button>
+                </div>
+
+                <div class="source-input-area">
+                    <!-- PDF Upload -->
+                    <div id="pdf-input" class="input-section active">
+                        <label class="file-drop-zone" id="pdf-drop-zone">
+                            <input type="file" id="pdf-file-input" accept=".pdf" hidden>
+                            <div class="drop-icon">📄</div>
+                            <span>Arraste um PDF ou clique para selecionar</span>
+                            <small id="pdf-file-name"></small>
+                        </label>
+                    </div>
+
+                    <!-- URL Input -->
+                    <div id="url-input" class="input-section hidden">
+                        <input type="url" id="url-value" placeholder="https://exemplo.com/artigo">
+                        <small>Cole a URL de um artigo, blog ou página web</small>
+                    </div>
+
+                    <!-- YouTube Input -->
+                    <div id="youtube-input" class="input-section hidden">
+                        <input type="url" id="youtube-value" placeholder="https://youtube.com/watch?v=...">
+                        <small>Cole o link de um vídeo do YouTube</small>
+                    </div>
+
+                    <!-- Topic Input -->
+                    <div id="topic-input" class="input-section hidden">
+                        <input type="text" id="topic-value" placeholder="Ex: Machine Learning, História do Brasil...">
+                        <small>O Scholar irá pesquisar na web sobre este tópico</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancel-source-btn">Cancelar</button>
+                <button class="btn-primary" id="confirm-source-btn">
+                    <span>Adicionar Fonte</span>
+                    <div class="loading-spinner hidden"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content quiz-modal-content">
+            <div class="modal-header">
+                <h2>🎮 Quiz Time!</h2>
+                <div class="quiz-progress">
+                    <span id="quiz-progress-text">Questão 1 de 5</span>
+                    <div class="xp-badge">XP: <span id="quiz-xp">0</span></div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="quiz-question" class="quiz-question"></div>
+                <div id="quiz-options" class="quiz-options"></div>
+                <div id="quiz-feedback" class="quiz-feedback hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="next-question-btn" disabled>Próxima Questão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="loading-spinner large"></div>
+            <span id="loading-text">Processando...</span>
+        </div>
+    </div>
+
+    <!-- Audio Player (Hidden) -->
+    <audio id="audio-player" hidden></audio>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="scholar.js"></script>
+</body>
+
+</html>
