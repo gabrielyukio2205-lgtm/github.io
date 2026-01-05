@@ -44,12 +44,8 @@
     let webSearchEnabled = false;
     const webSearchBtn = document.getElementById('webSearchBtn');
 
-    // Thinking Mode State
-    let thinkingModeEnabled = false;
-    const thinkingBtn = document.getElementById('thinkingBtn');
-
-    // Model Selector State (Jade High = GLM 4.7, Jade Flash = Cerebras)
-    let currentJadeModel = 'high'; // 'high' or 'flash'
+    // Model Selector State (Jade High = GLM 4.7, Jade Reasoning = MiniMax M2.1, Jade Flash = Cerebras)
+    let currentJadeModel = 'high'; // 'high', 'minimax', or 'flash'
     const modelDropdownBtn = document.getElementById('model-dropdown-btn');
     const modelDropdownMenu = document.getElementById('model-dropdown-menu');
     const currentModelName = document.getElementById('current-model-name');
@@ -117,9 +113,6 @@
 
         // Web Search Toggle
         if (webSearchBtn) webSearchBtn.addEventListener('click', toggleWebSearch);
-
-        // Thinking Mode Toggle
-        if (thinkingBtn) thinkingBtn.addEventListener('click', toggleThinkingMode);
 
         // PDF/OCR Button
         if (pdfBtn) pdfBtn.addEventListener('click', () => pdfInput.click());
@@ -589,8 +582,24 @@
         imagePreviewContainer.classList.add('hidden');
     }
 
-    function renderMarkdown(text) {
-        // Parse thinking blocks first
+    function renderMarkdown(text, reasoningContent = '') {
+        let html = '';
+
+        // Render reasoning block if exists (from API reasoning_content)
+        if (reasoningContent && reasoningContent.trim()) {
+            const reasoningHtml = typeof marked !== 'undefined' ? marked.parse(reasoningContent) : escapeHtml(reasoningContent).replace(/\n/g, '<br>');
+            html += `
+                <div class="thinking-block">
+                    <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                        <span>🧠 Raciocínio do Modelo</span>
+                        <span class="thinking-toggle">▼</span>
+                    </div>
+                    <div class="thinking-content">${reasoningHtml}</div>
+                </div>
+            `;
+        }
+
+        // Also check for legacy <thinking> tags in content (fallback)
         let thinkingContent = '';
         let mainContent = text;
 
@@ -598,22 +607,20 @@
         if (thinkingMatch) {
             thinkingContent = thinkingMatch[1].trim();
             mainContent = text.replace(/<thinking>[\s\S]*?<\/thinking>/i, '').trim();
-        }
 
-        let html = '';
-
-        // Render thinking block if exists
-        if (thinkingContent) {
-            const thinkingHtml = typeof marked !== 'undefined' ? marked.parse(thinkingContent) : escapeHtml(thinkingContent).replace(/\n/g, '<br>');
-            html += `
-                <div class="thinking-block">
-                    <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
-                        <span>🧠 Pensando...</span>
-                        <span class="thinking-toggle">▼</span>
+            // Only add if we didn't already get reasoning from API
+            if (!reasoningContent) {
+                const thinkingHtml = typeof marked !== 'undefined' ? marked.parse(thinkingContent) : escapeHtml(thinkingContent).replace(/\n/g, '<br>');
+                html += `
+                    <div class="thinking-block">
+                        <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                            <span>🧠 Pensando...</span>
+                            <span class="thinking-toggle">▼</span>
+                        </div>
+                        <div class="thinking-content">${thinkingHtml}</div>
                     </div>
-                    <div class="thinking-content">${thinkingHtml}</div>
-                </div>
-            `;
+                `;
+            }
         }
 
         // Render main content
@@ -740,10 +747,10 @@
         });
     }
 
-    function updateBotMessage(messageEl, text) {
+    function updateBotMessage(messageEl, text, reasoningContent = '') {
         const textEl = messageEl.querySelector('.text');
         if (textEl) {
-            textEl.innerHTML = renderMarkdown(text);
+            textEl.innerHTML = renderMarkdown(text, reasoningContent);
             addCopyButtons(textEl);
         }
     }
@@ -800,21 +807,6 @@
                 webSearchBtn.classList.remove('active');
                 webSearchBtn.title = 'Ativar Busca Web (Tavily)';
                 console.log('🔍 Web Search: OFF');
-            }
-        }
-    }
-
-    function toggleThinkingMode() {
-        thinkingModeEnabled = !thinkingModeEnabled;
-        if (thinkingBtn) {
-            if (thinkingModeEnabled) {
-                thinkingBtn.classList.add('active');
-                thinkingBtn.title = 'Modo Thinking ATIVADO';
-                console.log('🧠 Thinking Mode: ON');
-            } else {
-                thinkingBtn.classList.remove('active');
-                thinkingBtn.title = 'Modo Thinking (CoT)';
-                console.log('🧠 Thinking Mode: OFF');
             }
         }
     }
@@ -998,9 +990,8 @@
                     image_base64: image_base64,
                     user_id: masterUserId,
                     agent_type: currentAgent,
-                    jade_model: currentJadeModel, // 'high' (GLM 4.7) or 'flash' (Cerebras)
-                    web_search: webSearchEnabled && currentAgent === 'jade',
-                    thinking_mode: thinkingModeEnabled && currentAgent === 'jade'
+                    jade_model: currentJadeModel, // 'high' (GLM 4.7), 'minimax' (MiniMax M2.1), or 'flash' (Cerebras)
+                    web_search: webSearchEnabled && currentAgent === 'jade'
                 })
             });
 
@@ -1052,7 +1043,9 @@
                 clearInterval(heavyPhaseInterval);
             }
 
-            updateBotMessage(jadeTypingMessage, botResponse);
+            // Render with reasoning_content if available
+            const reasoningContent = json.reasoning_content || '';
+            updateBotMessage(jadeTypingMessage, botResponse, reasoningContent);
             saveMessageToCurrentChat(agentName, botResponse);
             chatbox.scrollTop = chatbox.scrollHeight;
 
@@ -1162,7 +1155,12 @@
 
         // Update button text
         if (currentModelName) {
-            currentModelName.textContent = model === 'high' ? 'Jade High' : 'Jade Flash';
+            const modelNames = {
+                'high': 'Jade High',
+                'minimax': 'Jade Reasoning',
+                'flash': 'Jade Flash'
+            };
+            currentModelName.textContent = modelNames[model] || 'Jade High';
         }
 
         // Update active state in dropdown
@@ -1173,7 +1171,12 @@
             modelDropdownMenu.classList.add('hidden');
         }
 
-        console.log(`🎯 Modelo alterado para: ${model === 'high' ? 'GLM 4.7 (High)' : 'Cerebras (Flash)'}`);
+        const modelDescriptions = {
+            'high': 'GLM 4.7 (High)',
+            'minimax': 'MiniMax M2.1 (Reasoning)',
+            'flash': 'Cerebras (Flash)'
+        };
+        console.log(`🎯 Modelo alterado para: ${modelDescriptions[model] || model}`);
     }
 
     setupEventListeners();
