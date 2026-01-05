@@ -193,11 +193,12 @@ body {
 .hero-title-ascii {
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     font-size: clamp(2rem, 4vw, 4rem);
-    line-height: 1.1;
+    line-height: 1.05;
     letter-spacing: 0;
     text-align: center;
-    color: #c7b6ff;
-    margin-bottom: 1.5rem;
+    color: #e1d7ff;
+    font-weight: 600;
+    margin-bottom: 1.35rem;
     animation: asciiFloat 10s ease-in-out infinite;
 }
 
@@ -247,7 +248,7 @@ body {
 
     50% {
         opacity: 1;
-        transform: translateX(4px);
+        transform: translateX(2px);
         text-shadow: 0 0 32px rgba(124, 108, 255, 0.6), 0 0 70px rgba(79, 209, 255, 0.28);
     }
 }

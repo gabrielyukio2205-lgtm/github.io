@@ -13,6 +13,7 @@
     const container = canvas.parentElement || document.body;
     let sceneWidth = 0;
     let sceneHeight = 0;
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // Theme detection and management
     let isDarkMode = true;
@@ -173,6 +174,97 @@
             applyTheme();
         }
     });
+
+    // Subtle ASCII flicker using only J/A/D/E for the hero title.
+    const asciiTitle = document.querySelector('.hero-title-ascii');
+    const asciiLines = asciiTitle ? Array.from(asciiTitle.querySelectorAll('span')) : [];
+    if (asciiLines.length) {
+        const swapLetters = ['J', 'A', 'D', 'E'];
+        const baseLines = asciiLines.map(span => span.textContent);
+        const activeLines = baseLines.map(line => line.split(''));
+        const timers = baseLines.map(line => Array.from(line, () => 0));
+        const swapIndices = baseLines.map(line => {
+            const indices = [];
+            for (let i = 0; i < line.length; i++) {
+                if (swapLetters.includes(line[i])) indices.push(i);
+            }
+            return indices;
+        });
+
+        const resetAscii = () => {
+            asciiLines.forEach((span, index) => {
+                span.textContent = baseLines[index];
+                activeLines[index] = baseLines[index].split('');
+                timers[index].fill(0);
+            });
+        };
+
+        let lastTime = performance.now();
+        let spawnTimer = 0.1;
+
+        const tickAscii = (time) => {
+            const dt = Math.min(0.05, (time - lastTime) / 1000);
+            lastTime = time;
+
+            if (!reducedMotionQuery.matches) {
+                let needsRender = false;
+
+                spawnTimer -= dt;
+                if (spawnTimer <= 0) {
+                    spawnTimer = 0.12 + Math.random() * 0.14;
+                    const sparks = 2 + Math.floor(Math.random() * 3);
+
+                    for (let i = 0; i < sparks; i++) {
+                        const lineIndex = Math.floor(Math.random() * swapIndices.length);
+                        const indices = swapIndices[lineIndex];
+                        if (!indices.length) continue;
+                        const pos = indices[Math.floor(Math.random() * indices.length)];
+                        const baseChar = baseLines[lineIndex][pos];
+                        let nextChar = swapLetters[Math.floor(Math.random() * swapLetters.length)];
+                        if (nextChar === baseChar) {
+                            nextChar = swapLetters[(swapLetters.indexOf(nextChar) + 1) % swapLetters.length];
+                        }
+                        activeLines[lineIndex][pos] = nextChar;
+                        timers[lineIndex][pos] = 0.2 + Math.random() * 0.25;
+                        needsRender = true;
+                    }
+                }
+
+                for (let lineIndex = 0; lineIndex < timers.length; lineIndex++) {
+                    const lineTimers = timers[lineIndex];
+                    const lineBase = baseLines[lineIndex];
+                    const lineActive = activeLines[lineIndex];
+
+                    for (let i = 0; i < lineTimers.length; i++) {
+                        if (lineTimers[i] > 0) {
+                            lineTimers[i] -= dt;
+                            if (lineTimers[i] <= 0) {
+                                lineActive[i] = lineBase[i];
+                                needsRender = true;
+                            }
+                        }
+                    }
+                }
+
+                if (needsRender) {
+                    asciiLines.forEach((span, index) => {
+                        span.textContent = activeLines[index].join('');
+                    });
+                }
+            }
+
+            requestAnimationFrame(tickAscii);
+        };
+
+        if (reducedMotionQuery.matches) {
+            resetAscii();
+        }
+        reducedMotionQuery.addEventListener('change', (event) => {
+            if (event.matches) resetAscii();
+        });
+
+        requestAnimationFrame(tickAscii);
+    }
 
     // Scroll animations
     const observer = new IntersectionObserver((entries) => {
