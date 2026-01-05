@@ -28,23 +28,6 @@
     let csvData = null;
     let csvColumns = [];
 
-    // Sidebar toggle
-    const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const sidebar = document.getElementById('sidebar');
-
-    if (toggleSidebarBtn) {
-        toggleSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-        });
-    }
-
-    if (mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-        });
-    }
-
     // Upload Zone Events
     uploadZone.addEventListener('click', () => csvInput.click());
 
