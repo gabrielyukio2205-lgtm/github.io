@@ -971,27 +971,26 @@ code {
 
 .icon-btn,
 .send-btn {
-  background: linear-gradient(rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.2)) padding-box, var(--accent-gradient) border-box;
-  background-size: 200% 200%;
-  animation: auroraShift 6s ease infinite;
-  border: 1px solid transparent;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.icon-btn:hover,
+.send-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-highlight);
   color: var(--text-primary);
 }
 
-.icon-btn:hover {
-  background: var(--surface-hover);
-  color: var(--primary-color);
-}
-
 .send-btn {
-  background: linear-gradient(var(--primary-color), var(--primary-color)) padding-box, var(--accent-gradient) border-box;
-  background-size: 200% 200%;
-  color: #fff;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .send-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px var(--primary-glow);
+  box-shadow: var(--shadow-sm);
 }
 
 .send-btn:active {
@@ -1001,26 +1000,27 @@ code {
 /* Web Search Button Active State */
 #webSearchBtn.active {
   color: var(--secondary-color);
-  background: rgba(53, 168, 85, 0.15);
+  background: transparent;
   border-color: var(--secondary-color);
 }
 
 [data-theme="light"] #webSearchBtn.active {
   color: #35a855;
-  background: rgba(53, 168, 85, 0.1);
+  background: transparent;
   border-color: #35a855;
 }
 
 /* Thinking Mode Button Active State */
 #thinkingBtn.active {
   color: #eb5757;
-  background: rgba(235, 87, 87, 0.12);
-  border-color: transparent;
+  background: transparent;
+  border-color: rgba(235, 87, 87, 0.6);
 }
 
 [data-theme="light"] #thinkingBtn.active {
   color: #e03e3e;
-  background: rgba(224, 62, 62, 0.08);
+  background: transparent;
+  border-color: rgba(224, 62, 62, 0.6);
 }
 
 /* Thinking Block Styling - ChatGPT Style */
@@ -1419,7 +1419,8 @@ code {
 /* PDF button active state */
 #pdfBtn.active {
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  background: transparent;
+  border-color: rgba(239, 68, 68, 0.6);
 }
 
 /* --- MODEL SELECTOR (ChatGPT Style) --- */
