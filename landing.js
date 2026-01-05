@@ -13,6 +13,7 @@
     const container = canvas.parentElement || document.body;
     let sceneWidth = 0;
     let sceneHeight = 0;
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // Theme detection and management
     let isDarkMode = true;
@@ -78,15 +79,17 @@
             this.x = Math.random() * sceneWidth;
             this.y = sceneHeight + 40;
             this.char = allChars[Math.floor(Math.random() * allChars.length)];
-            this.speed = 0.2 + Math.random() * 0.55;
-            this.size = 10 + Math.random() * 14;
-            this.opacity = 0.04 + Math.random() * 0.12;
-            this.drift = (Math.random() - 0.5) * 0.25;
+            this.speed = 0.35 + Math.random() * 0.85;
+            this.size = 10 + Math.random() * 18;
+            this.baseOpacity = 0.06 + Math.random() * 0.16;
+            this.drift = (Math.random() - 0.5) * 0.4;
+            this.twinkle = 0.6 + Math.random() * 0.9;
+            this.phase = Math.random() * Math.PI * 2;
 
             // Make JADE letters brighter
             if (jadeChars.includes(this.char)) {
-                this.opacity *= 1.6;
-                this.size *= 1.1;
+                this.baseOpacity *= 1.6;
+                this.size *= 1.15;
             }
 
             this.updateColors();
@@ -96,6 +99,7 @@
             this.y -= this.speed;
             this.x += this.drift;
             this.x += Math.sin(this.y * 0.01) * 0.2;
+            this.phase += 0.03 * this.twinkle;
 
             if (this.y < -40 || this.x < -40 || this.x > sceneWidth + 40) {
                 this.reset();
@@ -112,7 +116,8 @@
                 ctx.shadowBlur = 10;
             }
 
-            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
+            const alpha = this.baseOpacity * (0.65 + Math.sin(this.phase) * 0.35);
+            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${alpha})`;
             ctx.fillText(this.char, this.x, this.y);
             ctx.restore();
         }
@@ -123,7 +128,7 @@
 
     function setupParticles() {
         particles.length = 0;
-        particleCount = Math.min(70, Math.floor((sceneWidth * sceneHeight) / 16000));
+        particleCount = Math.min(110, Math.floor((sceneWidth * sceneHeight) / 12000));
         for (let i = 0; i < particleCount; i++) {
             particles.push(new Particle());
         }
@@ -169,6 +174,56 @@
             applyTheme();
         }
     });
+
+    // ASCII title shimmer (Jules-style movement)
+    const asciiTitle = document.querySelector('.hero-title-ascii');
+    const asciiLines = asciiTitle ? Array.from(asciiTitle.querySelectorAll('span')) : [];
+    if (asciiLines.length) {
+        const baseLines = asciiLines.map(span => span.textContent);
+        const shimmerChars = ['.', ':', '*', '+', 'x', 'o'];
+        let asciiTimer = null;
+
+        const renderAsciiShimmer = () => {
+            asciiLines.forEach((span, index) => {
+                const base = baseLines[index];
+                const chars = base.split('');
+                for (let i = 0; i < chars.length; i++) {
+                    if (chars[i] === ' ' && Math.random() < 0.05) {
+                        chars[i] = shimmerChars[Math.floor(Math.random() * shimmerChars.length)];
+                    }
+                }
+                span.textContent = chars.join('');
+            });
+        };
+
+        const startAsciiShimmer = () => {
+            if (asciiTimer) return;
+            asciiTimer = window.setInterval(renderAsciiShimmer, 140);
+        };
+
+        const stopAsciiShimmer = () => {
+            if (!asciiTimer) return;
+            window.clearInterval(asciiTimer);
+            asciiTimer = null;
+            asciiLines.forEach((span, index) => {
+                span.textContent = baseLines[index];
+            });
+        };
+
+        if (reducedMotionQuery.matches) {
+            stopAsciiShimmer();
+        } else {
+            startAsciiShimmer();
+        }
+
+        reducedMotionQuery.addEventListener('change', (event) => {
+            if (event.matches) {
+                stopAsciiShimmer();
+            } else {
+                startAsciiShimmer();
+            }
+        });
+    }
 
     // Scroll animations
     const observer = new IntersectionObserver((entries) => {
