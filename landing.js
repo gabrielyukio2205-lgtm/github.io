@@ -13,7 +13,6 @@
     const container = canvas.parentElement || document.body;
     let sceneWidth = 0;
     let sceneHeight = 0;
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // Theme detection and management
     let isDarkMode = true;
@@ -174,56 +173,6 @@
             applyTheme();
         }
     });
-
-    // ASCII title shimmer (Jules-style movement)
-    const asciiTitle = document.querySelector('.hero-title-ascii');
-    const asciiLines = asciiTitle ? Array.from(asciiTitle.querySelectorAll('span')) : [];
-    if (asciiLines.length) {
-        const baseLines = asciiLines.map(span => span.textContent);
-        const shimmerChars = ['.', ':', '*', '+', 'x', 'o'];
-        let asciiTimer = null;
-
-        const renderAsciiShimmer = () => {
-            asciiLines.forEach((span, index) => {
-                const base = baseLines[index];
-                const chars = base.split('');
-                for (let i = 0; i < chars.length; i++) {
-                    if (chars[i] === ' ' && Math.random() < 0.05) {
-                        chars[i] = shimmerChars[Math.floor(Math.random() * shimmerChars.length)];
-                    }
-                }
-                span.textContent = chars.join('');
-            });
-        };
-
-        const startAsciiShimmer = () => {
-            if (asciiTimer) return;
-            asciiTimer = window.setInterval(renderAsciiShimmer, 140);
-        };
-
-        const stopAsciiShimmer = () => {
-            if (!asciiTimer) return;
-            window.clearInterval(asciiTimer);
-            asciiTimer = null;
-            asciiLines.forEach((span, index) => {
-                span.textContent = baseLines[index];
-            });
-        };
-
-        if (reducedMotionQuery.matches) {
-            stopAsciiShimmer();
-        } else {
-            startAsciiShimmer();
-        }
-
-        reducedMotionQuery.addEventListener('change', (event) => {
-            if (event.matches) {
-                stopAsciiShimmer();
-            } else {
-                startAsciiShimmer();
-            }
-        });
-    }
 
     // Scroll animations
     const observer = new IntersectionObserver((entries) => {
