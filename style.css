@@ -1,85 +1,107 @@
 :root {
-  /* --- Notion-Style Palette (Dark) --- */
+  /* --- OpenAI-Style Palette (Dark) --- */
+  --bg-color: #0b0f14;
+  --bg-primary: #0b0f14;
+  --bg-secondary: #11161c;
+  --bg-tertiary: #161c24;
+  --bg-hover: #1b222c;
+  --sidebar-bg: rgba(13, 18, 24, 0.92);
+  --surface-color: #151b22;
+  --surface-hover: #1c232d;
+  --input-bg: #0f141b;
+  --glass-bg: rgba(15, 19, 25, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
-  /* Backgrounds */
-  --bg-color: #191919;
-  --sidebar-bg: #202020;
-  --surface-color: #262626;
-  --surface-hover: #2f2f2f;
-  --input-bg: #262626;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(255, 255, 255, 0.16);
 
-  /* Bordas */
-  --border-color: #353535;
-  --border-highlight: #454545;
+  --primary-color: #10b981;
+  --primary-gradient: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);
+  --secondary-color: #38bdf8;
+  --accent-1: #2dd4bf;
+  --accent-2: #38bdf8;
+  --accent-3: #fbbf24;
+  --accent-gradient: linear-gradient(120deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-1));
+  --accent-glow: rgba(45, 212, 191, 0.18);
+  --primary-glow: rgba(16, 185, 129, 0.18);
 
-  /* Cores de Destaque */
-  --primary-color: #2383e2;
-  --primary-gradient: linear-gradient(135deg, #2383e2 0%, #528bff 100%);
-  --secondary-color: #35a855;
-  --accent-glow: rgba(35, 131, 226, 0.15);
-  --primary-glow: rgba(35, 131, 226, 0.1);
+  --text-primary: #f4f6fb;
+  --text-secondary: #b3bccd;
+  --text-tertiary: #8b95a9;
+  --text-muted: #98a3b8;
 
-  /* Texto */
-  --text-primary: #ebebeb;
-  --text-secondary: #9b9b9b;
-  --text-tertiary: #6b6b6b;
+  --font-sans: 'Sora', 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 
-  /* Fontes */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.35);
 
-  /* Efeitos */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
-
-  /* Transições */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.2s ease;
   --transition-slow: 0.3s ease;
 
-  /* Raios de Borda */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 
-  /* Componentes Específicos */
-  --user-msg-bg: rgba(35, 131, 226, 0.12);
-  --user-msg-text: #6eb3f7;
+  --user-msg-bg: rgba(16, 185, 129, 0.12);
+  --user-msg-text: #4be3b4;
   --bot-msg-bg: transparent;
-  --code-header-bg: #2a2a2a;
-  --code-bg: #1e1e1e;
+  --code-header-bg: #141a22;
+  --code-bg: #0f141b;
+
+  --accent-primary: var(--primary-color);
+  --accent-secondary: #38bdf8;
+
+  --bg-gradient: radial-gradient(1200px circle at 10% -20%, rgba(45, 212, 191, 0.18), transparent 45%),
+    radial-gradient(1000px circle at 90% -30%, rgba(56, 189, 248, 0.18), transparent 45%);
 }
 
 /* Light Mode Override (Notion Style) */
 [data-theme="light"] {
-  --bg-color: #ffffff;
-  --sidebar-bg: #fbfbfa;
-  --surface-color: #f7f6f3;
-  --surface-hover: #efefef;
+  --bg-color: #f6f7f9;
+  --bg-primary: #f6f7f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eef1f6;
+  --bg-hover: #f1f3f7;
+  --sidebar-bg: rgba(255, 255, 255, 0.92);
+  --surface-color: #ffffff;
+  --surface-hover: #f1f3f7;
   --input-bg: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(15, 23, 42, 0.12);
 
-  --border-color: #e8e7e4;
-  --border-highlight: #d8d7d4;
+  --border-color: rgba(15, 23, 42, 0.12);
+  --border-highlight: rgba(15, 23, 42, 0.2);
 
-  --primary-color: #2383e2;
-  --primary-gradient: linear-gradient(135deg, #2383e2 0%, #528bff 100%);
-  --accent-glow: rgba(35, 131, 226, 0.1);
-  --primary-glow: rgba(35, 131, 226, 0.05);
+  --primary-color: #0ea371;
+  --primary-gradient: linear-gradient(135deg, #0ea371 0%, #38bdf8 100%);
+  --secondary-color: #0ea5e9;
+  --accent-1: #14b8a6;
+  --accent-2: #38bdf8;
+  --accent-3: #f59e0b;
+  --accent-gradient: linear-gradient(120deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-1));
+  --accent-glow: rgba(14, 163, 113, 0.12);
+  --primary-glow: rgba(14, 163, 113, 0.18);
 
-  --text-primary: #37352f;
-  --text-secondary: #787774;
-  --text-tertiary: #9b9a97;
+  --text-primary: #101827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
+  --text-muted: #8792a5;
 
-  --user-msg-bg: rgba(35, 131, 226, 0.08);
-  --user-msg-text: #2383e2;
+  --user-msg-bg: rgba(16, 185, 129, 0.12);
+  --user-msg-text: #0ea371;
 
-  --code-bg: #f7f6f3;
-  --code-header-bg: #efefef;
+  --code-bg: #f3f4f6;
+  --code-header-bg: #e5e7eb;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+
+  --bg-gradient: radial-gradient(1200px circle at 10% -20%, rgba(20, 184, 166, 0.12), transparent 45%),
+    radial-gradient(1000px circle at 90% -30%, rgba(56, 189, 248, 0.12), transparent 45%);
 }
 
 * {
@@ -92,7 +114,7 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-color);
+  background: var(--bg-gradient), var(--bg-color);
   color: var(--text-primary);
   height: 100vh;
   width: 100vw;
@@ -101,18 +123,55 @@ body {
   flex-direction: column;
 }
 
-/* --- BACKGROUND EFFECTS (Hidden for Notion style) --- */
+/* --- BACKGROUND EFFECTS --- */
 .background-effects {
-  display: none;
-  /* Hidden for clean Notion aesthetic */
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
 }
 
-/* Keeping these in case user wants to re-enable */
-.glow-orb,
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  animation: float 18s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.25), transparent 70%);
+  top: -220px;
+  left: -140px;
+}
+
+.orb-2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  bottom: -260px;
+  right: -180px;
+  animation-delay: -6s;
+}
+
 .grid-overlay {
-  display: none;
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 160px 160px;
+  opacity: 0.2;
 }
 
+[data-theme="light"] .glow-orb {
+  opacity: 0.2;
+}
+
+[data-theme="light"] .grid-overlay {
+  opacity: 0.12;
+}
 @keyframes float {
 
   0%,
@@ -125,18 +184,35 @@ body {
   }
 }
 
+@keyframes auroraShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* --- LAYOUT --- */
 #layout-container {
   display: flex;
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* --- SIDEBAR --- */
 #sidebar {
   width: 280px;
-  background-color: var(--sidebar-bg);
+  background: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
+  backdrop-filter: blur(18px);
   display: flex;
   flex-direction: column;
   padding: 1.25rem;
@@ -224,9 +300,13 @@ body {
 }
 
 .nav-btn.active {
-  background: var(--accent-glow);
-  color: var(--primary-color);
+  border: 1px solid transparent;
+  background: linear-gradient(var(--surface-color), var(--surface-color)) padding-box, var(--accent-gradient) border-box;
+  background-size: 200% 200%;
+  animation: auroraShift 9s ease infinite;
+  color: var(--text-primary);
   font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .nav-icon {
@@ -299,9 +379,11 @@ body {
 
 /* Estado Ativo */
 .agent-btn.active {
-  background: var(--accent-glow);
-  color: var(--primary-color);
-  border-color: transparent;
+  border: 1px solid transparent;
+  background: linear-gradient(var(--surface-color), var(--surface-color)) padding-box, var(--accent-gradient) border-box;
+  background-size: 200% 200%;
+  animation: auroraShift 9s ease infinite;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -330,22 +412,23 @@ body {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  background: transparent;
+  background: linear-gradient(var(--surface-color), var(--surface-color)) padding-box, var(--accent-gradient) border-box;
+  background-size: 200% 200%;
+  animation: auroraShift 8s ease infinite;
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   padding: 10px 12px;
   border-radius: var(--radius-md);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   margin-bottom: 2rem;
-  transition: all 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 #new-chat-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-highlight);
   transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
 
 /* Histórico */
@@ -472,6 +555,13 @@ body {
   height: 60px;
   flex-shrink: 0;
   z-index: 40;
+  background: rgba(15, 19, 25, 0.6);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(16px);
+}
+
+[data-theme="light"] #chat-header {
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .header-left {
@@ -881,18 +971,11 @@ code {
 
 .icon-btn,
 .send-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
+  background: linear-gradient(rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.2)) padding-box, var(--accent-gradient) border-box;
+  background-size: 200% 200%;
+  animation: auroraShift 6s ease infinite;
   border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+  color: var(--text-primary);
 }
 
 .icon-btn:hover {
@@ -901,13 +984,14 @@ code {
 }
 
 .send-btn {
-  background: var(--primary-color);
+  background: linear-gradient(var(--primary-color), var(--primary-color)) padding-box, var(--accent-gradient) border-box;
+  background-size: 200% 200%;
   color: #fff;
 }
 
 .send-btn:hover {
-  background: #1a73cc;
   transform: translateY(-1px);
+  box-shadow: 0 10px 24px var(--primary-glow);
 }
 
 .send-btn:active {
@@ -1215,6 +1299,16 @@ code {
   #input-container {
     width: 95%;
     bottom: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-btn.active,
+  .agent-btn.active,
+  #new-chat-btn,
+  .icon-btn,
+  .send-btn {
+    animation: none;
   }
 }
 

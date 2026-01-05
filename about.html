@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* Estilos específicos para a página Sobre */
     #about-container {
@@ -19,11 +19,14 @@
         line-height: 1.8;
     }
     h1 {
-        font-size: 2.5rem;
+        font-size: 2.4rem;
         margin-bottom: 0.5rem;
-        color: var(--primary-color);
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.08em;
         line-height: 1.2;
     }
     .subtitle {
@@ -73,29 +76,31 @@
         margin-top: 2rem;
     }
     .feature-card {
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
         padding: 1.5rem;
         border-radius: var(--radius-md);
         transition: transform 0.2s, border-color 0.2s;
         position: relative;
         overflow: hidden;
+        backdrop-filter: blur(12px);
+        box-shadow: var(--shadow-sm);
     }
     .feature-card:hover {
-        transform: translateY(-4px);
-        border-color: var(--primary-color);
-        box-shadow: 0 5px 20px rgba(0, 240, 255, 0.05);
+        transform: translateY(-6px);
+        border-color: var(--border-highlight);
+        box-shadow: var(--shadow-md);
     }
     .tech-tag {
         font-family: var(--font-mono);
         font-size: 0.75rem;
         color: var(--primary-color);
-        background: rgba(0, 240, 255, 0.1);
+        background: rgba(45, 212, 191, 0.12);
         padding: 4px 8px;
         border-radius: 4px;
         display: inline-block;
         margin-top: 0.5rem;
-        border: 1px solid rgba(0, 240, 255, 0.2);
+        border: 1px solid rgba(45, 212, 191, 0.3);
     }
     .system-specs {
         margin-top: 4rem;

@@ -3,25 +3,25 @@
 /* ========== CSS Variables ========== */
 :root {
     /* Colors - Dark Theme (default) */
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #12121a;
-    --bg-tertiary: #1a1a24;
-    --bg-card: rgba(26, 26, 36, 0.8);
-    --bg-hover: rgba(255, 255, 255, 0.05);
-    --bg-active: rgba(139, 92, 246, 0.15);
+    --bg-primary: #0b0f14;
+    --bg-secondary: #11161c;
+    --bg-tertiary: #161c24;
+    --bg-card: rgba(17, 22, 28, 0.75);
+    --bg-hover: rgba(255, 255, 255, 0.04);
+    --bg-active: rgba(16, 185, 129, 0.12);
 
-    --text-primary: #f5f5f7;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
+    --text-primary: #f4f6fb;
+    --text-secondary: #b3bccd;
+    --text-muted: #8b95a9;
 
-    --accent-primary: #8b5cf6;
-    --accent-secondary: #a78bfa;
-    --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #4f46e5 100%);
+    --accent-primary: #10b981;
+    --accent-secondary: #38bdf8;
+    --accent-gradient: linear-gradient(120deg, #2dd4bf 0%, #38bdf8 50%, #fbbf24 100%);
 
     --border-color: rgba(255, 255, 255, 0.08);
-    --border-accent: rgba(139, 92, 246, 0.3);
+    --border-accent: rgba(56, 189, 248, 0.3);
 
-    --success: #22c55e;
+    --success: #10b981;
     --error: #ef4444;
     --warning: #f59e0b;
 
@@ -44,35 +44,39 @@
     --chat-panel-width: 360px;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.3);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
+    --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 40px rgba(16, 185, 129, 0.25);
 
     /* Transitions */
     --transition-fast: 0.15s ease;
-    --transition-normal: 0.25s ease;
-    --transition-slow: 0.4s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    --font-sans: 'Sora', 'Space Grotesk', 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
 
 /* Light Theme */
 body.light-theme {
-    --bg-primary: #fafafa;
+    --bg-primary: #f6f7f9;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f4f4f5;
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --bg-hover: rgba(0, 0, 0, 0.03);
-    --bg-active: rgba(139, 92, 246, 0.1);
+    --bg-tertiary: #eef1f6;
+    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-hover: rgba(15, 23, 42, 0.04);
+    --bg-active: rgba(16, 185, 129, 0.12);
 
-    --text-primary: #18181b;
-    --text-secondary: #52525b;
-    --text-muted: #a1a1aa;
+    --text-primary: #101827;
+    --text-secondary: #4b5563;
+    --text-muted: #8792a5;
 
-    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color: rgba(15, 23, 42, 0.12);
+    --border-accent: rgba(14, 163, 113, 0.25);
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+    --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
 }
 
 /* ========== Reset & Base ========== */
@@ -87,7 +91,7 @@ body.light-theme {
 html,
 body {
     height: 100%;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-sans);
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
@@ -114,7 +118,7 @@ body {
 .orb-1 {
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent 70%);
+    background: radial-gradient(circle, rgba(45, 212, 191, 0.28), transparent 70%);
     top: -200px;
     left: -100px;
     animation-delay: 0s;
@@ -123,7 +127,7 @@ body {
 .orb-2 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.25), transparent 70%);
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
     bottom: -200px;
     right: -100px;
     animation-delay: -7s;
@@ -132,7 +136,7 @@ body {
 .orb-3 {
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(79, 70, 229, 0.2), transparent 70%);
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.18), transparent 70%);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -156,6 +160,20 @@ body {
 
     75% {
         transform: translate(-20px, -10px) scale(1.02);
+    }
+}
+
+@keyframes auroraShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
     }
 }
 
@@ -749,11 +767,13 @@ body.light-theme .gradient-orb {
 }
 
 .send-btn {
-    background: var(--accent-gradient);
-    border: none;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box, var(--accent-gradient) border-box;
+    border: 1px solid transparent;
+    background-size: 200% 200%;
+    animation: auroraShift 8s ease infinite;
     border-radius: var(--radius-md);
     padding: var(--space-sm) var(--space-md);
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -762,8 +782,8 @@ body.light-theme .gradient-orb {
 }
 
 .send-btn:hover {
-    opacity: 0.9;
     transform: scale(1.02);
+    box-shadow: var(--shadow-sm);
 }
 
 /* ========== Modal ========== */
@@ -881,9 +901,11 @@ body.light-theme .gradient-orb {
 }
 
 .tab-btn.active {
-    border-color: var(--accent-primary);
-    background: var(--bg-active);
-    color: var(--accent-primary);
+    border-color: transparent;
+    background: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)) padding-box, var(--accent-gradient) border-box;
+    background-size: 200% 200%;
+    animation: auroraShift 8s ease infinite;
+    color: var(--text-primary);
 }
 
 .tab-btn .tab-icon {
@@ -954,11 +976,13 @@ body.light-theme .gradient-orb {
 
 /* Buttons */
 .btn-primary {
-    background: var(--accent-gradient);
-    border: none;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box, var(--accent-gradient) border-box;
+    border: 1px solid transparent;
+    background-size: 200% 200%;
+    animation: auroraShift 8s ease infinite;
     border-radius: var(--radius-md);
     padding: var(--space-sm) var(--space-lg);
-    color: white;
+    color: var(--text-primary);
     font-weight: 500;
     cursor: pointer;
     display: flex;
@@ -968,8 +992,8 @@ body.light-theme .gradient-orb {
 }
 
 .btn-primary:hover {
-    opacity: 0.9;
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-primary:disabled {
@@ -990,7 +1014,10 @@ body.light-theme .gradient-orb {
 }
 
 .btn-secondary:hover {
-    background: var(--bg-hover);
+    border-color: transparent;
+    background: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)) padding-box, var(--accent-gradient) border-box;
+    background-size: 200% 200%;
+    animation: auroraShift 8s ease infinite;
     color: var(--text-primary);
 }
 
@@ -1104,8 +1131,10 @@ body.light-theme .gradient-orb {
 }
 
 .quiz-option:hover:not(:disabled) {
-    border-color: var(--accent-primary);
-    background: var(--bg-active);
+    border-color: transparent;
+    background: linear-gradient(var(--bg-tertiary), var(--bg-tertiary)) padding-box, var(--accent-gradient) border-box;
+    background-size: 200% 200%;
+    animation: auroraShift 8s ease infinite;
 }
 
 .quiz-option.correct {
@@ -1216,6 +1245,18 @@ body.light-theme .gradient-orb {
 
     #notebook-title {
         font-size: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-primary,
+    .btn-secondary,
+    .btn-secondary:hover,
+    .send-btn,
+    .tab-btn.active,
+    .add-block-header-btn,
+    .quiz-option:hover:not(:disabled) {
+        animation: none;
     }
 }
 
@@ -1424,7 +1465,7 @@ body.light-theme .gradient-orb {
     padding: 2px 6px;
     border-radius: 4px;
     border: 1px solid var(--border-color);
-    font-family: 'Fira Code', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
 }
 
@@ -1644,7 +1685,7 @@ body.light-theme .gradient-orb {
 /* Code block */
 .block-item.code {
     background: var(--bg-tertiary);
-    font-family: 'Fira Code', monospace;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
 }
 
@@ -1777,10 +1818,12 @@ body.light-theme .gradient-orb {
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-xs) var(--space-md);
-    background: var(--accent-gradient);
-    border: none;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box, var(--accent-gradient) border-box;
+    border: 1px solid transparent;
+    background-size: 200% 200%;
+    animation: auroraShift 8s ease infinite;
     border-radius: var(--radius-md);
-    color: white;
+    color: var(--text-primary);
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: 500;
@@ -1789,5 +1832,5 @@ body.light-theme .gradient-orb {
 
 .add-block-header-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: var(--shadow-md);
 }
