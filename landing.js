@@ -8,6 +8,11 @@
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const container = canvas.parentElement || document.body;
+    let sceneWidth = 0;
+    let sceneHeight = 0;
 
     // Theme detection and management
     let isDarkMode = true;
@@ -37,43 +42,31 @@
     // Expose toggle for button
     window.toggleJadeTheme = toggleTheme;
 
-    // Setup canvas size
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    // Characters to float - code/terminal style with JADE emphasis
-    const codeChars = '{}[]<>()=>;:./\\|01#$%&*+-@^_~'.split('');
-    const jadeChars = ['J', 'A', 'D', 'E', 'J', 'A', 'D', 'E']; // More JADE letters
+    // Characters to float - subtle ASCII with JADE emphasis
+    const codeChars = '.:;*+=/\\|<>(){}[]'.split('');
+    const jadeChars = ['J', 'A', 'D', 'E', '.'];
     const allChars = [...codeChars, ...jadeChars, ...jadeChars]; // Weight towards JADE
 
     // Color palettes
     const darkColors = [
-        { r: 99, g: 102, b: 241 },   // Indigo
-        { r: 139, g: 92, b: 246 },   // Purple
-        { r: 168, g: 85, b: 247 },   // Violet
-        { r: 59, g: 130, b: 246 },   // Blue
-        { r: 34, g: 211, b: 238 },   // Cyan
-        { r: 16, g: 185, b: 129 },   // Emerald
+        { r: 124, g: 108, b: 255 },  // Soft purple
+        { r: 79, g: 209, b: 255 },   // Cyan
+        { r: 246, g: 185, b: 92 },   // Warm accent
+        { r: 140, g: 255, b: 215 },  // Mint
     ];
 
     const lightColors = [
-        { r: 79, g: 70, b: 229 },    // Indigo darker
-        { r: 124, g: 58, b: 237 },   // Purple darker
-        { r: 147, g: 51, b: 234 },   // Violet darker
-        { r: 37, g: 99, b: 235 },    // Blue darker
-        { r: 6, g: 182, b: 212 },    // Cyan darker
-        { r: 5, g: 150, b: 105 },    // Emerald darker
+        { r: 90, g: 96, b: 201 },    // Indigo
+        { r: 56, g: 165, b: 215 },   // Cyan
+        { r: 214, g: 155, b: 80 },   // Warm accent
+        { r: 60, g: 168, b: 136 },   // Mint
     ];
 
     // Particle class for floating letters
     class Particle {
         constructor() {
             this.reset();
-            this.y = Math.random() * canvas.height;
+            this.y = Math.random() * sceneHeight;
         }
 
         updateColors() {
@@ -82,19 +75,18 @@
         }
 
         reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = canvas.height + 50;
+            this.x = Math.random() * sceneWidth;
+            this.y = sceneHeight + 40;
             this.char = allChars[Math.floor(Math.random() * allChars.length)];
-            this.speed = 0.4 + Math.random() * 1.0;
-            this.size = 14 + Math.random() * 22;
-            // MORE VISIBLE opacity
-            this.opacity = 0.08 + Math.random() * 0.18;
-            this.drift = (Math.random() - 0.5) * 0.4;
+            this.speed = 0.2 + Math.random() * 0.55;
+            this.size = 10 + Math.random() * 14;
+            this.opacity = 0.04 + Math.random() * 0.12;
+            this.drift = (Math.random() - 0.5) * 0.25;
 
             // Make JADE letters brighter
             if (jadeChars.includes(this.char)) {
-                this.opacity *= 1.5;
-                this.size *= 1.2;
+                this.opacity *= 1.6;
+                this.size *= 1.1;
             }
 
             this.updateColors();
@@ -103,16 +95,14 @@
         update() {
             this.y -= this.speed;
             this.x += this.drift;
-            this.x += Math.sin(this.y * 0.008) * 0.3;
+            this.x += Math.sin(this.y * 0.01) * 0.2;
 
-            if (this.y < -60) {
+            if (this.y < -40 || this.x < -40 || this.x > sceneWidth + 40) {
                 this.reset();
             }
         }
 
         draw() {
-            const bgColor = isDarkMode ? '#0a0a0f' : '#f8fafc';
-
             ctx.save();
             ctx.font = `600 ${this.size}px 'JetBrains Mono', 'Fira Code', 'Consolas', monospace`;
 
@@ -128,21 +118,39 @@
         }
     }
 
-    // Create particles - more for better coverage
     const particles = [];
-    const particleCount = Math.min(120, Math.floor((canvas.width * canvas.height) / 10000));
+    let particleCount = 0;
 
-    for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
+    function setupParticles() {
+        particles.length = 0;
+        particleCount = Math.min(70, Math.floor((sceneWidth * sceneHeight) / 16000));
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
     }
+
+    // Setup canvas size
+    function resize() {
+        const rect = container.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        sceneWidth = rect.width;
+        sceneHeight = rect.height;
+        setupParticles();
+    }
+    resize();
+    window.addEventListener('resize', resize);
 
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
 
-        // Clear with theme background
-        ctx.fillStyle = isDarkMode ? '#0a0a0f' : '#f8fafc';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, sceneWidth, sceneHeight);
 
         particles.forEach(p => {
             p.update();

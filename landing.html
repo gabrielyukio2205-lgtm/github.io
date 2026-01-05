@@ -8,15 +8,13 @@
     <meta name="description"
         content="J.A.D.E. é sua assistente de IA multimodal avançada. Chat, visão, voz, memória e ferramentas especializadas.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="landing.css">
 </head>
 
 <body>
-    <!-- WebGL Background -->
-    <canvas id="webgl-bg"></canvas>
-
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-brand">
@@ -34,10 +32,19 @@
         </div>
     </nav>
 
-    <!-- Hero Section - Neural Mesh Background -->
+    <!-- Hero Section - ASCII Ambient -->
     <section class="hero hero-centered">
+        <div class="hero-bg" aria-hidden="true">
+            <canvas id="webgl-bg"></canvas>
+        </div>
         <div class="hero-content centered">
-            <h1 class="hero-title-main">J.A.D.E.</h1>
+            <h1 class="hero-title-ascii" aria-label="J.A.D.E.">
+                <span>JJJJJ  AAA   DDDDD  EEEEE</span>
+                <span>  J   A   A  D   D  E</span>
+                <span>  J   AAAAA  D   D  EEEE</span>
+                <span>J J   A   A  D   D  E</span>
+                <span>JJ    A   A  DDDDD  EEEEE</span>
+            </h1>
             <p class="hero-tagline">Just an Artificially Designed Entity</p>
             <p class="hero-desc centered">
                 Sua assistente de IA multimodal com visão, voz, memória persistente
