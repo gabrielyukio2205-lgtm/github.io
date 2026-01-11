@@ -1,6 +1,7 @@
 /**
  * Image Gen - JavaScript Controller
  * Handles image generation with Chutes.ai models
+ * Supports multi-image editing (1-3 images)
  */
 
 // API Configuration - Same proxy used by other JADE pages
@@ -14,9 +15,9 @@ const uploadGroup = document.getElementById('upload-group');
 const uploadZone = document.getElementById('upload-zone');
 const imageUpload = document.getElementById('image-upload');
 const uploadPlaceholder = document.getElementById('upload-placeholder');
-const uploadPreview = document.getElementById('upload-preview');
-const previewImage = document.getElementById('preview-image');
-const removeImageBtn = document.getElementById('remove-image-btn');
+const uploadPreviews = document.getElementById('upload-previews');
+const addMoreBtn = document.getElementById('add-more-btn');
+const imageCountEl = document.getElementById('image-count');
 const toggleAdvancedBtn = document.getElementById('toggle-advanced');
 const advancedControls = document.getElementById('advanced-controls');
 const negativePrompt = document.getElementById('negative-prompt');
@@ -41,7 +42,8 @@ const clearGalleryBtn = document.getElementById('clear-gallery-btn');
 
 // State
 let selectedModel = 'z-turbo';
-let uploadedImageBase64 = null;
+let uploadedImages = []; // Array of { base64, name }
+const MAX_IMAGES = 3;
 let currentGeneratedImage = null;
 const GALLERY_KEY = 'jade_imagegen_gallery';
 const MAX_GALLERY_ITEMS = 20;
@@ -72,19 +74,23 @@ function initModelSelector() {
                 uploadGroup.classList.remove('hidden');
             } else {
                 uploadGroup.classList.add('hidden');
-                clearUploadedImage();
+                clearAllImages();
             }
         });
     });
 }
 
-// Upload Zone
+// Upload Zone - Multi-image support
 function initUploadZone() {
-    // Click to upload
-    uploadZone.addEventListener('click', (e) => {
-        if (e.target !== removeImageBtn && !removeImageBtn.contains(e.target)) {
-            imageUpload.click();
-        }
+    // Click to upload (on placeholder or add button)
+    uploadPlaceholder.addEventListener('click', (e) => {
+        e.stopPropagation();
+        imageUpload.click();
+    });
+
+    addMoreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        imageUpload.click();
     });
 
     // File selected
@@ -103,48 +109,94 @@ function initUploadZone() {
     uploadZone.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadZone.classList.remove('drag-over');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleFile(files[0]);
-        }
-    });
-
-    // Remove image
-    removeImageBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        clearUploadedImage();
+        handleFiles(e.dataTransfer.files);
     });
 }
 
 function handleFileSelect(e) {
-    const files = e.target.files;
-    if (files.length > 0) {
-        handleFile(files[0]);
+    handleFiles(e.target.files);
+    // Reset input to allow re-selecting same files
+    imageUpload.value = '';
+}
+
+function handleFiles(files) {
+    for (const file of files) {
+        if (uploadedImages.length >= MAX_IMAGES) {
+            showError(`Máximo de ${MAX_IMAGES} imagens permitido`);
+            break;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            continue;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            uploadedImages.push({
+                base64: e.target.result,
+                name: file.name
+            });
+            renderImagePreviews();
+        };
+        reader.readAsDataURL(file);
     }
 }
 
-function handleFile(file) {
-    if (!file.type.startsWith('image/')) {
-        showError('Por favor, selecione uma imagem válida');
+function renderImagePreviews() {
+    // Update counter
+    imageCountEl.textContent = uploadedImages.length;
+
+    // Clear existing previews
+    uploadPreviews.innerHTML = '';
+
+    if (uploadedImages.length === 0) {
+        // Show placeholder, hide add button
+        uploadPlaceholder.classList.remove('hidden');
+        addMoreBtn.classList.add('hidden');
+        uploadPreviews.classList.add('hidden');
         return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        uploadedImageBase64 = e.target.result;
-        previewImage.src = uploadedImageBase64;
-        uploadPlaceholder.classList.add('hidden');
-        uploadPreview.classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
+    // Hide placeholder, show previews
+    uploadPlaceholder.classList.add('hidden');
+    uploadPreviews.classList.remove('hidden');
+
+    // Show/hide add button based on count
+    if (uploadedImages.length < MAX_IMAGES) {
+        addMoreBtn.classList.remove('hidden');
+    } else {
+        addMoreBtn.classList.add('hidden');
+    }
+
+    // Render each image preview
+    uploadedImages.forEach((img, index) => {
+        const item = document.createElement('div');
+        item.className = 'upload-preview-item';
+        item.innerHTML = `
+            <img src="${img.base64}" alt="Imagem ${index + 1}">
+            <span class="image-number">${index + 1}</span>
+            <button class="remove-image-btn" data-index="${index}" title="Remover">×</button>
+        `;
+
+        // Remove button handler
+        item.querySelector('.remove-image-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeImage(index);
+        });
+
+        uploadPreviews.appendChild(item);
+    });
 }
 
-function clearUploadedImage() {
-    uploadedImageBase64 = null;
+function removeImage(index) {
+    uploadedImages.splice(index, 1);
+    renderImagePreviews();
+}
+
+function clearAllImages() {
+    uploadedImages = [];
     imageUpload.value = '';
-    previewImage.src = '';
-    uploadPlaceholder.classList.remove('hidden');
-    uploadPreview.classList.add('hidden');
+    renderImagePreviews();
 }
 
 // Advanced Controls
@@ -172,8 +224,8 @@ async function generateImage() {
         return;
     }
 
-    if (selectedModel === 'qwen-edit' && !uploadedImageBase64) {
-        showError('Por favor, faça upload de uma imagem para editar');
+    if (selectedModel === 'qwen-edit' && uploadedImages.length === 0) {
+        showError('Por favor, faça upload de pelo menos uma imagem para editar');
         return;
     }
 
@@ -190,8 +242,9 @@ async function generateImage() {
         height: parseInt(heightSelect.value)
     };
 
-    if (selectedModel === 'qwen-edit' && uploadedImageBase64) {
-        request.image_base64 = uploadedImageBase64;
+    // Send array of images for edit mode
+    if (selectedModel === 'qwen-edit' && uploadedImages.length > 0) {
+        request.images_base64 = uploadedImages.map(img => img.base64);
     }
 
     const seed = seedInput.value.trim();
@@ -292,15 +345,16 @@ function initResultActions() {
         selectedModel = 'qwen-edit';
         uploadGroup.classList.remove('hidden');
 
-        // Set as uploaded image
-        uploadedImageBase64 = `data:image/png;base64,${currentGeneratedImage.base64}`;
-        previewImage.src = uploadedImageBase64;
-        uploadPlaceholder.classList.add('hidden');
-        uploadPreview.classList.remove('hidden');
+        // Add as first image (clear others)
+        uploadedImages = [{
+            base64: `data:image/png;base64,${currentGeneratedImage.base64}`,
+            name: 'generated-image.png'
+        }];
+        renderImagePreviews();
 
         // Clear prompt for edit instruction
         promptInput.value = '';
-        promptInput.placeholder = 'Descreva a edição que você quer fazer...';
+        promptInput.placeholder = 'Descreva a edição que você quer fazer... (ex: "Mude o fundo para uma praia")';
         promptInput.focus();
     });
 }

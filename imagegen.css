@@ -180,22 +180,22 @@
     color: var(--text-muted);
 }
 
-/* Upload Zone */
+/* Upload Zone - Multi-image */
 .upload-group.hidden {
     display: none !important;
 }
 
-.upload-zone {
+.upload-zone.multi-upload {
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 24px;
+    padding: 20px;
     text-align: center;
-    cursor: pointer;
     transition: all 0.2s;
     background: var(--bg-secondary);
+    min-height: 120px;
 }
 
-.upload-zone:hover {
+.upload-zone.multi-upload:hover {
     border-color: var(--accent-1);
     background: rgba(45, 212, 191, 0.08);
 }
@@ -203,14 +203,28 @@
 .upload-zone.drag-over {
     border-color: var(--accent-1);
     background: rgba(45, 212, 191, 0.12);
+    transform: scale(1.01);
 }
 
+/* Image counter in label */
+.image-counter {
+    color: var(--accent-1);
+    font-weight: 600;
+}
+
+/* Upload placeholder */
 .upload-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     color: var(--text-muted);
+    cursor: pointer;
+    padding: 16px;
+}
+
+.upload-placeholder:hover {
+    color: var(--text-secondary);
 }
 
 .upload-placeholder svg {
@@ -223,41 +237,138 @@
     display: none;
 }
 
-.upload-preview {
-    position: relative;
-    display: inline-block;
+/* Grid de previews */
+.upload-previews {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
-.upload-preview.hidden {
+.upload-previews.hidden {
     display: none;
 }
 
-.upload-preview img {
-    max-width: 100%;
-    max-height: 200px;
+.upload-preview-item {
+    position: relative;
+    aspect-ratio: 1;
     border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    background: var(--bg-tertiary);
+    animation: fadeIn 0.3s ease;
 }
 
-.remove-image-btn {
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.upload-preview-item:hover {
+    border-color: var(--accent-1);
+}
+
+.upload-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Número da imagem */
+.image-number {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
+    top: 6px;
+    left: 6px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Botão remover imagem */
+.upload-preview-item .remove-image-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
     border: none;
     color: white;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
+    opacity: 0;
+    transition: all 0.2s;
 }
 
-.remove-image-btn:hover {
+.upload-preview-item:hover .remove-image-btn {
+    opacity: 1;
+}
+
+.upload-preview-item .remove-image-btn:hover {
+    background: #ef4444;
     transform: scale(1.1);
+}
+
+/* Botão adicionar mais */
+.add-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    background: var(--bg-tertiary);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-more-btn:hover {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+    background: rgba(45, 212, 191, 0.08);
+}
+
+.add-more-btn.hidden {
+    display: none;
+}
+
+.add-more-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Dica contextual */
+.upload-tip {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(45, 212, 191, 0.08);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-1);
 }
 
 /* Advanced Controls */
@@ -634,6 +745,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .model-btn.active,
     .generate-btn,
     .action-btn,

@@ -127,23 +127,40 @@
                             rows="3"></textarea>
                     </div>
 
-                    <!-- Image Upload (for edit mode) -->
+                    <!-- Image Upload (for edit mode - supports 1-3 images) -->
                     <div class="control-group upload-group hidden" id="upload-group">
-                        <label>Imagem de Referência</label>
-                        <div class="upload-zone" id="upload-zone">
-                            <input type="file" id="image-upload" accept="image/*" hidden>
+                        <label>Imagens de Referência <span class="image-counter">(<span
+                                    id="image-count">0</span>/3)</span></label>
+                        <div class="upload-zone multi-upload" id="upload-zone">
+                            <input type="file" id="image-upload" accept="image/*" multiple hidden>
+
+                            <!-- Grid de previews -->
+                            <div class="upload-previews" id="upload-previews"></div>
+
+                            <!-- Placeholder quando vazio -->
                             <div class="upload-placeholder" id="upload-placeholder">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="17 8 12 3 7 8"></polyline>
                                     <line x1="12" y1="3" x2="12" y2="15"></line>
                                 </svg>
-                                <span>Clique ou arraste uma imagem</span>
+                                <span>Clique ou arraste imagens (até 3)</span>
                             </div>
-                            <div class="upload-preview hidden" id="upload-preview">
-                                <img id="preview-image" src="" alt="Preview">
-                                <button class="remove-image-btn" id="remove-image-btn">×</button>
-                            </div>
+
+                            <!-- Botão adicionar mais -->
+                            <button class="add-more-btn hidden" id="add-more-btn" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Adicionar mais</span>
+                            </button>
+                        </div>
+
+                        <!-- Dica contextual -->
+                        <div class="upload-tip">
+                            💡 No prompt, referencie como "imagem 1", "imagem 2"... Ex: "Use o vestido da imagem 1 na
+                            pessoa da imagem 2"
                         </div>
                     </div>
 
