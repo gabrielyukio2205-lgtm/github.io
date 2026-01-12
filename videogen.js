@@ -19,6 +19,8 @@ const previewImage = document.getElementById('preview-image');
 const removeImageBtn = document.getElementById('remove-image-btn');
 const durationSelect = document.getElementById('duration');
 const resolutionSelect = document.getElementById('resolution');
+const aspectRatioSelect = document.getElementById('aspect-ratio');
+const aspectAutoBadge = document.getElementById('aspect-auto-badge');
 const cameraMotionSelect = document.getElementById('camera-motion');
 const generateBtn = document.getElementById('generate-btn');
 const resultPlaceholder = document.getElementById('result-placeholder');
@@ -34,6 +36,7 @@ const useFrameBtn = document.getElementById('use-frame-btn');
 let selectedMode = 't2v';
 let uploadedImageBase64 = null;
 let currentVideoData = null;
+let autoDetectedAspectRatio = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -59,6 +62,9 @@ function initModeSelector() {
             } else {
                 uploadGroup.classList.add('hidden');
                 clearUploadedImage();
+                // Reset aspect ratio to default when leaving i2v
+                autoDetectedAspectRatio = null;
+                aspectAutoBadge.classList.add('hidden');
             }
         });
     });
@@ -118,8 +124,41 @@ function handleFile(file) {
         previewImage.src = uploadedImageBase64;
         uploadPlaceholder.classList.add('hidden');
         uploadPreview.classList.remove('hidden');
+
+        // Auto-detect aspect ratio from image
+        detectImageAspectRatio(e.target.result);
     };
     reader.readAsDataURL(file);
+}
+
+// Detect aspect ratio from uploaded image
+function detectImageAspectRatio(base64) {
+    const img = new Image();
+    img.onload = () => {
+        const w = img.width;
+        const h = img.height;
+        const ratio = w / h;
+
+        let detectedRatio;
+        if (ratio > 1.3) {
+            // Landscape (wider than 4:3)
+            detectedRatio = '16:9';
+        } else if (ratio < 0.77) {
+            // Portrait (taller than 3:4)
+            detectedRatio = '9:16';
+        } else {
+            // Square-ish
+            detectedRatio = '1:1';
+        }
+
+        // Auto-set the aspect ratio
+        autoDetectedAspectRatio = detectedRatio;
+        aspectRatioSelect.value = detectedRatio;
+        aspectAutoBadge.classList.remove('hidden');
+
+        console.log(`🖼️ Image ${w}x${h} (ratio ${ratio.toFixed(2)}) → ${detectedRatio}`);
+    };
+    img.src = base64;
 }
 
 function clearUploadedImage() {
@@ -128,6 +167,10 @@ function clearUploadedImage() {
     previewImage.src = '';
     uploadPlaceholder.classList.remove('hidden');
     uploadPreview.classList.add('hidden');
+
+    // Reset auto-detected aspect ratio
+    autoDetectedAspectRatio = null;
+    aspectAutoBadge.classList.add('hidden');
 }
 
 // Generate Button
@@ -157,6 +200,7 @@ async function generateVideo() {
         mode: selectedMode,
         duration: parseInt(durationSelect.value),
         resolution: resolutionSelect.value,
+        aspect_ratio: aspectRatioSelect.value,
         camera_motion: cameraMotionSelect.value,
         guidance_scale: 3.0
     };
