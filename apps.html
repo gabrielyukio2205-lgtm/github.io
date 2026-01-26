@@ -15,6 +15,12 @@
 </head>
 
 <body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
     <div id="layout-container">
         <!-- Sidebar Simplificada -->
         <aside id="sidebar">
@@ -81,6 +87,24 @@
                     </div>
                 </div>
                 <div class="header-right" id="user-section">
+                    <button id="theme-toggle-btn" aria-label="Alternar tema">
+                        <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg id="moon-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
                     <a href="login.html" class="login-btn" id="login-btn">Entrar</a>
                     <div class="user-info" id="user-info" style="display: none;">
                         <img src="" alt="" class="user-avatar" id="user-avatar">
@@ -243,6 +267,7 @@
         </div>
     </div>
 
+    <script src="theme.js"></script>
     <script>
         const API_BASE = window.location.hostname === 'localhost'
             ? 'http://localhost:7860'
@@ -339,19 +364,19 @@
 
         .login-btn {
             padding: 8px 16px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border: none;
+            background: linear-gradient(var(--surface-color), var(--surface-color)) padding-box, var(--accent-gradient) border-box;
+            border: 1px solid transparent;
             border-radius: 8px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.2s;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            box-shadow: var(--shadow-sm);
         }
 
         .user-info {
@@ -359,9 +384,9 @@
             align-items: center;
             gap: 10px;
             padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--glass-bg);
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
         }
 
         .user-avatar {
@@ -373,13 +398,13 @@
 
         .user-info span {
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
         }
 
         .logout-btn {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--text-muted);
             cursor: pointer;
             font-size: 0.875rem;
             padding: 4px;

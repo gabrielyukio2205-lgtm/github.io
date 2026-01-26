@@ -7,6 +7,13 @@
     justify-content: space-between;
     height: 60px;
     flex-shrink: 0;
+    background: rgba(15, 19, 25, 0.6);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(16px);
+}
+
+[data-theme="light"] #apps-header {
+    background: rgba(255, 255, 255, 0.7);
 }
 
 #apps-container {
@@ -78,6 +85,11 @@
     transform: translateY(-4px);
     border-color: var(--border-highlight);
     box-shadow: var(--shadow-md);
+}
+
+.app-card:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 3px;
 }
 
 .app-card:hover::before {

@@ -19,7 +19,9 @@
     let isDarkMode = true;
 
     function detectTheme() {
-        const saved = localStorage.getItem('jade-theme');
+        const saved = localStorage.getItem('jade_theme')
+            || localStorage.getItem('jadeTheme')
+            || localStorage.getItem('jade-theme');
         if (saved) {
             isDarkMode = saved === 'dark';
         } else {
@@ -36,7 +38,7 @@
 
     function toggleTheme() {
         isDarkMode = !isDarkMode;
-        localStorage.setItem('jade-theme', isDarkMode ? 'dark' : 'light');
+        localStorage.setItem('jade_theme', isDarkMode ? 'dark' : 'light');
         applyTheme();
     }
 
@@ -169,7 +171,7 @@
 
     // Listen for system theme changes
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem('jade-theme')) {
+        if (!localStorage.getItem('jade_theme')) {
             isDarkMode = e.matches;
             applyTheme();
         }

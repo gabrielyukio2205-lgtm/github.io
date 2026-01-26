@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J.A.D.E. - Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -38,6 +39,18 @@
             align-items: center;
             justify-content: center;
             color: var(--text-primary);
+        }
+
+        .theme-toggle-floating {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .theme-toggle-floating #theme-toggle-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
         }
 
         .login-container {
@@ -212,6 +225,27 @@
 </head>
 
 <body>
+    <div class="theme-toggle-floating">
+        <button id="theme-toggle-btn" aria-label="Alternar tema">
+            <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg id="moon-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </div>
+
     <div class="login-container">
         <div class="logo">💎</div>
         <h1>J.A.D.E.</h1>
@@ -238,6 +272,7 @@
         </div>
     </div>
 
+    <script src="theme.js"></script>
     <script>
         const API_BASE = window.location.hostname === 'localhost'
             ? 'http://localhost:7860'

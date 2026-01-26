@@ -1162,16 +1162,20 @@ ${JSON.stringify(importMap, null, 8)}
     }
 
     function loadTheme() {
-        const saved = localStorage.getItem('jadeTheme') || 'dark';
+        const saved = localStorage.getItem('jade_theme')
+            || localStorage.getItem('jadeTheme')
+            || localStorage.getItem('jade-theme')
+            || 'dark';
         document.body.setAttribute('data-theme', saved);
         updateThemeIcon(saved);
+        localStorage.setItem('jade_theme', saved);
     }
 
     function toggleTheme() {
         const current = document.body.getAttribute('data-theme');
         const next = current === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', next);
-        localStorage.setItem('jadeTheme', next);
+        localStorage.setItem('jade_theme', next);
         updateThemeIcon(next);
     }
 

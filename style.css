@@ -44,6 +44,8 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
 
   --user-msg-bg: rgba(16, 185, 129, 0.12);
   --user-msg-text: #4be3b4;
@@ -568,6 +570,12 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 @media (min-width: 769px) {
