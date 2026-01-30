@@ -1,11 +1,11 @@
 /**
  * Video Gen - JavaScript Controller
- * Handles video generation with LTX-2 on Chutes.ai
+ * Handles video generation with LTX-2 and Wan 2.2 on Chutes.ai
  */
 
-// API Configuration
-const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
-const API_URL = `${PROXY_BASE_URL}/videogen/generate`;
+// API Configuration - Direct to HF Space (bypass proxy for long video requests)
+const HF_SPACE_URL = 'https://madras1-jade-port.hf.space';
+const API_URL = `${HF_SPACE_URL}/api/videogen/generate`;
 
 // DOM Elements
 const modeBtns = document.querySelectorAll('.mode-btn');
