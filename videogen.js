@@ -5,7 +5,7 @@
 
 // API Configuration - Direct to HF Space (bypass proxy for long video requests)
 const HF_SPACE_URL = 'https://madras1-jade-port.hf.space';
-const API_URL = `${HF_SPACE_URL}/api/videogen/generate`;
+const API_URL = `${HF_SPACE_URL}/videogen/generate`;
 
 // DOM Elements
 const modeBtns = document.querySelectorAll('.mode-btn');
