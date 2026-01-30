@@ -23,6 +23,7 @@ const aspectRatioSelect = document.getElementById('aspect-ratio');
 const aspectAutoBadge = document.getElementById('aspect-auto-badge');
 const cameraMotionSelect = document.getElementById('camera-motion');
 const generateBtn = document.getElementById('generate-btn');
+const modelSelect = document.getElementById('model');
 const resultPlaceholder = document.getElementById('result-placeholder');
 const resultLoading = document.getElementById('result-loading');
 const resultVideo = document.getElementById('result-video');
@@ -34,6 +35,7 @@ const useFrameBtn = document.getElementById('use-frame-btn');
 
 // State
 let selectedMode = 't2v';
+let selectedModel = 'ltx-2';
 let uploadedImageBase64 = null;
 let currentVideoData = null;
 let autoDetectedAspectRatio = null;
@@ -41,6 +43,7 @@ let autoDetectedAspectRatio = null;
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initModeSelector();
+    initModelSelector();
     initUploadZone();
     initGenerateButton();
     initResultActions();
@@ -62,12 +65,56 @@ function initModeSelector() {
             } else {
                 uploadGroup.classList.add('hidden');
                 clearUploadedImage();
-                // Reset aspect ratio to default when leaving i2v
                 autoDetectedAspectRatio = null;
                 aspectAutoBadge.classList.add('hidden');
             }
+
+            // Update model options based on mode
+            updateModelOptions();
         });
     });
+}
+
+// Model Selector
+function initModelSelector() {
+    if (modelSelect) {
+        modelSelect.addEventListener('change', () => {
+            selectedModel = modelSelect.value;
+            updateCameraMotionVisibility();
+        });
+    }
+}
+
+function updateModelOptions() {
+    if (!modelSelect) return;
+
+    // Wan 2.2 only supports I2V
+    const wanOption = modelSelect.querySelector('option[value="wan-2.2"]');
+    if (wanOption) {
+        if (selectedMode === 't2v') {
+            wanOption.disabled = true;
+            if (selectedModel === 'wan-2.2') {
+                modelSelect.value = 'ltx-2';
+                selectedModel = 'ltx-2';
+            }
+        } else {
+            wanOption.disabled = false;
+        }
+    }
+}
+
+function updateCameraMotionVisibility() {
+    // Camera motion only works with LTX-2
+    const cameraGroup = cameraMotionSelect?.closest('.option-item');
+    if (cameraGroup) {
+        if (selectedModel === 'wan-2.2') {
+            cameraGroup.style.opacity = '0.5';
+            cameraMotionSelect.disabled = true;
+        } else {
+            cameraGroup.style.opacity = '1';
+            cameraMotionSelect.disabled = false;
+        }
+    }
 }
 
 // Upload Zone
@@ -198,6 +245,7 @@ async function generateVideo() {
     const request = {
         prompt: prompt,
         mode: selectedMode,
+        model: selectedModel,
         duration: parseInt(durationSelect.value),
         resolution: resolutionSelect.value,
         aspect_ratio: aspectRatioSelect.value,
