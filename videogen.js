@@ -106,13 +106,29 @@ function updateModelOptions() {
 function updateCameraMotionVisibility() {
     // Camera motion only works with LTX-2
     const cameraGroup = cameraMotionSelect?.closest('.option-item');
-    if (cameraGroup) {
-        if (selectedModel === 'wan-2.2') {
+    const durationGroup = durationSelect?.closest('.option-item');
+
+    if (selectedModel === 'wan-2.2') {
+        // Disable camera motion for Wan 2.2
+        if (cameraGroup) {
             cameraGroup.style.opacity = '0.5';
             cameraMotionSelect.disabled = true;
-        } else {
+        }
+        // Hide duration for Wan 2.2 (always ~5s)
+        if (durationGroup) {
+            durationGroup.style.opacity = '0.5';
+            durationSelect.disabled = true;
+            durationSelect.value = '5'; // Force 5 seconds
+        }
+    } else {
+        // Enable all for LTX-2
+        if (cameraGroup) {
             cameraGroup.style.opacity = '1';
             cameraMotionSelect.disabled = false;
+        }
+        if (durationGroup) {
+            durationGroup.style.opacity = '1';
+            durationSelect.disabled = false;
         }
     }
 }
