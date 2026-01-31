@@ -46,6 +46,7 @@
 
     // Model Selector State (Jade High = GLM 4.7, Jade Reasoning = MiniMax M2.1, Jade Flash = Cerebras)
     let currentJadeModel = 'high'; // 'high', 'minimax', or 'flash'
+    window.currentJadeModel = currentJadeModel; // Expose for thinking animation
     const modelDropdownBtn = document.getElementById('model-dropdown-btn');
     const modelDropdownMenu = document.getElementById('model-dropdown-menu');
     const currentModelName = document.getElementById('current-model-name');
@@ -679,6 +680,15 @@
                         </div>
                     </div>
                 </div>`;
+            } else if (sender === 'J.A.D.E.' && (window.currentJadeModel === 'high' || window.currentJadeModel === 'minimax')) {
+                // Reasoning models get a "thinking" animation
+                const modelName = window.currentJadeModel === 'minimax' ? 'MiniMax M2.1' : 'GLM 4.7';
+                textHTML = `<div class="text thinking-processing">
+                    <div class="thinking-loader">
+                        <div class="brain-pulse">🧠</div>
+                        <span class="thinking-text">Pensando com ${modelName}...</span>
+                    </div>
+                </div>`;
             } else {
                 textHTML = `<div class="text"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
             }
@@ -1152,6 +1162,7 @@
 
     function selectModel(model) {
         currentJadeModel = model;
+        window.currentJadeModel = model; // Update global for thinking animation
 
         // Update button text
         if (currentModelName) {
