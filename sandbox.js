@@ -9,7 +9,7 @@
     // API Configuration
     const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:7860'
-        : '';
+        : 'https://madras1-jade-port.hf.space';
     const SANDBOX_URL = `${API_BASE}/sandbox/execute`;
     const STATUS_URL = `${API_BASE}/sandbox/status`;
 
