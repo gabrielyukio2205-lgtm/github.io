@@ -408,6 +408,22 @@ body {
     border-radius: 4px;
 }
 
+/* ========== OUTPUT IMAGES ========== */
+.output-images {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.output-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+
 /* ========== RUNNING STATE ========== */
 .running .run-btn {
     background: var(--warning-color);

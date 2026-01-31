@@ -199,10 +199,8 @@ print("📈 Arquivo: grafico.png")`
 
             if (data.success) {
                 let output = data.output || '(Sem output)';
-                if (data.logs?.results?.length > 0) {
-                    output += '\n\n' + data.logs.results.join('\n');
-                }
-                showOutput(output, 'success');
+                // Render text output and images
+                showOutput(output, 'success', data.images || []);
             } else {
                 showOutput(`❌ Erro:\n${data.error}`, 'error');
             }
@@ -223,9 +221,20 @@ print("📈 Arquivo: grafico.png")`
         }
     }
 
-    // Show output
-    function showOutput(content, type = 'success') {
-        outputContainer.innerHTML = `<div class="output-content ${type}">${escapeHtml(content)}</div>`;
+    // Show output with optional images
+    function showOutput(content, type = 'success', images = []) {
+        let html = `<div class="output-content ${type}">${escapeHtml(content)}</div>`;
+
+        // Add images if present
+        if (images && images.length > 0) {
+            html += '<div class="output-images">';
+            for (const img of images) {
+                html += `<img src="data:image/png;base64,${img}" class="output-image" alt="Generated chart" />`;
+            }
+            html += '</div>';
+        }
+
+        outputContainer.innerHTML = html;
     }
 
     // Escape HTML
