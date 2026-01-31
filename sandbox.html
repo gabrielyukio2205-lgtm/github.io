@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.D.E. Sandbox - Code Execution</title>
+    <link rel="stylesheet" href="sandbox.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+
+<body data-theme="dark">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <a href="index.html" class="back-btn" title="Voltar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                </a>
+                <div class="logo">
+                    <span class="logo-icon">🔲</span>
+                    <span class="logo-text">J.A.D.E. <span class="logo-accent">Sandbox</span></span>
+                </div>
+            </div>
+            <div class="header-center">
+                <span class="status-badge" id="status-badge">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Verificando...</span>
+                </span>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle tema">
+                    <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Code Editor Panel -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="16 18 22 12 16 6" />
+                            <polyline points="8 6 2 12 8 18" />
+                        </svg>
+                        <span>Editor</span>
+                    </div>
+                    <div class="panel-actions">
+                        <button class="action-btn" id="clear-btn" title="Limpar código">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                        </button>
+                        <button class="action-btn" id="example-btn" title="Carregar exemplo">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers"></div>
+                    <textarea id="code-editor" spellcheck="false" placeholder="# Escreva seu código Python aqui...
+
+print('Hello, J.A.D.E.!')
+"></textarea>
+                </div>
+                <div class="editor-footer">
+                    <span class="file-info">Python 3.11</span>
+                    <button class="run-btn" id="run-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        <span>Executar</span>
+                        <span class="shortcut">Ctrl+Enter</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="output-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="4 17 10 11 4 5" />
+                            <line x1="12" y1="19" x2="20" y2="19" />
+                        </svg>
+                        <span>Output</span>
+                    </div>
+                    <div class="panel-actions">
+                        <span class="execution-time" id="execution-time"></span>
+                        <button class="action-btn" id="copy-output-btn" title="Copiar output">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                        </button>
+                        <button class="action-btn" id="clear-output-btn" title="Limpar output">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="output-container" id="output-container">
+                    <div class="output-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1">
+                            <polyline points="4 17 10 11 4 5" />
+                            <line x1="12" y1="19" x2="20" y2="19" />
+                        </svg>
+                        <p>Output aparecerá aqui</p>
+                        <span>Pressione Ctrl+Enter para executar</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Examples Modal -->
+        <div class="modal hidden" id="examples-modal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>📚 Exemplos de Código</h3>
+                    <button class="modal-close" id="modal-close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="example-grid">
+                        <button class="example-card" data-example="hello">
+                            <span class="example-icon">👋</span>
+                            <span class="example-title">Hello World</span>
+                        </button>
+                        <button class="example-card" data-example="math">
+                            <span class="example-icon">🔢</span>
+                            <span class="example-title">Matemática</span>
+                        </button>
+                        <button class="example-card" data-example="fibonacci">
+                            <span class="example-icon">🌀</span>
+                            <span class="example-title">Fibonacci</span>
+                        </button>
+                        <button class="example-card" data-example="requests">
+                            <span class="example-icon">🌐</span>
+                            <span class="example-title">HTTP Request</span>
+                        </button>
+                        <button class="example-card" data-example="pandas">
+                            <span class="example-icon">📊</span>
+                            <span class="example-title">Pandas</span>
+                        </button>
+                        <button class="example-card" data-example="matplotlib">
+                            <span class="example-icon">📈</span>
+                            <span class="example-title">Matplotlib</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="sandbox.js"></script>
+</body>
+
+</html>
