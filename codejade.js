@@ -1,291 +1,327 @@
-/**
- * CodeJade - Cursor AI Style
- */
-(function () {
-    'use strict';
+// CodeJade - Cursor AI Style Frontend
 
-    const API_BASE = window.location.hostname.includes('localhost') || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:7860'
-        : 'https://madras1-jade-port.hf.space';
+const API_BASE = window.location.hostname === 'localhost' ? '' : '';
 
-    const CHAT_URL = `${API_BASE}/codejade/chat`;
-    const CONTEXT_URL = `${API_BASE}/codejade/context`;
-    const STATUS_URL = `${API_BASE}/codejade/status`;
+// State
+let editor = null;
+let currentFile = null;
+let openFiles = {};
+let repoCloned = false;
 
-    // Elements
-    const codeEditor = document.getElementById('code-editor');
-    const runBtn = document.getElementById('run-btn');
-    const outputContainer = document.getElementById('output-container');
-    const execTime = document.getElementById('exec-time');
-    const statusBadge = document.getElementById('status-badge');
-    const themeToggle = document.getElementById('theme-toggle');
-    const clearBtn = document.getElementById('clear-btn');
-    const copyBtn = document.getElementById('copy-btn');
+// Elements
+const statusBadge = document.getElementById('status-badge');
+const statusText = document.getElementById('status-text');
+const repoBtn = document.getElementById('repo-btn');
+const repoName = document.getElementById('repo-name');
+const fileTree = document.getElementById('file-tree');
+const editorContainer = document.getElementById('editor-container');
+const monacoContainer = document.getElementById('monaco-editor');
+const welcomeEditor = document.getElementById('welcome-editor');
+const editorTabs = document.getElementById('editor-tabs');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
 
-    // Modal elements
-    const examplesBtn = document.getElementById('examples-btn');
-    const examplesModal = document.getElementById('examples-modal');
-    const examplesClose = document.getElementById('examples-close');
-    const contextBtn = document.getElementById('context-btn');
-    const contextModal = document.getElementById('context-modal');
-    const contextClose = document.getElementById('context-close');
-    const contextInput = document.getElementById('context-input');
-    const contextSave = document.getElementById('context-save');
-    const contextCancel = document.getElementById('context-cancel');
+// Initialize Monaco
+require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+require(['vs/editor/editor.main'], function () {
+    const isDark = document.body.dataset.theme === 'dark';
+    editor = monaco.editor.create(monacoContainer, {
+        value: '',
+        language: 'python',
+        theme: isDark ? 'vs-dark' : 'vs',
+        fontSize: 13,
+        fontFamily: "'JetBrains Mono', monospace",
+        minimap: { enabled: true },
+        lineNumbers: 'on',
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        tabSize: 4,
+    });
+    console.log('Monaco initialized');
+});
 
-    let isRunning = false;
-    let lastOutput = '';
-
-    // Examples
-    const examples = {
-        hello: `Crie um programa Python que imprime "Hello, World!" e depois mostra a data e hora atual.`,
-        fibonacci: `Crie um gráfico da sequência de Fibonacci mostrando os primeiros 20 números. Use matplotlib e salve como imagem.`,
-        search: `Busque informações sobre as novidades do Python 3.12 e me dê um resumo.`,
-        api: `Faça uma requisição GET para a API do GitHub (https://api.github.com/repos/python/cpython) e mostre as stars e forks do repositório.`,
-        pandas: `Crie um DataFrame com dados de vendas fictícios (5 vendedores, vendas por mês) e mostre estatísticas básicas.`,
-        complex: `Crie uma API Flask simples com 2 endpoints: GET /health e POST /echo. Depois teste localmente e mostre o resultado.`
-    };
-
-    // Init
-    function init() {
-        checkStatus();
-        setupEventListeners();
-        loadTheme();
+// Check status
+async function checkStatus() {
+    try {
+        const res = await fetch(`${API_BASE}/codejade/status`);
+        const data = await res.json();
+        if (data.sandbox_ready) {
+            statusBadge.className = 'status-badge online';
+            statusText.textContent = 'E2B Online';
+        } else {
+            statusBadge.className = 'status-badge';
+            statusText.textContent = 'Sandbox Offline';
+        }
+    } catch (e) {
+        statusBadge.className = 'status-badge error';
+        statusText.textContent = 'Desconectado';
     }
+}
 
-    // Check status
-    async function checkStatus() {
-        try {
-            const resp = await fetch(STATUS_URL);
-            const data = await resp.json();
-            if (data.available) {
-                statusBadge.classList.add('online');
-                statusBadge.innerHTML = `<span class="status-dot"></span><span>E2B Online</span>`;
+// Clone modal
+const cloneModal = document.getElementById('clone-modal');
+const repoInput = document.getElementById('repo-input');
+
+repoBtn.onclick = () => cloneModal.classList.remove('hidden');
+document.getElementById('clone-close').onclick = () => cloneModal.classList.add('hidden');
+document.getElementById('clone-cancel').onclick = () => cloneModal.classList.add('hidden');
+
+document.getElementById('clone-confirm').onclick = async () => {
+    const repo = repoInput.value.trim();
+    if (!repo) return;
+
+    cloneModal.classList.add('hidden');
+    addMessage('user', `Clone: ${repo}`);
+    addMessage('tool', '⏳ Clonando repositório...');
+
+    try {
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `clone o repositório ${repo}` })
+        });
+        const data = await res.json();
+        addMessage('assistant', data.response || 'Repo clonado!');
+        repoName.textContent = repo.split('/').pop();
+        repoCloned = true;
+        loadFiles('');
+    } catch (e) {
+        addMessage('assistant', `❌ Erro: ${e.message}`);
+    }
+};
+
+// Load files
+async function loadFiles(path = '') {
+    try {
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `liste os arquivos em ${path || 'raiz'}` })
+        });
+        const data = await res.json();
+
+        // Parse file list from response
+        const lines = (data.response || '').split('\n');
+        fileTree.innerHTML = '';
+
+        lines.forEach(line => {
+            const match = line.match(/(📁|📄)\s*(.+)/);
+            if (match) {
+                const isDir = match[1] === '📁';
+                const name = match[2].trim();
+                const item = document.createElement('div');
+                item.className = `file-item ${isDir ? 'folder' : ''}`;
+                item.innerHTML = `${match[1]} ${name}`;
+                item.onclick = () => {
+                    if (isDir) {
+                        loadFiles(path ? `${path}/${name}` : name);
+                    } else {
+                        openFile(path ? `${path}/${name}` : name);
+                    }
+                };
+                fileTree.appendChild(item);
             }
-        } catch (e) {
-            statusBadge.innerHTML = `<span class="status-dot"></span><span>Offline</span>`;
+        });
+
+        if (fileTree.children.length === 0) {
+            fileTree.innerHTML = '<div class="empty-state">Nenhum arquivo</div>';
         }
+    } catch (e) {
+        console.error('Load files error:', e);
+    }
+}
+
+// Open file
+async function openFile(path) {
+    if (openFiles[path]) {
+        switchToFile(path);
+        return;
     }
 
-    // Execute
-    async function execute() {
-        const prompt = codeEditor.value.trim();
-        if (!prompt || isRunning) return;
+    try {
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `leia o arquivo ${path}` })
+        });
+        const data = await res.json();
 
-        isRunning = true;
-        runBtn.disabled = true;
-        runBtn.textContent = '⏳ Executando...';
-        runBtn.classList.add('loading');
-        execTime.textContent = '';
+        openFiles[path] = {
+            content: data.response || '',
+            modified: false
+        };
 
-        showOutput('🔄 Processando...', 'loading');
-
-        const startTime = Date.now();
-
-        try {
-            const resp = await fetch(CHAT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: prompt })
-            });
-
-            const data = await resp.json();
-            const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-            execTime.textContent = `${elapsed}s`;
-
-            // Render response
-            renderOutput(data);
-
-        } catch (error) {
-            showOutput(`❌ Erro: ${error.message}`, 'error');
-        } finally {
-            isRunning = false;
-            runBtn.disabled = false;
-            runBtn.textContent = '▶ Executar';
-            runBtn.classList.remove('loading');
-        }
+        addTab(path);
+        switchToFile(path);
+    } catch (e) {
+        console.error('Open file error:', e);
     }
+}
 
-    // Render output with markdown and images
-    function renderOutput(data) {
-        const container = outputContainer;
-        container.innerHTML = '';
+// Add tab
+function addTab(path) {
+    const tab = document.createElement('div');
+    tab.className = 'tab';
+    tab.dataset.path = path;
+    tab.innerHTML = `<span>${path.split('/').pop()}</span>`;
+    tab.onclick = () => switchToFile(path);
+    editorTabs.appendChild(tab);
+}
 
-        // Parse markdown-like content
-        let html = parseMarkdown(data.response || '');
+// Switch to file
+function switchToFile(path) {
+    currentFile = path;
 
-        const content = document.createElement('div');
-        content.className = 'output-content success';
-        content.innerHTML = html;
-        container.appendChild(content);
+    // Update tabs
+    document.querySelectorAll('.tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.path === path);
+    });
 
-        // Add tool badges
+    // Show editor
+    welcomeEditor.style.display = 'none';
+    monacoContainer.style.display = 'block';
+
+    if (editor && openFiles[path]) {
+        const ext = path.split('.').pop();
+        const langMap = { py: 'python', js: 'javascript', ts: 'typescript', html: 'html', css: 'css', json: 'json', md: 'markdown' };
+        const language = langMap[ext] || 'plaintext';
+
+        monaco.editor.setModelLanguage(editor.getModel(), language);
+        editor.setValue(openFiles[path].content);
+    }
+}
+
+// Chat
+async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    chatInput.value = '';
+    sendBtn.disabled = true;
+    addMessage('user', message);
+    addMessage('tool', '⏳ Processando...');
+
+    try {
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+
+        // Remove loading message
+        const loadingMsg = chatMessages.querySelector('.message.tool:last-child');
+        if (loadingMsg && loadingMsg.textContent.includes('⏳')) {
+            loadingMsg.remove();
+        }
+
+        // Add tools used
         if (data.tools_used && data.tools_used.length > 0) {
-            const toolsDiv = document.createElement('div');
-            toolsDiv.className = 'tools-used';
-            data.tools_used.forEach(tool => {
-                const badge = document.createElement('span');
-                badge.className = 'tool-badge';
-                badge.textContent = `⚡ ${tool}`;
-                toolsDiv.appendChild(badge);
-            });
-            container.appendChild(toolsDiv);
+            addMessage('tool', `⚡ ${data.tools_used.join(' → ')}`);
         }
 
-        // Check for base64 images in response
-        if (data.images && data.images.length > 0) {
-            data.images.forEach(img => {
-                const imgEl = document.createElement('img');
-                imgEl.src = `data:image/png;base64,${img}`;
-                imgEl.alt = 'Generated image';
-                content.appendChild(imgEl);
-            });
+        addMessage('assistant', data.response || 'OK');
+
+        // Refresh files if github operation
+        if (message.toLowerCase().includes('clone') || message.toLowerCase().includes('commit')) {
+            loadFiles('');
         }
-
-        lastOutput = data.response;
-        container.scrollTop = container.scrollHeight;
+    } catch (e) {
+        addMessage('assistant', `❌ Erro: ${e.message}`);
+    } finally {
+        sendBtn.disabled = false;
     }
+}
 
-    // Simple markdown parser
-    function parseMarkdown(text) {
-        return text
-            // Code blocks
-            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-            // Inline code
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            // Headers
-            .replace(/^### (.*)$/gm, '<h4>$1</h4>')
-            .replace(/^## (.*)$/gm, '<h3>$1</h3>')
-            .replace(/^# (.*)$/gm, '<h2>$1</h2>')
-            // Bold
-            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-            // Italic
-            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-            // Lists
-            .replace(/^\* (.*)$/gm, '• $1')
-            .replace(/^- (.*)$/gm, '• $1')
-            // Line breaks
-            .replace(/\n/g, '<br>');
+function addMessage(type, content) {
+    const msg = document.createElement('div');
+    msg.className = `message ${type}`;
+    msg.innerHTML = formatMessage(content);
+    chatMessages.appendChild(msg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatMessage(text) {
+    // Simple markdown-like formatting
+    return text
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+}
+
+// Event listeners
+sendBtn.onclick = sendMessage;
+chatInput.onkeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
     }
+};
 
-    // Show simple output
-    function showOutput(text, type = 'success') {
-        outputContainer.innerHTML = `<div class="output-content ${type}">${escapeHtml(text)}</div>`;
-    }
+document.getElementById('clear-chat').onclick = () => {
+    chatMessages.innerHTML = '<div class="message assistant"><p>Chat limpo. Como posso ajudar?</p></div>';
+};
 
-    // Set context
-    async function setContext() {
-        const context = contextInput.value.trim();
-        if (!context) return;
+document.getElementById('refresh-files').onclick = () => loadFiles('');
 
-        try {
-            await fetch(CONTEXT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ context })
-            });
-            closeModal(contextModal);
-            showOutput(`📄 Contexto definido (${context.length} chars)`, 'success');
-        } catch (e) {
-            alert('Erro ao definir contexto');
-        }
-    }
+// Diff modal
+const diffModal = document.getElementById('diff-modal');
+document.getElementById('diff-btn').onclick = async () => {
+    diffModal.classList.remove('hidden');
+    document.getElementById('diff-content').textContent = '(carregando...)';
 
-    // Clear
-    function clearOutput() {
-        outputContainer.innerHTML = `
-            <div class="welcome">
-                <div class="welcome-icon">🤖</div>
-                <h2>CodeJade</h2>
-                <p>Agente de código com E2B Sandbox, Web Search e DAG Planning</p>
-                <div class="features">
-                    <span>🔲 E2B Sandbox</span>
-                    <span>🌐 Web Search</span>
-                    <span>📊 DAG</span>
-                    <span>📄 CAT</span>
-                </div>
-            </div>
-        `;
-        execTime.textContent = '';
-    }
-
-    // Copy
-    function copyOutput() {
-        if (lastOutput) {
-            navigator.clipboard.writeText(lastOutput);
-            copyBtn.textContent = '✓ Copiado';
-            setTimeout(() => copyBtn.textContent = 'Copiar', 1500);
-        }
-    }
-
-    // Modal helpers
-    function openModal(modal) { modal.classList.remove('hidden'); }
-    function closeModal(modal) { modal.classList.add('hidden'); }
-
-    // Theme
-    function toggleTheme() {
-        const theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-        document.body.dataset.theme = theme;
-        themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
-        localStorage.setItem('codejade-theme', theme);
-    }
-
-    function loadTheme() {
-        const saved = localStorage.getItem('codejade-theme');
-        if (saved) {
-            document.body.dataset.theme = saved;
-            themeToggle.textContent = saved === 'dark' ? '🌙' : '☀️';
-        }
-    }
-
-    // Escape HTML
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Event listeners
-    function setupEventListeners() {
-        runBtn.addEventListener('click', execute);
-        codeEditor.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                execute();
-            }
+    try {
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'mostre o git diff' })
         });
-
-        clearBtn.addEventListener('click', clearOutput);
-        copyBtn.addEventListener('click', copyOutput);
-        themeToggle.addEventListener('click', toggleTheme);
-
-        // Examples modal
-        examplesBtn.addEventListener('click', () => openModal(examplesModal));
-        examplesClose.addEventListener('click', () => closeModal(examplesModal));
-        examplesModal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(examplesModal));
-
-        document.querySelectorAll('.example-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                codeEditor.value = examples[btn.dataset.example];
-                closeModal(examplesModal);
-            });
-        });
-
-        // Context modal
-        contextBtn.addEventListener('click', () => openModal(contextModal));
-        contextClose.addEventListener('click', () => closeModal(contextModal));
-        contextCancel.addEventListener('click', () => closeModal(contextModal));
-        contextModal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(contextModal));
-        contextSave.addEventListener('click', setContext);
-
-        // Escape to close modals
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') {
-                closeModal(examplesModal);
-                closeModal(contextModal);
-            }
-        });
+        const data = await res.json();
+        document.getElementById('diff-content').textContent = data.response || '(sem mudanças)';
+    } catch (e) {
+        document.getElementById('diff-content').textContent = `Erro: ${e.message}`;
     }
+};
+document.getElementById('diff-close').onclick = () => diffModal.classList.add('hidden');
 
-    init();
-})();
+// Commit modal
+const commitModal = document.getElementById('commit-modal');
+document.getElementById('commit-btn').onclick = () => commitModal.classList.remove('hidden');
+document.getElementById('commit-close').onclick = () => commitModal.classList.add('hidden');
+document.getElementById('commit-cancel').onclick = () => commitModal.classList.add('hidden');
+
+document.getElementById('commit-confirm').onclick = async () => {
+    const message = document.getElementById('commit-message').value.trim() || 'Update via CodeJade';
+    commitModal.classList.add('hidden');
+
+    addMessage('user', `Commit: ${message}`);
+    addMessage('tool', '⏳ Fazendo commit e push...');
+
+    try {
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `faça commit com mensagem "${message}" e push` })
+        });
+        const data = await res.json();
+        addMessage('assistant', data.response || 'Commit realizado!');
+    } catch (e) {
+        addMessage('assistant', `❌ Erro: ${e.message}`);
+    }
+};
+
+// Theme toggle
+document.getElementById('theme-toggle').onclick = () => {
+    const isDark = document.body.dataset.theme === 'dark';
+    document.body.dataset.theme = isDark ? 'light' : 'dark';
+    document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+
+    if (editor) {
+        monaco.editor.setTheme(isDark ? 'vs' : 'vs-dark');
+    }
+};
+
+// Init
+checkStatus();
+setInterval(checkStatus, 30000);

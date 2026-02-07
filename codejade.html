@@ -10,6 +10,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="codejade.css">
+    <!-- Monaco Editor CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 </head>
 
 <body data-theme="dark">
@@ -25,107 +27,141 @@
             </div>
 
             <div class="header-center">
+                <div class="repo-selector">
+                    <button class="repo-btn" id="repo-btn">
+                        <span id="repo-name">Selecionar Repo</span>
+                        <span class="chevron">▼</span>
+                    </button>
+                </div>
                 <div class="status-badge" id="status-badge">
                     <span class="status-dot"></span>
-                    <span>Conectando...</span>
+                    <span id="status-text">Conectando...</span>
                 </div>
             </div>
 
             <div class="header-right">
-                <button class="btn-icon" id="context-btn" title="CAT Context">📄</button>
-                <button class="btn-icon" id="clear-btn" title="Limpar">🗑️</button>
+                <button class="btn-icon" id="diff-btn" title="Ver Diff">📊</button>
+                <button class="btn-icon" id="commit-btn" title="Commit">💾</button>
                 <button class="btn-icon" id="theme-toggle">🌙</button>
             </div>
         </header>
 
-        <!-- Main -->
+        <!-- Main Content -->
         <main class="main-content">
+            <!-- File Tree Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <span>📁 Arquivos</span>
+                    <button class="btn-icon-small" id="refresh-files">🔄</button>
+                </div>
+                <div class="file-tree" id="file-tree">
+                    <div class="empty-state">
+                        Clone um repositório<br>para começar
+                    </div>
+                </div>
+            </aside>
+
             <!-- Editor Panel -->
             <div class="editor-panel">
-                <div class="panel-header">
-                    <span>💻 Prompt / Código</span>
-                    <div class="panel-actions">
-                        <button class="btn-small" id="examples-btn">Exemplos</button>
+                <div class="editor-tabs" id="editor-tabs">
+                    <div class="tab active" data-path="welcome">
+                        <span>Bem-vindo</span>
                     </div>
                 </div>
-                <div class="editor-wrapper">
-                    <textarea id="code-editor" spellcheck="false" placeholder="Digite seu prompt ou código aqui...
-
-Exemplos:
-• crie um gráfico de fibonacci
-• busque informações sobre Python 3.12
-• faça um hello world"></textarea>
-                </div>
-                <div class="editor-footer">
-                    <span class="hint">Ctrl+Enter para executar</span>
-                    <button class="run-btn" id="run-btn">
-                        ▶ Executar
-                    </button>
-                </div>
-            </div>
-
-            <!-- Output Panel -->
-            <div class="output-panel">
-                <div class="panel-header">
-                    <span>📤 Output</span>
-                    <div class="panel-actions">
-                        <span class="execution-time" id="exec-time"></span>
-                        <button class="btn-small" id="copy-btn">Copiar</button>
-                    </div>
-                </div>
-                <div class="output-container" id="output-container">
-                    <div class="welcome">
-                        <div class="welcome-icon">🤖</div>
-                        <h2>CodeJade</h2>
-                        <p>Agente de código com E2B Sandbox, Web Search e DAG Planning</p>
-                        <div class="features">
-                            <span>🔲 E2B Sandbox</span>
-                            <span>🌐 Web Search</span>
-                            <span>📊 DAG</span>
-                            <span>📄 CAT</span>
+                <div class="editor-container" id="editor-container">
+                    <div class="welcome-editor" id="welcome-editor">
+                        <div class="welcome-content">
+                            <div class="welcome-icon">🤖</div>
+                            <h2>CodeJade</h2>
+                            <p>Agente de código estilo Cursor AI</p>
+                            <div class="features-grid">
+                                <div class="feature">
+                                    <span class="feature-icon">📂</span>
+                                    <span>Clone GitHub</span>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">✏️</span>
+                                    <span>Monaco Editor</span>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">🌳</span>
+                                    <span>AST Editing</span>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">🚀</span>
+                                    <span>Git Commit/Push</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div id="monaco-editor" style="display:none;"></div>
                 </div>
             </div>
+
+            <!-- AI Chat Panel -->
+            <aside class="chat-panel" id="chat-panel">
+                <div class="chat-header">
+                    <span>💬 AI Chat</span>
+                    <button class="btn-icon-small" id="clear-chat">🗑️</button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant">
+                        <p>Olá! Sou o CodeJade. Clone um repo ou me peça algo.</p>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <textarea id="chat-input" placeholder="Peça edições, refatoração, análise..." rows="2"></textarea>
+                    <button class="send-btn" id="send-btn">▶</button>
+                </div>
+            </aside>
         </main>
     </div>
 
-    <!-- Examples Modal -->
-    <div class="modal hidden" id="examples-modal">
+    <!-- Clone Modal -->
+    <div class="modal hidden" id="clone-modal">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📚 Exemplos</h3>
-                <button class="modal-close" id="examples-close">×</button>
+                <h3>📂 Clonar Repositório</h3>
+                <button class="modal-close" id="clone-close">×</button>
             </div>
             <div class="modal-body">
-                <div class="examples-grid">
-                    <button class="example-btn" data-example="hello">👋 Hello World</button>
-                    <button class="example-btn" data-example="fibonacci">📊 Gráfico Fibonacci</button>
-                    <button class="example-btn" data-example="search">🔍 Web Search</button>
-                    <button class="example-btn" data-example="api">🌐 API Request</button>
-                    <button class="example-btn" data-example="pandas">📈 Análise Pandas</button>
-                    <button class="example-btn" data-example="complex">🔧 Tarefa Complexa</button>
+                <input type="text" id="repo-input" placeholder="owner/repo ou URL completa" class="input-field">
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="clone-cancel">Cancelar</button>
+                    <button class="btn-primary" id="clone-confirm">Clonar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Context Modal -->
-    <div class="modal hidden" id="context-modal">
+    <!-- Diff Modal -->
+    <div class="modal hidden" id="diff-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>📊 Diferenças</h3>
+                <button class="modal-close" id="diff-close">×</button>
+            </div>
+            <div class="modal-body">
+                <pre id="diff-content" class="diff-view">(carregando...)</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commit Modal -->
+    <div class="modal hidden" id="commit-modal">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📄 CAT Context</h3>
-                <button class="modal-close" id="context-close">×</button>
+                <h3>💾 Commit & Push</h3>
+                <button class="modal-close" id="commit-close">×</button>
             </div>
             <div class="modal-body">
-                <p>Cole o contexto do projeto (Markdown):</p>
-                <textarea id="context-input"
-                    placeholder="# Meu Projeto&#10;&#10;## Stack&#10;- Python 3.11&#10;- FastAPI"></textarea>
+                <input type="text" id="commit-message" placeholder="Mensagem do commit" class="input-field">
                 <div class="modal-actions">
-                    <button class="btn-secondary" id="context-cancel">Cancelar</button>
-                    <button class="btn-primary" id="context-save">Salvar</button>
+                    <button class="btn-secondary" id="commit-cancel">Cancelar</button>
+                    <button class="btn-primary" id="commit-confirm">Commit & Push</button>
                 </div>
             </div>
         </div>
