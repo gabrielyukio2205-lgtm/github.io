@@ -46,7 +46,7 @@ async function checkStatus() {
     try {
         const res = await fetch(`${API_BASE}/codejade/status`);
         const data = await res.json();
-        if (data.sandbox_ready) {
+        if (data.sandbox || data.available) {
             statusBadge.className = 'status-badge online';
             statusText.textContent = 'E2B Online';
         } else {
