@@ -2,6 +2,21 @@
 
 const API_BASE = 'https://madras1-jade-port.hf.space';
 
+// Get JWT token from localStorage
+function getAuthToken() {
+    return localStorage.getItem('jade_token');
+}
+
+// Auth headers for all requests
+function authHeaders() {
+    const token = getAuthToken();
+    if (!token) return { 'Content-Type': 'application/json' };
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
 // State
 let editor = null;
 let currentFile = null;
@@ -21,6 +36,16 @@ const editorTabs = document.getElementById('editor-tabs');
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
+
+// Check if user is logged in
+function checkAuth() {
+    const token = getAuthToken();
+    if (!token) {
+        addMessage('assistant', '⚠️ Você precisa fazer login para usar o CodeJade. <a href="/login">Login com GitHub</a>');
+        return false;
+    }
+    return true;
+}
 
 // Initialize Monaco
 require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
@@ -44,7 +69,7 @@ require(['vs/editor/editor.main'], function () {
 // Check status
 async function checkStatus() {
     try {
-        const res = await fetch(`${API_BASE}/codejade/status`);
+        const res = await fetch(`${API_BASE}/codejade/status`, { headers: authHeaders() });
         const data = await res.json();
         if (data.sandbox || data.available) {
             statusBadge.className = 'status-badge online';
@@ -54,7 +79,6 @@ async function checkStatus() {
             statusText.textContent = 'Offline';
         }
 
-        // If there's a current repo, set it
         if (data.current_repo && !currentRepo) {
             currentRepo = data.current_repo;
             repoName.textContent = currentRepo;
@@ -75,6 +99,8 @@ document.getElementById('clone-close').onclick = () => cloneModal.classList.add(
 document.getElementById('clone-cancel').onclick = () => cloneModal.classList.add('hidden');
 
 document.getElementById('clone-confirm').onclick = async () => {
+    if (!checkAuth()) return;
+
     const repo = repoInput.value.trim();
     if (!repo) return;
 
@@ -83,10 +109,9 @@ document.getElementById('clone-confirm').onclick = async () => {
     addMessage('tool', '⏳ Clonando repositório...');
 
     try {
-        // Use direct clone endpoint
         const res = await fetch(`${API_BASE}/codejade/clone`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ repo_url: repo })
         });
         const data = await res.json();
@@ -104,26 +129,27 @@ document.getElementById('clone-confirm').onclick = async () => {
     }
 };
 
-// Load files DIRECTLY from R2 (no LLM!)
+// Load files DIRECTLY from R2 (auth required)
 async function loadFilesFromR2(path = '') {
     if (!currentRepo) {
         fileTree.innerHTML = '<div class="empty-state">Clone um repositório<br>para começar</div>';
         return;
     }
 
+    if (!checkAuth()) return;
+
     try {
         const url = `${API_BASE}/codejade/files/${encodeURIComponent(currentRepo)}?path=${encodeURIComponent(path)}`;
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: authHeaders() });
         const data = await res.json();
 
         if (!data.success) {
-            fileTree.innerHTML = `<div class="empty-state">Erro: ${data.error}</div>`;
+            fileTree.innerHTML = `<div class="empty-state">${data.error}</div>`;
             return;
         }
 
         fileTree.innerHTML = '';
 
-        // Sort: folders first, then files
         const files = data.files.sort((a, b) => {
             if (a.type === 'dir' && b.type !== 'dir') return -1;
             if (a.type !== 'dir' && b.type === 'dir') return 1;
@@ -153,9 +179,9 @@ async function loadFilesFromR2(path = '') {
     }
 }
 
-// Open file DIRECTLY from R2
+// Open file DIRECTLY from R2 (auth required)
 async function openFileFromR2(filePath) {
-    if (!currentRepo) return;
+    if (!currentRepo || !checkAuth()) return;
 
     if (openFiles[filePath]) {
         switchToFile(filePath);
@@ -164,7 +190,7 @@ async function openFileFromR2(filePath) {
 
     try {
         const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${filePath}`;
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: authHeaders() });
         const data = await res.json();
 
         if (!data.success) {
@@ -198,12 +224,10 @@ function addTab(path) {
 function switchToFile(path) {
     currentFile = path;
 
-    // Update tabs
     document.querySelectorAll('.tab').forEach(t => {
         t.classList.toggle('active', t.dataset.path === path);
     });
 
-    // Show editor
     welcomeEditor.style.display = 'none';
     monacoContainer.style.display = 'block';
 
@@ -217,7 +241,7 @@ function switchToFile(path) {
     }
 }
 
-// Chat (uses LLM for AI assistance)
+// Chat
 async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
@@ -230,12 +254,11 @@ async function sendMessage() {
     try {
         const res = await fetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ message })
         });
         const data = await res.json();
 
-        // Remove loading
         const loading = chatMessages.querySelector('.message.tool:last-child');
         if (loading && loading.textContent.includes('⏳')) loading.remove();
 
@@ -245,7 +268,6 @@ async function sendMessage() {
 
         addMessage('assistant', data.response || 'OK');
 
-        // Refresh files after clone
         if (message.toLowerCase().includes('clone')) {
             setTimeout(loadFilesFromR2, 500);
         }
@@ -295,7 +317,7 @@ document.getElementById('diff-btn').onclick = async () => {
     try {
         const res = await fetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ message: 'mostre o git diff' })
         });
         const data = await res.json();
@@ -322,7 +344,7 @@ document.getElementById('commit-confirm').onclick = async () => {
     try {
         const res = await fetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: JSON.stringify({ message: `faça commit com mensagem "${message}" e push` })
         });
         const data = await res.json();
@@ -344,5 +366,6 @@ document.getElementById('theme-toggle').onclick = () => {
 };
 
 // Init
+checkAuth();
 checkStatus();
 setInterval(checkStatus, 30000);
