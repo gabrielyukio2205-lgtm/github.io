@@ -5,8 +5,8 @@ const API_BASE = 'https://madras1-jade-port.hf.space';
 // State
 let editor = null;
 let currentFile = null;
+let currentRepo = null;
 let openFiles = {};
-let repoCloned = false;
 
 // Elements
 const statusBadge = document.getElementById('status-badge');
@@ -51,7 +51,14 @@ async function checkStatus() {
             statusText.textContent = 'E2B Online';
         } else {
             statusBadge.className = 'status-badge';
-            statusText.textContent = 'Sandbox Offline';
+            statusText.textContent = 'Offline';
+        }
+
+        // If there's a current repo, set it
+        if (data.current_repo && !currentRepo) {
+            currentRepo = data.current_repo;
+            repoName.textContent = currentRepo;
+            loadFilesFromR2();
         }
     } catch (e) {
         statusBadge.className = 'status-badge error';
@@ -76,84 +83,102 @@ document.getElementById('clone-confirm').onclick = async () => {
     addMessage('tool', '⏳ Clonando repositório...');
 
     try {
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
+        // Use direct clone endpoint
+        const res = await fetch(`${API_BASE}/codejade/clone`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `clone o repositório ${repo}` })
+            body: JSON.stringify({ repo_url: repo })
         });
         const data = await res.json();
-        addMessage('assistant', data.response || 'Repo clonado!');
-        repoName.textContent = repo.split('/').pop();
-        repoCloned = true;
-        loadFiles('');
+
+        if (data.success) {
+            currentRepo = data.repo;
+            repoName.textContent = currentRepo;
+            addMessage('assistant', `✅ Clonado! ${data.files_count} arquivos salvos.`);
+            loadFilesFromR2();
+        } else {
+            addMessage('assistant', `❌ Erro: ${data.error}`);
+        }
     } catch (e) {
         addMessage('assistant', `❌ Erro: ${e.message}`);
     }
 };
 
-// Load files
-async function loadFiles(path = '') {
-    try {
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `liste os arquivos em ${path || 'raiz'}` })
-        });
-        const data = await res.json();
-
-        // Parse file list from response
-        const lines = (data.response || '').split('\n');
-        fileTree.innerHTML = '';
-
-        lines.forEach(line => {
-            const match = line.match(/(📁|📄)\s*(.+)/);
-            if (match) {
-                const isDir = match[1] === '📁';
-                const name = match[2].trim();
-                const item = document.createElement('div');
-                item.className = `file-item ${isDir ? 'folder' : ''}`;
-                item.innerHTML = `${match[1]} ${name}`;
-                item.onclick = () => {
-                    if (isDir) {
-                        loadFiles(path ? `${path}/${name}` : name);
-                    } else {
-                        openFile(path ? `${path}/${name}` : name);
-                    }
-                };
-                fileTree.appendChild(item);
-            }
-        });
-
-        if (fileTree.children.length === 0) {
-            fileTree.innerHTML = '<div class="empty-state">Nenhum arquivo</div>';
-        }
-    } catch (e) {
-        console.error('Load files error:', e);
-    }
-}
-
-// Open file
-async function openFile(path) {
-    if (openFiles[path]) {
-        switchToFile(path);
+// Load files DIRECTLY from R2 (no LLM!)
+async function loadFilesFromR2(path = '') {
+    if (!currentRepo) {
+        fileTree.innerHTML = '<div class="empty-state">Clone um repositório<br>para começar</div>';
         return;
     }
 
     try {
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: `leia o arquivo ${path}` })
-        });
+        const url = `${API_BASE}/codejade/files/${encodeURIComponent(currentRepo)}?path=${encodeURIComponent(path)}`;
+        const res = await fetch(url);
         const data = await res.json();
 
-        openFiles[path] = {
-            content: data.response || '',
+        if (!data.success) {
+            fileTree.innerHTML = `<div class="empty-state">Erro: ${data.error}</div>`;
+            return;
+        }
+
+        fileTree.innerHTML = '';
+
+        // Sort: folders first, then files
+        const files = data.files.sort((a, b) => {
+            if (a.type === 'dir' && b.type !== 'dir') return -1;
+            if (a.type !== 'dir' && b.type === 'dir') return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        files.forEach(f => {
+            const item = document.createElement('div');
+            item.className = `file-item ${f.type === 'dir' ? 'folder' : ''}`;
+            item.innerHTML = `${f.type === 'dir' ? '📁' : '📄'} ${f.name}`;
+            item.onclick = () => {
+                if (f.type === 'dir') {
+                    loadFilesFromR2(path ? `${path}/${f.name}` : f.name);
+                } else {
+                    openFileFromR2(path ? `${path}/${f.name}` : f.name);
+                }
+            };
+            fileTree.appendChild(item);
+        });
+
+        if (files.length === 0) {
+            fileTree.innerHTML = '<div class="empty-state">Pasta vazia</div>';
+        }
+    } catch (e) {
+        console.error('Load files error:', e);
+        fileTree.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+    }
+}
+
+// Open file DIRECTLY from R2
+async function openFileFromR2(filePath) {
+    if (!currentRepo) return;
+
+    if (openFiles[filePath]) {
+        switchToFile(filePath);
+        return;
+    }
+
+    try {
+        const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${filePath}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success) {
+            addMessage('tool', `❌ ${data.error}`);
+            return;
+        }
+
+        openFiles[filePath] = {
+            content: data.content,
             modified: false
         };
 
-        addTab(path);
-        switchToFile(path);
+        addTab(filePath);
+        switchToFile(filePath);
     } catch (e) {
         console.error('Open file error:', e);
     }
@@ -192,7 +217,7 @@ function switchToFile(path) {
     }
 }
 
-// Chat
+// Chat (uses LLM for AI assistance)
 async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
@@ -210,22 +235,19 @@ async function sendMessage() {
         });
         const data = await res.json();
 
-        // Remove loading message
-        const loadingMsg = chatMessages.querySelector('.message.tool:last-child');
-        if (loadingMsg && loadingMsg.textContent.includes('⏳')) {
-            loadingMsg.remove();
-        }
+        // Remove loading
+        const loading = chatMessages.querySelector('.message.tool:last-child');
+        if (loading && loading.textContent.includes('⏳')) loading.remove();
 
-        // Add tools used
         if (data.tools_used && data.tools_used.length > 0) {
             addMessage('tool', `⚡ ${data.tools_used.join(' → ')}`);
         }
 
         addMessage('assistant', data.response || 'OK');
 
-        // Refresh files if github operation
-        if (message.toLowerCase().includes('clone') || message.toLowerCase().includes('commit')) {
-            loadFiles('');
+        // Refresh files after clone
+        if (message.toLowerCase().includes('clone')) {
+            setTimeout(loadFilesFromR2, 500);
         }
     } catch (e) {
         addMessage('assistant', `❌ Erro: ${e.message}`);
@@ -243,7 +265,6 @@ function addMessage(type, content) {
 }
 
 function formatMessage(text) {
-    // Simple markdown-like formatting
     return text
         .replace(/`([^`]+)`/g, '<code>$1</code>')
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -260,16 +281,16 @@ chatInput.onkeydown = (e) => {
 };
 
 document.getElementById('clear-chat').onclick = () => {
-    chatMessages.innerHTML = '<div class="message assistant"><p>Chat limpo. Como posso ajudar?</p></div>';
+    chatMessages.innerHTML = '<div class="message assistant"><p>Chat limpo.</p></div>';
 };
 
-document.getElementById('refresh-files').onclick = () => loadFiles('');
+document.getElementById('refresh-files').onclick = () => loadFilesFromR2();
 
 // Diff modal
 const diffModal = document.getElementById('diff-modal');
 document.getElementById('diff-btn').onclick = async () => {
     diffModal.classList.remove('hidden');
-    document.getElementById('diff-content').textContent = '(carregando...)';
+    document.getElementById('diff-content').textContent = 'Carregando...';
 
     try {
         const res = await fetch(`${API_BASE}/codejade/chat`, {
@@ -296,7 +317,7 @@ document.getElementById('commit-confirm').onclick = async () => {
     commitModal.classList.add('hidden');
 
     addMessage('user', `Commit: ${message}`);
-    addMessage('tool', '⏳ Fazendo commit e push...');
+    addMessage('tool', '⏳ Commit + Push...');
 
     try {
         const res = await fetch(`${API_BASE}/codejade/chat`, {
