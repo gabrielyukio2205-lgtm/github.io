@@ -1,6 +1,6 @@
 // CodeJade - Cursor AI Style Frontend
 
-const API_BASE = window.location.hostname === 'localhost' ? '' : '';
+const API_BASE = 'https://madras1-jade-port.hf.space';
 
 // State
 let editor = null;
