@@ -22,158 +22,83 @@ let editor = null;
 let currentFile = null;
 let currentRepo = null;
 let openFiles = {};
-let chatHistory = []; // Current session messages
-let currentSessionId = null; // Current session ID
+let chatHistory = []; // Chat for current repo
 
-// ========== MULTI-SESSION CHAT SYSTEM ==========
-
-// Generate unique session ID
-function generateSessionId() {
-    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-// Get all sessions for current repo
-function getRepoSessions() {
-    if (!currentRepo) return [];
-    const key = `codejade_sessions_${currentRepo}`;
-    return JSON.parse(localStorage.getItem(key) || '[]');
-}
-
-// Save session to list
-function saveSession(sessionId, messages) {
-    if (!currentRepo || messages.length === 0) return;
-
-    const key = `codejade_sessions_${currentRepo}`;
-    let sessions = getRepoSessions();
-
-    // Find or create session
-    const existingIdx = sessions.findIndex(s => s.id === sessionId);
-    const sessionData = {
-        id: sessionId,
-        preview: messages.length > 0 ? messages[0].content.substring(0, 40) : 'Nova conversa',
-        messageCount: messages.length,
-        createdAt: existingIdx >= 0 ? sessions[existingIdx].createdAt : Date.now(),
-        updatedAt: Date.now()
-    };
-
-    if (existingIdx >= 0) {
-        sessions[existingIdx] = sessionData;
-    } else {
-        sessions.unshift(sessionData);
-    }
-
-    // Keep max 20 sessions per repo
-    sessions = sessions.slice(0, 20);
-    localStorage.setItem(key, JSON.stringify(sessions));
-
-    // Save messages separately
-    const messagesKey = `codejade_chat_${currentRepo}_${sessionId}`;
-    localStorage.setItem(messagesKey, JSON.stringify(messages.slice(-100)));
-}
-
-// Load session messages
-function loadSessionMessages(sessionId) {
-    if (!currentRepo) return [];
-    const key = `codejade_chat_${currentRepo}_${sessionId}`;
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : [];
-}
-
-// Delete a session
-function deleteSession(sessionId) {
-    if (!currentRepo) return;
-
-    // Remove from sessions list
-    const key = `codejade_sessions_${currentRepo}`;
-    let sessions = getRepoSessions();
-    sessions = sessions.filter(s => s.id !== sessionId);
-    localStorage.setItem(key, JSON.stringify(sessions));
-
-    // Remove messages
-    localStorage.removeItem(`codejade_chat_${currentRepo}_${sessionId}`);
-}
+// ========== SIMPLE CHAT: 1 Repo = 1 Chat ==========
 
 // Save Indicator
 function showSaveIndicator(state = 'saved') {
     const indicator = document.getElementById('save-indicator');
     if (!indicator) return;
     indicator.className = 'save-indicator ' + state;
-    if (state === 'saved') {
-        setTimeout(() => { indicator.className = 'save-indicator'; }, 2000);
-    }
+    if (state === 'saved') setTimeout(() => indicator.className = 'save-indicator', 2000);
 }
 
-// Save current chat
+// Save chat for current repo
 function saveChatHistory() {
-    if (!currentRepo || !currentSessionId) return;
+    if (!currentRepo) return;
     showSaveIndicator('saving');
-    saveSession(currentSessionId, chatHistory);
+    localStorage.setItem(`codejade_chat_${currentRepo}`, JSON.stringify(chatHistory.slice(-100)));
+    updateReposIndex();
     setTimeout(() => showSaveIndicator('saved'), 300);
 }
 
-// Load chat for current session
+// Update repos index
+function updateReposIndex() {
+    let repos = JSON.parse(localStorage.getItem('codejade_repos') || '[]');
+    const idx = repos.findIndex(r => r.name === currentRepo);
+    const data = {
+        name: currentRepo,
+        count: chatHistory.length,
+        preview: chatHistory.length > 0 ? chatHistory[chatHistory.length - 1].content.substring(0, 40) : '',
+        updatedAt: Date.now()
+    };
+    if (idx >= 0) repos[idx] = data;
+    else repos.unshift(data);
+    localStorage.setItem('codejade_repos', JSON.stringify(repos.slice(0, 20)));
+}
+
+// Get all repos with chats
+function getSavedRepos() {
+    return JSON.parse(localStorage.getItem('codejade_repos') || '[]');
+}
+
+// Load chat for current repo
 function loadChatHistory() {
-    if (!currentRepo || !currentSessionId) return;
-    chatHistory = loadSessionMessages(currentSessionId);
+    if (!currentRepo) return;
+    const saved = localStorage.getItem(`codejade_chat_${currentRepo}`);
     chatMessages.innerHTML = '';
-    if (chatHistory.length > 0) {
-        chatHistory.forEach(msg => renderMessage(msg.type, msg.content, false));
-        showSaveIndicator('saved');
+    if (saved) {
+        try {
+            chatHistory = JSON.parse(saved);
+            chatHistory.forEach(msg => renderMessage(msg.type, msg.content, false));
+            showSaveIndicator('saved');
+        } catch (e) { chatHistory = []; renderWelcomeMessage(); }
     } else {
-        // Show welcome for empty session
+        chatHistory = [];
         renderWelcomeMessage();
     }
 }
 
-// Create new session
-function createNewSession() {
-    // Save current session first
-    if (currentSessionId && chatHistory.length > 0) {
-        saveSession(currentSessionId, chatHistory);
-    }
-
-    // Create new
-    currentSessionId = generateSessionId();
+// Clear chat
+function clearChatHistory() {
     chatHistory = [];
+    if (currentRepo) localStorage.removeItem(`codejade_chat_${currentRepo}`);
     chatMessages.innerHTML = '';
     renderWelcomeMessage();
-
-    // Save empty session to list
-    if (currentRepo) {
-        saveSession(currentSessionId, []);
-    }
 }
 
-// Switch to a different session
-function switchToSession(sessionId) {
-    // Save current first
-    if (currentSessionId && chatHistory.length > 0) {
-        saveSession(currentSessionId, chatHistory);
-    }
-
-    currentSessionId = sessionId;
-    loadChatHistory();
-}
-
-// Render welcome message
+// Welcome message
 function renderWelcomeMessage() {
     chatMessages.innerHTML = `
         <div class="message assistant welcome-msg">
             <div class="msg-icon">🤖</div>
             <div class="msg-content">
                 <strong>CodeJade</strong>
-                <p>Olá! Me peça para editar, analisar ou refatorar código.</p>
+                <p>Olá! Me peça para editar código.</p>
             </div>
         </div>
     `;
-}
-
-// Legacy compatibility
-function clearChatHistory() {
-    chatHistory = [];
-    if (currentRepo && currentSessionId) {
-        localStorage.removeItem(`codejade_chat_${currentRepo}_${currentSessionId}`);
-    }
 }
 
 // Elements
@@ -286,8 +211,8 @@ document.getElementById('clone-confirm').onclick = async () => {
 
     cloneModal.classList.add('hidden');
 
-    // Save current session before switching repos
-    if (currentRepo && currentSessionId && chatHistory.length > 0) {
+    // Save current chat before switching repos
+    if (currentRepo && chatHistory.length > 0) {
         saveChatHistory();
     }
 
@@ -316,8 +241,7 @@ document.getElementById('clone-confirm').onclick = async () => {
             const loading = chatMessages.querySelector('.message.tool:last-child');
             if (loading && loading.textContent.includes('⏳')) loading.remove();
 
-            // Create NEW SESSION for this repo
-            currentSessionId = generateSessionId();
+            // Start fresh chat for this repo
             chatHistory = [];
             addMessage('assistant', `✅ Clonado ${data.repo}! ${data.files_count} arquivos. O que deseja fazer?`);
 
@@ -826,88 +750,68 @@ document.getElementById('plan-approve').onclick = async () => {
     pendingPlan = null;
 };
 
-// ========== SESSIONS PANEL ==========
+// ========== REPOS PANEL (shows all repos with saved chats) ==========
 
 function loadSessionsList() {
     const sessionsList = document.getElementById('sessions-list');
     if (!sessionsList) return;
 
-    if (!currentRepo) {
-        sessionsList.innerHTML = '<div class="no-sessions">Clone um repo primeiro</div>';
+    const repos = getSavedRepos();
+
+    if (repos.length === 0) {
+        sessionsList.innerHTML = '<div class="no-sessions">Nenhum repo com chat salvo</div>';
         return;
     }
 
-    const sessions = getRepoSessions();
-
-    if (sessions.length === 0) {
-        sessionsList.innerHTML = '<div class="no-sessions">Nenhum chat salvo para este repo</div>';
-        return;
-    }
-
-    sessionsList.innerHTML = sessions.map(s => `
-        <div class="session-item ${s.id === currentSessionId ? 'active' : ''}" data-session-id="${s.id}">
-            <span class="session-icon">${s.id === currentSessionId ? '▶️' : '💬'}</span>
+    sessionsList.innerHTML = repos.map(r => `
+        <div class="session-item ${r.name === currentRepo ? 'active' : ''}" data-repo="${r.name}">
+            <span class="session-icon">${r.name === currentRepo ? '▶️' : '📁'}</span>
             <div class="session-info">
-                <div class="session-name">${s.preview || 'Nova conversa'}...</div>
-                <div class="session-date">${s.messageCount} msgs • ${formatTimeAgo(s.updatedAt)}</div>
+                <div class="session-name">${r.name}</div>
+                <div class="session-date">${r.count || 0} msgs • ${formatTimeAgo(r.updatedAt)}</div>
             </div>
-            <span class="session-delete" data-session-id="${s.id}" title="Deletar">🗑️</span>
         </div>
     `).join('');
 
-    // Add click handlers for switching sessions
+    // Click to switch repo
     sessionsList.querySelectorAll('.session-item').forEach(item => {
-        item.onclick = (e) => {
-            // Don't switch if clicking delete button
-            if (e.target.classList.contains('session-delete')) return;
-
-            const sessionId = item.dataset.sessionId;
-            if (sessionId !== currentSessionId) {
-                switchToSession(sessionId);
-                loadSessionsList(); // Refresh list to update active state
-            }
+        item.onclick = () => {
+            const repo = item.dataset.repo;
             document.getElementById('chat-sessions').classList.add('hidden');
-        };
-    });
 
-    // Add delete handlers
-    sessionsList.querySelectorAll('.session-delete').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const sessionId = btn.dataset.sessionId;
+            if (repo !== currentRepo) {
+                // Save current chat first
+                if (currentRepo && chatHistory.length > 0) {
+                    saveChatHistory();
+                }
 
-            // Don't delete current session
-            if (sessionId === currentSessionId) {
-                alert('Não pode deletar a sessão atual. Crie uma nova primeiro.');
-                return;
+                // Switch repo
+                currentRepo = repo;
+                repoName.textContent = repo;
+                loadChatHistory();
+                loadFilesFromR2();
             }
-
-            deleteSession(sessionId);
-            loadSessionsList(); // Refresh
         };
     });
 }
 
 function formatTimeAgo(timestamp) {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
+    if (!timestamp) return '';
+    const diff = Date.now() - timestamp;
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'agora';
-    if (minutes < 60) return `${minutes}min atrás`;
-    if (hours < 24) return `${hours}h atrás`;
-    return `${days}d atrás`;
+    if (mins < 1) return 'agora';
+    if (mins < 60) return `${mins}min`;
+    if (hrs < 24) return `${hrs}h`;
+    return `${days}d`;
 }
 
-// Sessions button handlers
+// Button handlers
 document.getElementById('sessions-btn')?.addEventListener('click', () => {
-    const sessionsPanel = document.getElementById('chat-sessions');
-    sessionsPanel.classList.toggle('hidden');
-    if (!sessionsPanel.classList.contains('hidden')) {
-        loadSessionsList();
-    }
+    const panel = document.getElementById('chat-sessions');
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) loadSessionsList();
 });
 
 document.getElementById('close-sessions')?.addEventListener('click', () => {
@@ -919,7 +823,8 @@ document.getElementById('new-chat-btn')?.addEventListener('click', () => {
         alert('Clone um repositório primeiro!');
         return;
     }
-    createNewSession();
+    // Clear current chat for this repo
+    clearChatHistory();
 });
 
 // Init
