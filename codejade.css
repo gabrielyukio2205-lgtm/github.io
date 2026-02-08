@@ -255,14 +255,14 @@ body {
 }
 
 .tab {
-    padding: 8px 16px;
+    padding: 8px 12px;
     font-size: 0.8rem;
     color: var(--text-secondary);
     border-right: 1px solid var(--border);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     white-space: nowrap;
 }
 
@@ -274,6 +274,29 @@ body {
     background: var(--bg);
     color: var(--text);
     border-bottom: 2px solid var(--primary);
+}
+
+.tab-close {
+    font-size: 1rem;
+    opacity: 0.5;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.tab-close:hover {
+    opacity: 1;
+    background: rgba(248, 81, 73, 0.2);
+    color: #f85149;
+}
+
+.file-item.back-btn {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.file-item.back-btn:hover {
+    background: rgba(124, 58, 237, 0.1);
 }
 
 .editor-container {

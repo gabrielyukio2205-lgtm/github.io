@@ -275,6 +275,20 @@ async function loadFilesFromR2(path = '') {
 
         fileTree.innerHTML = '';
 
+        // Add back button if in subfolder
+        if (path) {
+            const backBtn = document.createElement('div');
+            backBtn.className = 'file-item folder back-btn';
+            backBtn.innerHTML = '⬅️ .. (voltar)';
+            backBtn.onclick = () => {
+                const parentPath = path.includes('/')
+                    ? path.substring(0, path.lastIndexOf('/'))
+                    : '';
+                loadFilesFromR2(parentPath);
+            };
+            fileTree.appendChild(backBtn);
+        }
+
         const files = data.files.sort((a, b) => {
             if (a.type === 'dir' && b.type !== 'dir') return -1;
             if (a.type !== 'dir' && b.type === 'dir') return 1;
@@ -296,7 +310,7 @@ async function loadFilesFromR2(path = '') {
         });
 
         if (files.length === 0) {
-            fileTree.innerHTML = '<div class="empty-state">Pasta vazia</div>';
+            fileTree.innerHTML += '<div class="empty-state">Pasta vazia</div>';
         }
     } catch (e) {
         console.error('Load files error:', e);
@@ -335,14 +349,51 @@ async function openFileFromR2(filePath) {
     }
 }
 
-// Add tab
+// Add tab with close button
 function addTab(path) {
     const tab = document.createElement('div');
     tab.className = 'tab';
     tab.dataset.path = path;
-    tab.innerHTML = `<span>${path.split('/').pop()}</span>`;
-    tab.onclick = () => switchToFile(path);
+    tab.innerHTML = `
+        <span class="tab-name">${path.split('/').pop()}</span>
+        <span class="tab-close" title="Fechar">×</span>
+    `;
+
+    // Click on tab name to switch
+    tab.querySelector('.tab-name').onclick = (e) => {
+        e.stopPropagation();
+        switchToFile(path);
+    };
+
+    // Click on X to close
+    tab.querySelector('.tab-close').onclick = (e) => {
+        e.stopPropagation();
+        closeTab(path);
+    };
+
     editorTabs.appendChild(tab);
+}
+
+// Close tab
+function closeTab(path) {
+    // Remove from openFiles
+    delete openFiles[path];
+
+    // Remove tab element
+    const tab = editorTabs.querySelector(`[data-path="${path}"]`);
+    if (tab) tab.remove();
+
+    // If this was the current file, switch to another or show welcome
+    if (currentFile === path) {
+        const remainingTabs = Object.keys(openFiles);
+        if (remainingTabs.length > 0) {
+            switchToFile(remainingTabs[remainingTabs.length - 1]);
+        } else {
+            currentFile = null;
+            welcomeEditor.style.display = 'flex';
+            monacoContainer.style.display = 'none';
+        }
+    }
 }
 
 // Switch to file
@@ -779,18 +830,22 @@ document.getElementById('close-sessions')?.addEventListener('click', () => {
 });
 
 document.getElementById('new-chat-btn')?.addEventListener('click', () => {
-    // Clear current chat and start fresh
-    clearChatHistory();
+    // SAVE current chat before clearing
+    if (chatHistory.length > 0) {
+        saveChatHistory();
+    }
+
+    // Clear and start fresh
+    chatHistory = [];
     chatMessages.innerHTML = `
         <div class="message assistant welcome-msg">
             <div class="msg-icon">🤖</div>
             <div class="msg-content">
                 <strong>CodeJade</strong>
-                <p>Nova conversa iniciada. Clone um repo ou me peça para editar código.</p>
+                <p>Nova conversa iniciada. Me peça para editar código!</p>
             </div>
         </div>
     `;
-    addMessage('system', '✨ Nova conversa iniciada', false);
 });
 
 // Init
