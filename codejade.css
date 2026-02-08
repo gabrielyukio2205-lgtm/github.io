@@ -915,6 +915,113 @@ body {
     font-size: 0.85rem;
 }
 
+/* Hierarchical Repos/Chats Panel */
+.repo-section {
+    margin-bottom: 8px;
+}
+
+.repo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.repo-header:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.repo-section.active .repo-header {
+    background: var(--primary);
+    color: white;
+}
+
+.repo-icon {
+    font-size: 1rem;
+}
+
+.repo-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.repo-count {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.chats-list {
+    margin-left: 12px;
+    border-left: 2px solid var(--border);
+    padding-left: 8px;
+    margin-top: 4px;
+}
+
+.chats-list.hidden {
+    display: none;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 2px;
+    transition: all 0.2s;
+}
+
+.chat-item:hover {
+    background: var(--surface-2);
+}
+
+.chat-item.active {
+    background: rgba(124, 58, 237, 0.2);
+    border-left: 2px solid var(--primary);
+}
+
+.chat-icon {
+    font-size: 0.9rem;
+}
+
+.chat-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-title {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-meta {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
+
+.chat-delete {
+    opacity: 0.3;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 3px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.chat-delete:hover {
+    opacity: 1;
+    background: rgba(248, 81, 73, 0.2);
+}
+
 /* Login Banner */
 .login-banner {
     padding: 16px;
