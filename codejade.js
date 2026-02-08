@@ -252,10 +252,20 @@ async function sendMessage() {
     addMessage('tool', '⏳ Processando...');
 
     try {
+        // Send file content directly - backend does RAG processing
+        const fileContent = (currentFile && openFiles[currentFile])
+            ? openFiles[currentFile].content
+            : null;
+
         const res = await fetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
             headers: authHeaders(),
-            body: JSON.stringify({ message })
+            body: JSON.stringify({
+                message,
+                repo: currentRepo,
+                file: currentFile,
+                file_content: fileContent
+            })
         });
         const data = await res.json();
 
