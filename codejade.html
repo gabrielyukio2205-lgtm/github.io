@@ -149,6 +149,29 @@
         </div>
     </div>
 
+    <!-- Plan Approval Modal (Jules Style) -->
+    <div class="modal hidden" id="plan-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>📋 Plano de Execução</h3>
+                <button class="modal-close" id="plan-close">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    Revise os passos antes de executar:
+                </p>
+                <div id="plan-steps" class="plan-container">
+                    <!-- Steps will be inserted here -->
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="plan-cancel">❌ Cancelar</button>
+                    <button class="btn-primary" id="plan-approve">✅ Aprovar e Executar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Commit Modal -->
     <div class="modal hidden" id="commit-modal">
         <div class="modal-backdrop"></div>

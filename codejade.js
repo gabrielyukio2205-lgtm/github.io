@@ -22,6 +22,39 @@ let editor = null;
 let currentFile = null;
 let currentRepo = null;
 let openFiles = {};
+let chatHistory = []; // Chat persistence
+
+// Chat Persistence Functions
+function saveChatHistory() {
+    if (!currentRepo) return;
+    const key = `codejade_chat_${currentRepo}`;
+    localStorage.setItem(key, JSON.stringify(chatHistory.slice(-50))); // Keep last 50 messages
+}
+
+function loadChatHistory() {
+    if (!currentRepo) return;
+    const key = `codejade_chat_${currentRepo}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+        try {
+            chatHistory = JSON.parse(saved);
+            // Render saved messages
+            chatMessages.innerHTML = '';
+            chatHistory.forEach(msg => {
+                renderMessage(msg.type, msg.content, false);
+            });
+        } catch (e) {
+            console.error('Error loading chat history:', e);
+        }
+    }
+}
+
+function clearChatHistory() {
+    chatHistory = [];
+    if (currentRepo) {
+        localStorage.removeItem(`codejade_chat_${currentRepo}`);
+    }
+}
 
 // Elements
 const statusBadge = document.getElementById('status-badge');
@@ -82,6 +115,7 @@ async function checkStatus() {
         if (data.current_repo && !currentRepo) {
             currentRepo = data.current_repo;
             repoName.textContent = currentRepo;
+            loadChatHistory(); // Restore chat history for this repo
             loadFilesFromR2();
         }
     } catch (e) {
@@ -119,6 +153,7 @@ document.getElementById('clone-confirm').onclick = async () => {
         if (data.success) {
             currentRepo = data.repo;
             repoName.textContent = currentRepo;
+            loadChatHistory(); // Load saved chat for this repo
             addMessage('assistant', `✅ Clonado! ${data.files_count} arquivos salvos.`);
             loadFilesFromR2();
         } else {
@@ -272,6 +307,13 @@ async function sendMessage() {
         const loading = chatMessages.querySelector('.message.tool:last-child');
         if (loading && loading.textContent.includes('⏳')) loading.remove();
 
+        // Check if response contains a plan that needs approval
+        if (data.pending_plan && data.pending_plan.length > 0) {
+            addMessage('assistant', '📋 O agente elaborou um plano. Revise antes de executar:');
+            showPlanApproval(data.pending_plan);
+            return;
+        }
+
         if (data.tools_used && data.tools_used.length > 0) {
             addMessage('tool', `⚡ ${data.tools_used.join(' → ')}`);
 
@@ -303,7 +345,7 @@ async function sendMessage() {
     }
 }
 
-// Refresh current file from R2 (after LLM edits)
+// Refresh current file from R2 (after LLM edits) with visual diff
 async function refreshCurrentFile() {
     if (!currentFile || !currentRepo) return;
 
@@ -313,12 +355,20 @@ async function refreshCurrentFile() {
         const data = await res.json();
 
         if (data.success && data.content) {
-            openFiles[currentFile].content = data.content;
+            const oldContent = openFiles[currentFile]?.content || '';
+            const newContent = data.content;
+
+            // Show visual diff if content changed
+            if (oldContent && oldContent !== newContent) {
+                showVisualDiff(currentFile, oldContent, newContent);
+            }
+
+            openFiles[currentFile].content = newContent;
             openFiles[currentFile].modified = false;
 
             // Update Monaco if this is the active file
             if (editor) {
-                editor.setValue(data.content);
+                editor.setValue(newContent);
             }
         }
     } catch (e) {
@@ -326,19 +376,84 @@ async function refreshCurrentFile() {
     }
 }
 
-function addMessage(type, content) {
+// Show visual diff in chat
+function showVisualDiff(filename, oldContent, newContent) {
+    const oldLines = oldContent.split('\n');
+    const newLines = newContent.split('\n');
+
+    let diffHtml = `<div class="diff-container">`;
+    diffHtml += `<div class="diff-header"><span>📝 ${filename}</span><span class="status-chip done">Atualizado</span></div>`;
+    diffHtml += `<div class="diff-content">`;
+
+    // Simple line-by-line diff (first 20 lines changed)
+    let changesShown = 0;
+    const maxChanges = 10;
+
+    for (let i = 0; i < Math.max(oldLines.length, newLines.length) && changesShown < maxChanges; i++) {
+        const oldLine = oldLines[i] || '';
+        const newLine = newLines[i] || '';
+
+        if (oldLine !== newLine) {
+            if (oldLine) {
+                diffHtml += `<span class="diff-line diff-remove">- ${escapeHtml(oldLine)}</span>`;
+            }
+            if (newLine) {
+                diffHtml += `<span class="diff-line diff-add">+ ${escapeHtml(newLine)}</span>`;
+            }
+            changesShown++;
+        }
+    }
+
+    if (changesShown >= maxChanges) {
+        diffHtml += `<span class="diff-line" style="color: var(--text-secondary)">... mais mudanças</span>`;
+    }
+
+    diffHtml += `</div></div>`;
+
+    // Add to chat as custom HTML
     const msg = document.createElement('div');
-    msg.className = `message ${type}`;
-    msg.innerHTML = formatMessage(content);
+    msg.className = 'message assistant';
+    msg.innerHTML = diffHtml;
     chatMessages.appendChild(msg);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Render message to DOM (without saving to history)
+function renderMessage(type, content, scroll = true) {
+    const msg = document.createElement('div');
+    msg.className = `message ${type}`;
+    msg.innerHTML = formatMessage(content);
+    chatMessages.appendChild(msg);
+    if (scroll) chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Add message to chat (and save to history)
+function addMessage(type, content, persist = true) {
+    renderMessage(type, content);
+
+    // Save to history (skip temporary messages like loading)
+    if (persist && !content.includes('⏳')) {
+        chatHistory.push({ type, content, timestamp: Date.now() });
+        saveChatHistory();
+    }
+}
+
 function formatMessage(text) {
-    return text
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
+    // Handle code blocks
+    text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code class="lang-$1">$2</code></pre>');
+    // Inline code
+    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // Bold
+    text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // Line breaks
+    text = text.replace(/\n/g, '<br>');
+    return text;
 }
 
 // Event listeners
@@ -351,7 +466,9 @@ chatInput.onkeydown = (e) => {
 };
 
 document.getElementById('clear-chat').onclick = () => {
-    chatMessages.innerHTML = '<div class="message assistant"><p>Chat limpo.</p></div>';
+    clearChatHistory();
+    chatMessages.innerHTML = '';
+    addMessage('system', '🗑️ Chat limpo', false);
 };
 
 document.getElementById('refresh-files').onclick = () => loadFilesFromR2();
@@ -411,6 +528,80 @@ document.getElementById('theme-toggle').onclick = () => {
     if (editor) {
         monaco.editor.setTheme(isDark ? 'vs' : 'vs-dark');
     }
+};
+
+// Plan Approval Modal (Jules-style)
+const planModal = document.getElementById('plan-modal');
+const planStepsContainer = document.getElementById('plan-steps');
+let pendingPlan = null;
+
+function showPlanApproval(plan) {
+    pendingPlan = plan;
+    planStepsContainer.innerHTML = '';
+
+    plan.forEach((step, idx) => {
+        const stepEl = document.createElement('div');
+        stepEl.className = 'plan-step pending';
+        stepEl.innerHTML = `
+            <div class="plan-step-number">${idx + 1}</div>
+            <div class="plan-step-content">
+                <div>${step.action || step.description || 'Ação'}</div>
+                ${step.tool ? `<div class="plan-step-tool">${step.tool}(${JSON.stringify(step.args || {}).substring(0, 50)}...)</div>` : ''}
+            </div>
+        `;
+        planStepsContainer.appendChild(stepEl);
+    });
+
+    planModal.classList.remove('hidden');
+}
+
+document.getElementById('plan-close').onclick = () => {
+    planModal.classList.add('hidden');
+    pendingPlan = null;
+};
+
+document.getElementById('plan-cancel').onclick = () => {
+    planModal.classList.add('hidden');
+    addMessage('system', '❌ Plano cancelado pelo usuário');
+    pendingPlan = null;
+};
+
+document.getElementById('plan-approve').onclick = async () => {
+    if (!pendingPlan) return;
+
+    planModal.classList.add('hidden');
+    addMessage('tool', '⏳ Executando plano aprovado...');
+
+    try {
+        // Execute the approved plan
+        const res = await fetch(`${API_BASE}/codejade/chat`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({
+                message: `execute o plano aprovado`,
+                repo: currentRepo,
+                approved_plan: pendingPlan
+            })
+        });
+        const data = await res.json();
+
+        const loading = chatMessages.querySelector('.message.tool:last-child');
+        if (loading && loading.textContent.includes('⏳')) loading.remove();
+
+        if (data.tools_used && data.tools_used.length > 0) {
+            addMessage('tool', `✅ ${data.tools_used.join(' → ')}`);
+            await loadFilesFromR2();
+            if (currentFile && data.modified_files?.includes(currentFile)) {
+                await refreshCurrentFile();
+            }
+        }
+
+        addMessage('assistant', data.response || 'Plano executado com sucesso!');
+    } catch (e) {
+        addMessage('assistant', `❌ Erro: ${e.message}`);
+    }
+
+    pendingPlan = null;
 };
 
 // Init
