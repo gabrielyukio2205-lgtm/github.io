@@ -735,6 +735,262 @@ body {
     white-space: pre-wrap;
 }
 
+/* ========== NEW UX STYLES ========== */
+
+/* Chat Header Improvements */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.save-indicator {
+    font-size: 0.7rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.save-indicator.saving {
+    opacity: 1;
+    animation: pulse 1s infinite;
+}
+
+.save-indicator.saved {
+    opacity: 1;
+    color: var(--success);
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Sessions Sidebar */
+.chat-sessions {
+    position: absolute;
+    top: 45px;
+    left: 0;
+    right: 0;
+    bottom: 60px;
+    background: var(--surface);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--border);
+}
+
+.chat-sessions.hidden {
+    display: none;
+}
+
+.sessions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.sessions-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.session-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.session-item:hover {
+    background: var(--surface-2);
+}
+
+.session-item.active {
+    background: var(--primary);
+    color: white;
+}
+
+.session-item .session-icon {
+    font-size: 1.1rem;
+}
+
+.session-item .session-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.session-item .session-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.session-item .session-date {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.session-item.active .session-date {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.no-sessions {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px 20px;
+    font-size: 0.85rem;
+}
+
+/* Login Banner */
+.login-banner {
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(99, 102, 241, 0.1));
+    border-bottom: 1px solid var(--border);
+}
+
+.login-banner.hidden {
+    display: none;
+}
+
+.login-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.login-icon {
+    font-size: 1.5rem;
+}
+
+.login-text {
+    flex: 1;
+}
+
+.login-text strong {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.login-text p {
+    margin: 2px 0 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.login-btn {
+    padding: 8px 16px !important;
+    font-size: 0.8rem !important;
+    text-decoration: none;
+}
+
+/* Improved Message Styling */
+.message.welcome-msg {
+    display: flex;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.msg-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.msg-content {
+    flex: 1;
+}
+
+.msg-content strong {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    color: var(--primary);
+}
+
+.msg-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Loading State */
+.send-btn .loading-icon {
+    display: none;
+}
+
+.send-btn .loading-icon.visible {
+    display: inline;
+}
+
+.send-btn .send-icon.hidden {
+    display: none;
+}
+
+.loading-icon.hidden {
+    display: none;
+}
+
+/* Unauthorized State (File Sidebar) */
+.file-tree .unauthorized-msg {
+    text-align: center;
+    padding: 30px 15px;
+    color: var(--text-secondary);
+}
+
+.unauthorized-msg .lock-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.unauthorized-msg p {
+    font-size: 0.85rem;
+    margin: 0 0 12px;
+}
+
+.unauthorized-msg a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.unauthorized-msg a:hover {
+    text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .main-content {

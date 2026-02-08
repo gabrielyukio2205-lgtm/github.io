@@ -98,20 +98,62 @@
                 </div>
             </div>
 
-            <!-- AI Chat Panel -->
+            <!-- AI Chat Panel (Redesigned UX) -->
             <aside class="chat-panel" id="chat-panel">
+                <!-- Chat Sessions Header -->
                 <div class="chat-header">
-                    <span>💬 AI Chat</span>
-                    <button class="btn-icon-small" id="clear-chat">🗑️</button>
-                </div>
-                <div class="chat-messages" id="chat-messages">
-                    <div class="message assistant">
-                        <p>Olá! Sou o CodeJade. Clone um repo ou me peça algo.</p>
+                    <div class="chat-header-left">
+                        <span>💬 Chat</span>
+                        <span class="save-indicator" id="save-indicator" title="Histórico salvo">💾</span>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="btn-icon-small" id="new-chat-btn" title="Nova conversa">➕</button>
+                        <button class="btn-icon-small" id="sessions-btn" title="Ver sessões">📋</button>
+                        <button class="btn-icon-small" id="clear-chat" title="Limpar chat">🗑️</button>
                     </div>
                 </div>
+
+                <!-- Sessions Sidebar (Hidden by default) -->
+                <div class="chat-sessions hidden" id="chat-sessions">
+                    <div class="sessions-header">
+                        <span>📁 Sessões Salvas</span>
+                        <button class="btn-icon-small" id="close-sessions">✕</button>
+                    </div>
+                    <div class="sessions-list" id="sessions-list">
+                        <!-- Sessions loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Login Required Banner -->
+                <div class="login-banner hidden" id="login-banner">
+                    <div class="login-banner-content">
+                        <span class="login-icon">🔐</span>
+                        <div class="login-text">
+                            <strong>Login Necessário</strong>
+                            <p>Faça login com GitHub para usar o CodeJade</p>
+                        </div>
+                        <a href="login.html" class="btn-primary login-btn">Entrar</a>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant welcome-msg">
+                        <div class="msg-icon">🤖</div>
+                        <div class="msg-content">
+                            <strong>CodeJade</strong>
+                            <p>Olá! Clone um repositório ou me peça para editar código.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
                 <div class="chat-input-container">
-                    <textarea id="chat-input" placeholder="Peça edições, refatoração, análise..." rows="2"></textarea>
-                    <button class="send-btn" id="send-btn">▶</button>
+                    <textarea id="chat-input" placeholder="Peça edições, análise, refatoração..." rows="2"></textarea>
+                    <button class="send-btn" id="send-btn" title="Enviar">
+                        <span class="send-icon">▶</span>
+                        <span class="loading-icon hidden">⏳</span>
+                    </button>
                 </div>
             </aside>
         </main>

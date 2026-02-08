@@ -24,11 +24,54 @@ let currentRepo = null;
 let openFiles = {};
 let chatHistory = []; // Chat persistence
 
+// Save Indicator
+function showSaveIndicator(state = 'saved') {
+    const indicator = document.getElementById('save-indicator');
+    if (!indicator) return;
+
+    indicator.className = 'save-indicator ' + state;
+    if (state === 'saved') {
+        setTimeout(() => { indicator.className = 'save-indicator'; }, 2000);
+    }
+}
+
 // Chat Persistence Functions
 function saveChatHistory() {
     if (!currentRepo) return;
+
+    showSaveIndicator('saving');
+
     const key = `codejade_chat_${currentRepo}`;
     localStorage.setItem(key, JSON.stringify(chatHistory.slice(-50))); // Keep last 50 messages
+
+    // Also save to sessions index
+    saveToSessionsIndex(currentRepo);
+
+    setTimeout(() => showSaveIndicator('saved'), 300);
+}
+
+function saveToSessionsIndex(repoName) {
+    const sessionsKey = 'codejade_sessions';
+    let sessions = JSON.parse(localStorage.getItem(sessionsKey) || '[]');
+
+    // Update or add session
+    const existing = sessions.findIndex(s => s.repo === repoName);
+    const sessionData = {
+        repo: repoName,
+        lastMessage: chatHistory.length > 0 ? chatHistory[chatHistory.length - 1].content.substring(0, 50) : '',
+        messageCount: chatHistory.length,
+        updatedAt: Date.now()
+    };
+
+    if (existing >= 0) {
+        sessions[existing] = sessionData;
+    } else {
+        sessions.unshift(sessionData);
+    }
+
+    // Keep only last 10 sessions
+    sessions = sessions.slice(0, 10);
+    localStorage.setItem(sessionsKey, JSON.stringify(sessions));
 }
 
 function loadChatHistory() {
@@ -43,6 +86,7 @@ function loadChatHistory() {
             chatHistory.forEach(msg => {
                 renderMessage(msg.type, msg.content, false);
             });
+            showSaveIndicator('saved');
         } catch (e) {
             console.error('Error loading chat history:', e);
         }
@@ -70,13 +114,39 @@ const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
 
-// Check if user is logged in
+// Check if user is logged in and update UI accordingly
 function checkAuth() {
     const token = getAuthToken();
+    const loginBanner = document.getElementById('login-banner');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
     if (!token) {
-        addMessage('assistant', '⚠️ Você precisa fazer login para usar o CodeJade. <a href="/login">Login com GitHub</a>');
+        // Show login banner, hide repo name
+        if (loginBanner) loginBanner.classList.remove('hidden');
+        if (repoName) repoName.textContent = 'Não conectado';
+
+        // Show nice message instead of adding to chat
+        fileTree.innerHTML = `
+            <div class="unauthorized-msg">
+                <div class="lock-icon">🔐</div>
+                <p>Faça login para ver seus repositórios</p>
+                <a href="login.html">Entrar com GitHub</a>
+            </div>
+        `;
+
+        // Disable input
+        if (chatInput) chatInput.disabled = true;
+        if (sendBtn) sendBtn.disabled = true;
+
         return false;
     }
+
+    // User is logged in
+    if (loginBanner) loginBanner.classList.add('hidden');
+    if (chatInput) chatInput.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
+
     return true;
 }
 
@@ -603,6 +673,85 @@ document.getElementById('plan-approve').onclick = async () => {
 
     pendingPlan = null;
 };
+
+// ========== SESSIONS PANEL ==========
+
+function loadSessionsList() {
+    const sessionsList = document.getElementById('sessions-list');
+    if (!sessionsList) return;
+
+    const sessions = JSON.parse(localStorage.getItem('codejade_sessions') || '[]');
+
+    if (sessions.length === 0) {
+        sessionsList.innerHTML = '<div class="no-sessions">Nenhuma sessão salva ainda</div>';
+        return;
+    }
+
+    sessionsList.innerHTML = sessions.map(s => `
+        <div class="session-item ${s.repo === currentRepo ? 'active' : ''}" data-repo="${s.repo}">
+            <span class="session-icon">💬</span>
+            <div class="session-info">
+                <div class="session-name">${s.repo}</div>
+                <div class="session-date">${s.messageCount} mensagens • ${formatTimeAgo(s.updatedAt)}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Add click handlers
+    sessionsList.querySelectorAll('.session-item').forEach(item => {
+        item.onclick = () => {
+            const repo = item.dataset.repo;
+            if (repo !== currentRepo) {
+                currentRepo = repo;
+                repoName.textContent = repo;
+                loadChatHistory();
+                loadFilesFromR2();
+            }
+            document.getElementById('chat-sessions').classList.add('hidden');
+        };
+    });
+}
+
+function formatTimeAgo(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'agora';
+    if (minutes < 60) return `${minutes}min atrás`;
+    if (hours < 24) return `${hours}h atrás`;
+    return `${days}d atrás`;
+}
+
+// Sessions button handlers
+document.getElementById('sessions-btn')?.addEventListener('click', () => {
+    const sessionsPanel = document.getElementById('chat-sessions');
+    sessionsPanel.classList.toggle('hidden');
+    if (!sessionsPanel.classList.contains('hidden')) {
+        loadSessionsList();
+    }
+});
+
+document.getElementById('close-sessions')?.addEventListener('click', () => {
+    document.getElementById('chat-sessions').classList.add('hidden');
+});
+
+document.getElementById('new-chat-btn')?.addEventListener('click', () => {
+    // Clear current chat and start fresh
+    clearChatHistory();
+    chatMessages.innerHTML = `
+        <div class="message assistant welcome-msg">
+            <div class="msg-icon">🤖</div>
+            <div class="msg-content">
+                <strong>CodeJade</strong>
+                <p>Nova conversa iniciada. Clone um repo ou me peça para editar código.</p>
+            </div>
+        </div>
+    `;
+    addMessage('system', '✨ Nova conversa iniciada', false);
+});
 
 // Init
 checkAuth();
