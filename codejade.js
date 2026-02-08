@@ -274,6 +274,21 @@ async function sendMessage() {
 
         if (data.tools_used && data.tools_used.length > 0) {
             addMessage('tool', `⚡ ${data.tools_used.join(' → ')}`);
+
+            // Check if any file was modified - refresh Monaco if needed
+            const editTools = ['write_file', 'ast_edit', 'ast_rename'];
+            const hasEdits = data.tools_used.some(t => editTools.some(e => t.includes(e)));
+
+            if (hasEdits) {
+                // Refresh file list
+                await loadFilesFromR2();
+
+                // If current file was edited, reload it
+                if (currentFile && data.modified_files?.includes(currentFile)) {
+                    await refreshCurrentFile();
+                    addMessage('tool', '🔄 Arquivo atualizado no editor');
+                }
+            }
         }
 
         addMessage('assistant', data.response || 'OK');
@@ -285,6 +300,29 @@ async function sendMessage() {
         addMessage('assistant', `❌ Erro: ${e.message}`);
     } finally {
         sendBtn.disabled = false;
+    }
+}
+
+// Refresh current file from R2 (after LLM edits)
+async function refreshCurrentFile() {
+    if (!currentFile || !currentRepo) return;
+
+    try {
+        const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${currentFile}`;
+        const res = await fetch(url, { headers: authHeaders() });
+        const data = await res.json();
+
+        if (data.success && data.content) {
+            openFiles[currentFile].content = data.content;
+            openFiles[currentFile].modified = false;
+
+            // Update Monaco if this is the active file
+            if (editor) {
+                editor.setValue(data.content);
+            }
+        }
+    } catch (e) {
+        console.error('Refresh file error:', e);
     }
 }
 
