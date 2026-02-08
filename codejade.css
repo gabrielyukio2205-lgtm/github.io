@@ -890,6 +890,24 @@ body {
     color: rgba(255, 255, 255, 0.7);
 }
 
+.session-delete {
+    opacity: 0.3;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.session-delete:hover {
+    opacity: 1;
+    background: rgba(248, 81, 73, 0.2);
+}
+
+.session-item.active .session-delete:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .no-sessions {
     text-align: center;
     color: var(--text-secondary);
