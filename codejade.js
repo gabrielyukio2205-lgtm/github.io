@@ -209,8 +209,15 @@ document.getElementById('clone-confirm').onclick = async () => {
     if (!repo) return;
 
     cloneModal.classList.add('hidden');
-    addMessage('user', `Clone: ${repo}`);
-    addMessage('tool', '⏳ Clonando repositório...');
+
+    // IMPORTANT: Clear current chat before cloning new repo
+    const previousRepo = currentRepo;
+    chatHistory = [];
+    chatMessages.innerHTML = '';  // Clear visually
+
+    // Show clone message in fresh chat
+    addMessage('user', `Clone: ${repo}`, false);
+    addMessage('tool', '⏳ Clonando repositório...', false);
 
     try {
         const res = await fetch(`${API_BASE}/codejade/clone`, {
@@ -221,13 +228,26 @@ document.getElementById('clone-confirm').onclick = async () => {
         const data = await res.json();
 
         if (data.success) {
+            // Switch to new repo
             currentRepo = data.repo;
             repoName.textContent = currentRepo;
-            loadChatHistory(); // Load saved chat for this repo
-            addMessage('assistant', `✅ Clonado! ${data.files_count} arquivos salvos.`);
+
+            // Remove loading message
+            const loading = chatMessages.querySelector('.message.tool:last-child');
+            if (loading && loading.textContent.includes('⏳')) loading.remove();
+
+            // Start fresh session for this repo
+            chatHistory = [];
+            addMessage('assistant', `✅ Clonado ${data.repo}! ${data.files_count} arquivos. O que deseja fazer?`);
+
             loadFilesFromR2();
         } else {
             addMessage('assistant', `❌ Erro: ${data.error}`);
+            // Restore previous repo if clone failed
+            if (previousRepo) {
+                currentRepo = previousRepo;
+                repoName.textContent = previousRepo;
+            }
         }
     } catch (e) {
         addMessage('assistant', `❌ Erro: ${e.message}`);
@@ -701,13 +721,33 @@ function loadSessionsList() {
     sessionsList.querySelectorAll('.session-item').forEach(item => {
         item.onclick = () => {
             const repo = item.dataset.repo;
+
+            // Close sessions panel
+            document.getElementById('chat-sessions').classList.add('hidden');
+
             if (repo !== currentRepo) {
+                // Save current chat first
+                if (currentRepo && chatHistory.length > 0) {
+                    saveChatHistory();
+                }
+
+                // Switch to new repo
                 currentRepo = repo;
                 repoName.textContent = repo;
+
+                // Clear and load new chat
+                chatMessages.innerHTML = '';
+                chatHistory = [];
+
+                // Show transition message
+                addMessage('system', `📂 Sessão: ${repo}`, false);
+
+                // Load history for this repo
                 loadChatHistory();
                 loadFilesFromR2();
+
+                showSaveIndicator('saved');
             }
-            document.getElementById('chat-sessions').classList.add('hidden');
         };
     });
 }
