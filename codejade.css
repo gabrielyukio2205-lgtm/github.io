@@ -178,8 +178,38 @@ body {
 .main-content {
     flex: 1;
     display: grid;
-    grid-template-columns: 220px 1fr 320px;
+    grid-template-columns: 220px 6px 1fr 6px 320px;
     overflow: hidden;
+}
+
+/* Resize Dividers */
+.resize-divider {
+    width: 6px;
+    background: var(--border);
+    cursor: col-resize;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.resize-divider:hover,
+.resize-divider.dragging {
+    background: var(--primary);
+}
+
+.resize-divider::after {
+    content: '⋮';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-secondary);
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+.resize-divider:hover::after {
+    opacity: 1;
+    color: white;
 }
 
 /* Sidebar */

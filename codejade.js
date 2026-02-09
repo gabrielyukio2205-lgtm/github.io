@@ -1031,3 +1031,82 @@ document.getElementById('new-chat-btn')?.addEventListener('click', () => {
 checkAuth();
 checkStatus();
 setInterval(checkStatus, 30000);
+
+// ========== PANEL RESIZE HANDLERS ==========
+(function () {
+    const mainContent = document.querySelector('.main-content');
+    const sidebar = document.getElementById('sidebar');
+    const chatPanel = document.getElementById('chat-panel');
+    const resizeLeft = document.getElementById('resize-left');
+    const resizeRight = document.getElementById('resize-right');
+
+    if (!mainContent || !resizeLeft || !resizeRight) return;
+
+    let isDragging = null; // 'left' or 'right'
+    let startX = 0;
+    let startWidth = 0;
+
+    // Left divider (sidebar resize)
+    resizeLeft?.addEventListener('mousedown', (e) => {
+        isDragging = 'left';
+        startX = e.clientX;
+        startWidth = sidebar.offsetWidth;
+        resizeLeft.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    // Right divider (chat panel resize)
+    resizeRight?.addEventListener('mousedown', (e) => {
+        isDragging = 'right';
+        startX = e.clientX;
+        startWidth = chatPanel.offsetWidth;
+        resizeRight.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        const dx = e.clientX - startX;
+
+        if (isDragging === 'left') {
+            // Sidebar grows/shrinks with drag
+            const newWidth = Math.min(Math.max(startWidth + dx, 150), 500);
+            mainContent.style.gridTemplateColumns = `${newWidth}px 6px 1fr 6px ${chatPanel.offsetWidth}px`;
+        } else if (isDragging === 'right') {
+            // Chat panel grows/shrinks (inverse direction)
+            const newWidth = Math.min(Math.max(startWidth - dx, 250), 700);
+            mainContent.style.gridTemplateColumns = `${sidebar.offsetWidth}px 6px 1fr 6px ${newWidth}px`;
+        }
+
+        // Trigger Monaco editor resize
+        if (editor) editor.layout();
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            resizeLeft.classList.remove('dragging');
+            resizeRight.classList.remove('dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            isDragging = null;
+
+            // Save sizes to localStorage
+            localStorage.setItem('codejade_sidebar_width', sidebar.offsetWidth);
+            localStorage.setItem('codejade_chat_width', chatPanel.offsetWidth);
+        }
+    });
+
+    // Restore saved sizes
+    const savedSidebar = localStorage.getItem('codejade_sidebar_width');
+    const savedChat = localStorage.getItem('codejade_chat_width');
+    if (savedSidebar || savedChat) {
+        const sw = savedSidebar ? parseInt(savedSidebar) : 220;
+        const cw = savedChat ? parseInt(savedChat) : 320;
+        mainContent.style.gridTemplateColumns = `${sw}px 6px 1fr 6px ${cw}px`;
+    }
+})();
