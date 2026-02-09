@@ -1072,15 +1072,27 @@ setInterval(checkStatus, 30000);
         if (!isDragging) return;
 
         const dx = e.clientX - startX;
+        const totalWidth = mainContent.offsetWidth;
+        const minEditor = 300; // Editor minimum in pixels
 
         if (isDragging === 'left') {
-            // Sidebar grows/shrinks with drag
-            const newWidth = Math.min(Math.max(startWidth + dx, 150), 500);
-            mainContent.style.gridTemplateColumns = `${newWidth}px 6px 1fr 6px ${chatPanel.offsetWidth}px`;
+            // Sidebar: min 150px, max 35% of screen or leave room for editor
+            const maxSidebar = Math.min(500, totalWidth * 0.35);
+            const newWidth = Math.min(Math.max(startWidth + dx, 150), maxSidebar);
+
+            // Ensure editor has space
+            if (totalWidth - newWidth - chatPanel.offsetWidth - 12 >= minEditor) {
+                mainContent.style.gridTemplateColumns = `${newWidth}px 6px 1fr 6px ${chatPanel.offsetWidth}px`;
+            }
         } else if (isDragging === 'right') {
-            // Chat panel grows/shrinks (inverse direction)
-            const newWidth = Math.min(Math.max(startWidth - dx, 250), 700);
-            mainContent.style.gridTemplateColumns = `${sidebar.offsetWidth}px 6px 1fr 6px ${newWidth}px`;
+            // Chat: min 250px, max 50% of screen or leave room for editor
+            const maxChat = Math.min(700, totalWidth * 0.5);
+            const newWidth = Math.min(Math.max(startWidth - dx, 250), maxChat);
+
+            // Ensure editor has space
+            if (totalWidth - sidebar.offsetWidth - newWidth - 12 >= minEditor) {
+                mainContent.style.gridTemplateColumns = `${sidebar.offsetWidth}px 6px 1fr 6px ${newWidth}px`;
+            }
         }
 
         // Trigger Monaco editor resize
