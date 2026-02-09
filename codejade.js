@@ -1081,8 +1081,8 @@ setInterval(checkStatus, 30000);
             const newWidth = Math.min(Math.max(startWidth + dx, 150), maxSidebar);
 
             // Ensure editor has space
-            if (totalWidth - newWidth - chatPanel.offsetWidth - 12 >= minEditor) {
-                mainContent.style.gridTemplateColumns = `${newWidth}px 6px 1fr 6px ${chatPanel.offsetWidth}px`;
+            if (totalWidth - newWidth - chatPanel.offsetWidth - 4 >= minEditor) {
+                mainContent.style.gridTemplateColumns = `${newWidth}px 2px 1fr 2px ${chatPanel.offsetWidth}px`;
             }
         } else if (isDragging === 'right') {
             // Chat: min 250px, max 50% of screen or leave room for editor
@@ -1090,8 +1090,8 @@ setInterval(checkStatus, 30000);
             const newWidth = Math.min(Math.max(startWidth - dx, 250), maxChat);
 
             // Ensure editor has space
-            if (totalWidth - sidebar.offsetWidth - newWidth - 12 >= minEditor) {
-                mainContent.style.gridTemplateColumns = `${sidebar.offsetWidth}px 6px 1fr 6px ${newWidth}px`;
+            if (totalWidth - sidebar.offsetWidth - newWidth - 4 >= minEditor) {
+                mainContent.style.gridTemplateColumns = `${sidebar.offsetWidth}px 2px 1fr 2px ${newWidth}px`;
             }
         }
 
@@ -1119,6 +1119,6 @@ setInterval(checkStatus, 30000);
     if (savedSidebar || savedChat) {
         const sw = savedSidebar ? parseInt(savedSidebar) : 220;
         const cw = savedChat ? parseInt(savedChat) : 320;
-        mainContent.style.gridTemplateColumns = `${sw}px 6px 1fr 6px ${cw}px`;
+        mainContent.style.gridTemplateColumns = `${sw}px 2px 1fr 2px ${cw}px`;
     }
 })();

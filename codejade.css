@@ -178,14 +178,14 @@ body {
 .main-content {
     flex: 1;
     display: grid;
-    grid-template-columns: 220px 6px 1fr 6px 320px;
+    grid-template-columns: 220px 2px 1fr 2px 320px;
     overflow: hidden;
 }
 
-/* Resize Dividers */
+/* Resize Dividers - thin and subtle */
 .resize-divider {
-    width: 6px;
-    background: var(--border);
+    width: 2px;
+    background: transparent;
     cursor: col-resize;
     transition: background 0.2s;
     position: relative;
@@ -194,22 +194,7 @@ body {
 .resize-divider:hover,
 .resize-divider.dragging {
     background: var(--primary);
-}
-
-.resize-divider::after {
-    content: '⋮';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--text-secondary);
-    font-size: 12px;
-    opacity: 0.5;
-}
-
-.resize-divider:hover::after {
-    opacity: 1;
-    color: white;
+    width: 3px;
 }
 
 /* Sidebar */
