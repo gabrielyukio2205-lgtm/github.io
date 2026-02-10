@@ -11,6 +11,7 @@
     const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
     // Use HuggingFace directly for WebDev (avoids proxy timeout on Compound PRO)
     const API_URL = `${HF_SPACE_URL}/webdev/generate`;
+    const PROJECT_API_URL = `${HF_SPACE_URL}/webdev/project`;
 
     const SANDPACK_IMPORT_URLS = [
         'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
@@ -31,7 +32,7 @@
     ];
 
     // State
-    let currentMode = 'html'; // 'html' or 'react'
+    let currentMode = 'html'; // 'html', 'react', or 'project'
     let currentCode = '';
     let currentFiles = {}; // For React mode
     let currentDependencies = {};
@@ -41,6 +42,8 @@
     let sandpackImportPromise = null;
     let sandpackCtor = null;
     let reactPreviewMode = 'sandpack';
+    let projectPreviewUrl = null; // E2B dev server URL for project mode
+    let projectSandboxId = null; // E2B sandbox ID
 
     // Agentic auto-fix state
     const MAX_FIX_ATTEMPTS = 3;
@@ -119,6 +122,8 @@
         // Mode toggle
         htmlModeBtn.addEventListener('click', () => setMode('html'));
         reactModeBtn.addEventListener('click', () => setMode('react'));
+        const projectModeBtn = document.getElementById('projectModeBtn');
+        if (projectModeBtn) projectModeBtn.addEventListener('click', () => setMode('project'));
 
         // Listen for errors from iframe (for auto-fix)
         window.addEventListener('message', handleIframeMessage);
@@ -168,6 +173,8 @@
         currentCode = '';
         currentFiles = {};
         currentDependencies = {};
+        projectPreviewUrl = null;
+        projectSandboxId = null;
         updateModeUI();
         resetPreview();
     }
@@ -176,20 +183,28 @@
         // Toggle buttons
         htmlModeBtn.classList.toggle('active', currentMode === 'html');
         reactModeBtn.classList.toggle('active', currentMode === 'react');
+        const projectModeBtn = document.getElementById('projectModeBtn');
+        if (projectModeBtn) projectModeBtn.classList.toggle('active', currentMode === 'project');
 
         // Update description
-        if (currentMode === 'react') {
+        if (currentMode === 'project') {
+            modeDescription.textContent = 'Projetos completos com npm, TypeScript e build real via E2B';
+            modeIndicator.textContent = 'Project';
+            modeIndicator.classList.remove('react');
+            modeIndicator.classList.add('project');
+        } else if (currentMode === 'react') {
             modeDescription.textContent = 'Gere projetos React com imports e dependencias';
             modeIndicator.textContent = 'React';
             modeIndicator.classList.add('react');
+            modeIndicator.classList.remove('project');
         } else {
             modeDescription.textContent = 'Gere código HTML + Tailwind CSS funcional';
             modeIndicator.textContent = 'HTML';
-            modeIndicator.classList.remove('react');
+            modeIndicator.classList.remove('react', 'project');
         }
 
         // File explorer visibility
-        fileExplorer.classList.toggle('hidden', currentMode !== 'react');
+        fileExplorer.classList.toggle('hidden', currentMode === 'html');
     }
 
     function resetPreview() {
@@ -204,6 +219,7 @@
     }
 
     function getBackendMode() {
+        if (currentMode === 'project') return 'react_project';
         return currentMode === 'react' ? 'react_project' : 'html';
     }
 
@@ -469,6 +485,12 @@ root.render(<App />);
 
         showLoading();
 
+        // Route to project mode if selected
+        if (currentMode === 'project') {
+            await generateProject(prompt);
+            return;
+        }
+
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -523,6 +545,105 @@ root.render(<App />);
                 hideLoading();
             }
         }
+    }
+
+    // ========== PROJECT MODE (E2B) ==========
+    function updateLoadingText(text) {
+        const loadingText = loadingOverlay.querySelector('.loading-text');
+        if (loadingText) loadingText.textContent = text;
+    }
+
+    async function generateProject(prompt) {
+        try {
+            updateLoadingText('📝 Gerando código com IA...');
+
+            // Step 1: Generate code using existing LLM pipeline
+            const genResponse = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt,
+                    mode: 'react_project',
+                    model: modelSelect.value
+                })
+            });
+            const genData = await genResponse.json();
+
+            if (!genData.success || !genData.files) {
+                throw new Error(genData.error || 'Falha na geracao de código');
+            }
+
+            currentFiles = genData.files;
+            currentDependencies = genData.dependencies || extractDependenciesFromPackage(currentFiles);
+            activeFile = pickDefaultFile();
+            renderFileExplorer();
+
+            // Step 2: Send to E2B for build + preview
+            updateLoadingText('📦 Criando projeto no E2B...');
+
+            const projectResponse = await fetch(PROJECT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    files: currentFiles,
+                    dependencies: currentDependencies,
+                    prompt: prompt
+                })
+            });
+            const projectData = await projectResponse.json();
+
+            if (projectData.success) {
+                projectPreviewUrl = projectData.preview_url || null;
+                projectSandboxId = projectData.sandbox_id || null;
+
+                // Update files if E2B auto-fixed them
+                if (projectData.files) {
+                    currentFiles = projectData.files;
+                    renderFileExplorer();
+                }
+
+                // Show preview
+                if (projectPreviewUrl) {
+                    renderProjectPreview(projectPreviewUrl);
+                } else {
+                    // No preview URL, fallback to Sandpack with the validated files
+                    await renderReactPreview();
+                }
+
+                showPreview();
+
+                if (projectData.quality_score) {
+                    showQualityScore(projectData.quality_score);
+                }
+
+                // Show build info in terminal if available
+                if (projectData.build_output) {
+                    showTerminal();
+                    writeToTerminal('$ npm install', 'blue');
+                    writeToTerminal(projectData.build_output, 'green');
+                    writeToTerminal('\n✅ Build concluído!', 'green');
+                }
+            } else {
+                // E2B failed, fallback to Sandpack preview
+                console.warn('⚠️ E2B project build failed:', projectData.error);
+                updateLoadingText('⚠️ Build falhou, usando preview local...');
+                await renderReactPreview();
+                showPreview();
+            }
+        } catch (error) {
+            console.error('Project generation error:', error);
+            alert('Erro no modo Project: ' + error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function renderProjectPreview(url) {
+        // Show E2B dev server URL in iframe
+        previewFrame.src = url;
+        previewFrame.classList.remove('hidden');
+        sandpackContainer.classList.add('hidden');
+        reactPreviewMode = 'iframe';
     }
 
     async function refineSite() {
@@ -656,7 +777,80 @@ root.render(<App />);
     }
 
     async function renderReactPreview() {
-        // Use Babel + React CDN for inline preview
+        // Try Sandpack first for better preview, fallback to Babel inline
+        const Ctor = await loadSandpackClient();
+        if (Ctor) {
+            try {
+                await renderWithSandpack(Ctor);
+                return;
+            } catch (err) {
+                console.warn('⚠️ Sandpack failed, falling back to Babel:', err);
+            }
+        } else {
+            console.warn('⚠️ Sandpack client not available, using Babel fallback');
+        }
+        // Fallback: Babel inline
+        renderWithBabel();
+    }
+
+    async function renderWithSandpack(Ctor) {
+        reactPreviewMode = 'sandpack';
+
+        // Normalize files for Sandpack (needs leading slash)
+        const spFiles = normalizeSandpackFiles({ ...currentFiles });
+        const deps = resolveDependencies();
+        ensurePackageJson(spFiles, deps);
+
+        // Build iframe for Sandpack
+        const frame = buildSandpackFrame();
+        sandpackContainer.classList.remove('hidden');
+        previewFrame.classList.add('hidden');
+
+        // Cleanup previous Sandpack client
+        if (sandpackClient) {
+            try { sandpackClient.destroy(); } catch (e) { /* ignore */ }
+            sandpackClient = null;
+        }
+
+        // Create Sandpack client
+        sandpackClient = new Ctor(frame, {
+            files: spFiles,
+            entry: getSandpackEntry(spFiles),
+            dependencies: deps,
+            template: 'react'
+        });
+
+        // Listen for Sandpack ready / error events
+        return new Promise((resolve, reject) => {
+            let settled = false;
+
+            const handleMessage = (msg) => {
+                if (settled) return;
+                if (msg.type === 'done' || msg.type === 'success') {
+                    settled = true;
+                    hideLoading();
+                    console.log('✅ Sandpack preview ready');
+                    resolve();
+                }
+            };
+
+            if (sandpackClient.listen) {
+                sandpackClient.listen(handleMessage);
+            }
+
+            // Timeout fallback — if Sandpack doesn't respond in 15s, resolve anyway
+            setTimeout(() => {
+                if (!settled) {
+                    settled = true;
+                    hideLoading();
+                    console.warn('⏱️ Sandpack timeout, showing preview as-is');
+                    resolve();
+                }
+            }, 15000);
+        });
+    }
+
+    function renderWithBabel() {
         reactPreviewMode = 'iframe';
 
         const html = buildReactHtml();

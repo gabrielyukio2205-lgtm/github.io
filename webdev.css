@@ -597,6 +597,11 @@ body {
     color: #1a1a2e;
 }
 
+.mode-indicator.project {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+}
+
 /* Quality Badge */
 .quality-badge {
     display: inline-flex;
@@ -1339,6 +1344,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .mode-btn.active,
     .generate-btn,
     .action-btn.primary,
