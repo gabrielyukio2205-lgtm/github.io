@@ -592,6 +592,15 @@ root.render(<App />);
             });
             const projectData = await projectResponse.json();
 
+            console.log('🔍 E2B Project response:', JSON.stringify({
+                success: projectData.success,
+                preview_url: projectData.preview_url,
+                sandbox_id: projectData.sandbox_id,
+                error: projectData.error,
+                has_files: !!projectData.files,
+                build_output_length: projectData.build_output?.length
+            }));
+
             if (projectData.success) {
                 projectPreviewUrl = projectData.preview_url || null;
                 projectSandboxId = projectData.sandbox_id || null;
@@ -604,8 +613,10 @@ root.render(<App />);
 
                 // Show preview
                 if (projectPreviewUrl) {
+                    console.log('✅ Using E2B iframe preview:', projectPreviewUrl);
                     renderProjectPreview(projectPreviewUrl);
                 } else {
+                    console.warn('⚠️ No preview URL from E2B, falling back to Sandpack');
                     // No preview URL, fallback to Sandpack with the validated files
                     await renderReactPreview();
                 }
