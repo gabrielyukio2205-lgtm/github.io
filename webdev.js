@@ -578,10 +578,26 @@ root.render(<App />);
             activeFile = pickDefaultFile();
             renderFileExplorer();
 
-            // Step 2: Send to E2B for build + preview
-            updateLoadingText('📦 Criando projeto no E2B...');
+            // Step 2: Build in E2B
+            await buildE2BProject(prompt);
 
-            const projectResponse = await fetch(PROJECT_API_URL, {
+        } catch (error) {
+            console.error('Project generation error:', error);
+            alert('Erro no modo Project: ' + error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function buildE2BProject(prompt) {
+        // 🚀 SSE STREAMING — Build in E2B with realtime progress
+        updateLoadingText('📦 Conectando ao E2B...');
+
+        const PROJECT_STREAM_URL = `${HF_SPACE_URL}/webdev/project/stream`;
+        let projectData = null;
+
+        try {
+            const streamResponse = await fetch(PROJECT_STREAM_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -590,64 +606,111 @@ root.render(<App />);
                     prompt: prompt
                 })
             });
-            const projectData = await projectResponse.json();
 
-            console.log('🔍 E2B Project response:', JSON.stringify({
-                success: projectData.success,
-                preview_url: projectData.preview_url,
-                sandbox_id: projectData.sandbox_id,
-                error: projectData.error,
-                has_files: !!projectData.files,
-                build_output_length: projectData.build_output?.length
-            }));
-
-            if (projectData.success) {
-                projectPreviewUrl = projectData.preview_url || null;
-                projectSandboxId = projectData.sandbox_id || null;
-
-                // Update files if E2B auto-fixed them
-                if (projectData.files) {
-                    currentFiles = projectData.files;
-                    renderFileExplorer();
-                }
-
-                // Show preview
-                if (projectPreviewUrl) {
-                    console.log('✅ Using E2B iframe preview:', projectPreviewUrl);
-                    renderProjectPreview(projectPreviewUrl);
-                } else {
-                    console.warn('⚠️ No preview URL from E2B, falling back to Sandpack');
-                    // No preview URL, fallback to Sandpack with the validated files
-                    await renderReactPreview();
-                }
-
-                showPreview();
-
-                if (projectData.quality_score) {
-                    showQualityScore(projectData.quality_score);
-                }
-
-                // Show build info in terminal if available
-                if (projectData.build_output) {
-                    showTerminal();
-                    writeToTerminal('$ npm install', 'blue');
-                    writeToTerminal(projectData.build_output, 'green');
-                    writeToTerminal('\n✅ Build concluído!', 'green');
-                }
-            } else {
-                // E2B failed, fallback to Sandpack preview
-                console.warn('⚠️ E2B project build failed:', projectData.error);
-                updateLoadingText('⚠️ Build falhou, usando preview local...');
-                await renderReactPreview();
-                showPreview();
+            if (!streamResponse.ok) {
+                throw new Error(`Stream response not ok: ${streamResponse.status}`);
             }
-        } catch (error) {
-            console.error('Project generation error:', error);
-            alert('Erro no modo Project: ' + error.message);
-        } finally {
-            hideLoading();
+
+            const reader = streamResponse.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep incomplete line in buffer
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                        const event = JSON.parse(line.slice(6));
+                        console.log('📡 SSE:', event.stage, event.message);
+
+                        if (event.stage === 'keepalive') continue;
+                        if (event.stage === 'error') {
+                            console.error('❌ E2B error:', event.message);
+                            updateLoadingText(`❌ ${event.message}`);
+                            continue;
+                        }
+                        if (event.stage === 'result') {
+                            // Final result with all data
+                            projectData = event;
+                            continue;
+                        }
+                        // Update loading text with progress
+                        updateLoadingText(event.message);
+                    } catch (parseErr) {
+                        console.warn('SSE parse error:', parseErr);
+                    }
+                }
+            }
+        } catch (streamError) {
+            // Fallback to non-streaming endpoint
+            console.warn('⚠️ SSE streaming failed, using fallback:', streamError);
+            updateLoadingText('📦 Build em andamento...');
+            const fallbackResponse = await fetch(PROJECT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    files: currentFiles,
+                    dependencies: currentDependencies,
+                    prompt: prompt
+                })
+            });
+            projectData = await fallbackResponse.json();
+        }
+
+        console.log('🔍 E2B Project result:', JSON.stringify({
+            success: projectData?.success,
+            preview_url: projectData?.preview_url,
+            sandbox_id: projectData?.sandbox_id,
+            error: projectData?.error
+        }));
+
+        if (projectData && projectData.success) {
+            projectPreviewUrl = projectData.preview_url || null;
+            projectSandboxId = projectData.sandbox_id || null;
+
+            // Update files if E2B auto-fixed them
+            if (projectData.files) {
+                currentFiles = projectData.files;
+                renderFileExplorer();
+            }
+
+            // Show preview
+            if (projectPreviewUrl) {
+                console.log('✅ Using E2B iframe preview:', projectPreviewUrl);
+                renderProjectPreview(projectPreviewUrl);
+            } else {
+                console.warn('⚠️ No preview URL from E2B, falling back to Sandpack');
+                await renderReactPreview();
+            }
+
+            showPreview();
+
+            if (projectData.quality_score) {
+                showQualityScore(projectData.quality_score);
+            }
+
+            // Show build info in terminal if available
+            if (projectData.build_output) {
+                showTerminal();
+                writeToTerminal('$ npm install', 'blue');
+                writeToTerminal(projectData.build_output, 'green');
+                writeToTerminal('\n✅ Build concluído!', 'green');
+            }
+        } else {
+            // E2B failed, fallback to Sandpack preview
+            console.warn('⚠️ E2B project build failed:', projectData?.error);
+            updateLoadingText('⚠️ Build falhou, usando preview local...');
+            await renderReactPreview();
+            showPreview();
         }
     }
+
 
     function renderProjectPreview(url) {
         // Show E2B dev server URL in iframe
@@ -661,7 +724,10 @@ root.render(<App />);
         const feedback = refineInput.value.trim();
         if (!feedback) return;
 
-        if (currentMode === 'react' && Object.keys(currentFiles).length === 0) {
+        // Support both react and project modes for file-based apps
+        const isFileBased = currentMode === 'react' || currentMode === 'project';
+
+        if (isFileBased && Object.keys(currentFiles).length === 0) {
             alert('Gere um app primeiro!');
             return;
         }
@@ -673,7 +739,8 @@ root.render(<App />);
         showLoading();
 
         try {
-            const existingCode = currentMode === 'react'
+            // For React and Project modes, we send a JSON representation of the project
+            const existingCode = isFileBased
                 ? JSON.stringify({ files: currentFiles, dependencies: currentDependencies }, null, 2)
                 : currentCode;
 
@@ -696,7 +763,14 @@ root.render(<App />);
                     currentDependencies = data.dependencies || extractDependenciesFromPackage(currentFiles);
                     activeFile = pickDefaultFile();
                     renderFileExplorer();
-                    await renderReactPreview();
+
+                    if (currentMode === 'project') {
+                        // 🚀 RE-BUILD IN E2B
+                        await buildE2BProject(feedback);
+                    } else {
+                        // Local Sandpack preview
+                        await renderReactPreview();
+                    }
                 } else {
                     currentCode = data.code;
                     renderHtmlPreview(currentCode);
