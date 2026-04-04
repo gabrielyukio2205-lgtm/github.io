@@ -15,6 +15,7 @@
                 { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B' },
                 { id: 'mistralai/devstral-2512:free', name: 'Devstral 2512' },
                 { id: 'arcee-ai/trinity-mini:free', name: 'Arcee Trinity Mini' },
+                { id: 'arcee-ai/trinity-large-preview:free', name: 'Arcee Trinity Large' },
                 { id: 'nvidia/nemotron-nano-12b-v2-vl:free', name: 'Nemotron Nano 12B VL' },
                 { id: 'openai/gpt-oss-120b:free', name: 'GPT-OSS 120B' },
                 { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air' },

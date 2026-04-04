@@ -1,20 +1,76 @@
 // CodeJade - Cursor AI Style Frontend
 
-const API_BASE = 'https://madras1-jade-port.hf.space';
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:7860'
+    : 'https://madras1-jade-port.hf.space';
+localStorage.removeItem('jade_token');
+const authState = {
+    authenticated: false,
+    csrfToken: sessionStorage.getItem('jade_csrf_token') || '',
+    user: null
+};
 
-// Get JWT token from localStorage
-function getAuthToken() {
-    return localStorage.getItem('jade_token');
+function getCsrfToken() {
+    return authState.csrfToken || sessionStorage.getItem('jade_csrf_token') || '';
 }
 
 // Auth headers for all requests
-function authHeaders() {
-    const token = getAuthToken();
-    if (!token) return { 'Content-Type': 'application/json' };
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+function authHeaders(method = 'GET') {
+    const normalizedMethod = method.toUpperCase();
+    const headers = {};
+
+    if (normalizedMethod !== 'GET' && normalizedMethod !== 'HEAD') {
+        headers['Content-Type'] = 'application/json';
+        headers['X-CSRF-Token'] = getCsrfToken();
+    }
+
+    return headers;
+}
+
+function apiFetch(url, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = {
+        ...authHeaders(method),
+        ...(options.headers || {})
     };
+
+    return fetch(url, {
+        ...options,
+        method,
+        credentials: 'include',
+        headers
+    });
+}
+
+async function refreshAuthState() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+        const data = await res.json();
+
+        authState.authenticated = !!data.authenticated;
+        authState.user = data.user || null;
+        authState.csrfToken = data.csrf_token || '';
+
+        if (authState.csrfToken) {
+            sessionStorage.setItem('jade_csrf_token', authState.csrfToken);
+        } else {
+            sessionStorage.removeItem('jade_csrf_token');
+        }
+
+        if (data.user?.id) {
+            sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
+        } else {
+            sessionStorage.removeItem('jade_auth_user_id');
+        }
+    } catch (e) {
+        authState.authenticated = false;
+        authState.user = null;
+        authState.csrfToken = '';
+        sessionStorage.removeItem('jade_csrf_token');
+        sessionStorage.removeItem('jade_auth_user_id');
+    }
+
+    return authState.authenticated;
 }
 
 // State
@@ -222,12 +278,11 @@ const sendBtn = document.getElementById('send-btn');
 
 // Check if user is logged in and update UI accordingly
 function checkAuth() {
-    const token = getAuthToken();
     const loginBanner = document.getElementById('login-banner');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
 
-    if (!token) {
+    if (!authState.authenticated) {
         // Show login banner, hide repo name
         if (loginBanner) loginBanner.classList.remove('hidden');
         if (repoName) repoName.textContent = 'Não conectado';
@@ -278,7 +333,7 @@ require(['vs/editor/editor.main'], function () {
 // Check status
 async function checkStatus() {
     try {
-        const res = await fetch(`${API_BASE}/codejade/status`, { headers: authHeaders() });
+        const res = await apiFetch(`${API_BASE}/codejade/status`);
         const data = await res.json();
         if (data.sandbox || data.available) {
             statusBadge.className = 'status-badge online';
@@ -286,6 +341,17 @@ async function checkStatus() {
         } else {
             statusBadge.className = 'status-badge';
             statusText.textContent = 'Offline';
+        }
+
+        if (typeof data.authenticated === 'boolean') {
+            authState.authenticated = data.authenticated;
+            if (!data.authenticated) {
+                authState.user = null;
+                authState.csrfToken = '';
+                sessionStorage.removeItem('jade_csrf_token');
+                sessionStorage.removeItem('jade_auth_user_id');
+                checkAuth();
+            }
         }
 
         if (data.current_repo && !currentRepo) {
@@ -330,9 +396,8 @@ document.getElementById('clone-confirm').onclick = async () => {
     addMessage('tool', '⏳ Clonando repositório...', false);
 
     try {
-        const res = await fetch(`${API_BASE}/codejade/clone`, {
+        const res = await apiFetch(`${API_BASE}/codejade/clone`, {
             method: 'POST',
-            headers: authHeaders(),
             body: JSON.stringify({ repo_url: repo })
         });
         const data = await res.json();
@@ -375,7 +440,7 @@ async function loadFilesFromR2(path = '') {
 
     try {
         const url = `${API_BASE}/codejade/files/${encodeURIComponent(currentRepo)}?path=${encodeURIComponent(path)}`;
-        const res = await fetch(url, { headers: authHeaders() });
+        const res = await apiFetch(url);
         const data = await res.json();
 
         if (!data.success) {
@@ -439,7 +504,7 @@ async function openFileFromR2(filePath) {
 
     try {
         const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${filePath}`;
-        const res = await fetch(url, { headers: authHeaders() });
+        const res = await apiFetch(url);
         const data = await res.json();
 
         if (!data.success) {
@@ -543,9 +608,8 @@ async function sendMessage() {
             ? openFiles[currentFile].content
             : null;
 
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
+        const res = await apiFetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: authHeaders(),
             body: JSON.stringify({
                 message,
                 repo: currentRepo,
@@ -602,7 +666,7 @@ async function refreshCurrentFile() {
 
     try {
         const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${currentFile}`;
-        const res = await fetch(url, { headers: authHeaders() });
+        const res = await apiFetch(url);
         const data = await res.json();
 
         if (data.success && data.content) {
@@ -731,9 +795,8 @@ document.getElementById('diff-btn').onclick = async () => {
     document.getElementById('diff-content').textContent = 'Carregando...';
 
     try {
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
+        const res = await apiFetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: authHeaders(),
             body: JSON.stringify({ message: 'mostre o git diff' })
         });
         const data = await res.json();
@@ -758,9 +821,8 @@ document.getElementById('commit-confirm').onclick = async () => {
     addMessage('tool', '⏳ Commit + Push...');
 
     try {
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
+        const res = await apiFetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: authHeaders(),
             body: JSON.stringify({ message: `faça commit com mensagem "${message}" e push` })
         });
         const data = await res.json();
@@ -825,9 +887,8 @@ document.getElementById('plan-approve').onclick = async () => {
 
     try {
         // Execute the approved plan
-        const res = await fetch(`${API_BASE}/codejade/chat`, {
+        const res = await apiFetch(`${API_BASE}/codejade/chat`, {
             method: 'POST',
-            headers: authHeaders(),
             body: JSON.stringify({
                 message: `execute o plano aprovado`,
                 repo: currentRepo,
@@ -1028,9 +1089,12 @@ document.getElementById('new-chat-btn')?.addEventListener('click', () => {
 });
 
 // Init
-checkAuth();
-checkStatus();
-setInterval(checkStatus, 30000);
+(async function initAuthAndStatus() {
+    await refreshAuthState();
+    checkAuth();
+    await checkStatus();
+    setInterval(checkStatus, 30000);
+})();
 
 // ========== PANEL RESIZE HANDLERS ==========
 (function () {

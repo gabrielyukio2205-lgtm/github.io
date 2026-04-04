@@ -173,18 +173,10 @@
     // --- Identity Management ---
 
     function getPersistentUserId() {
-        // First check if user is logged in via GitHub OAuth
-        const jwtToken = localStorage.getItem('jade_token');
-        if (jwtToken) {
-            try {
-                // Decode JWT to get user info (basic decode, not verified)
-                const payload = JSON.parse(atob(jwtToken.split('.')[1]));
-                if (payload && payload.sub) {
-                    return 'github_' + payload.sub;
-                }
-            } catch (e) {
-                console.error('Failed to parse JWT', e);
-            }
+        // First check if user is logged in via secure cookie auth
+        const authenticatedUserId = sessionStorage.getItem('jade_auth_user_id');
+        if (authenticatedUserId) {
+            return authenticatedUserId;
         }
 
         // Fallback to local random ID
@@ -206,22 +198,21 @@
         const logoutBtn = document.getElementById('logout-btn');
 
         if (!loginLink || !loggedUser) return;
-
-        const token = localStorage.getItem('jade_token');
-
-        if (!token) {
-            loginLink.style.display = 'flex';
-            loggedUser.style.display = 'none';
-            return;
-        }
+        localStorage.removeItem('jade_token');
 
         try {
             const res = await fetch(`${AUTH_BASE_URL}/auth/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             const data = await res.json();
 
             if (data.authenticated && data.user) {
+                if (data.csrf_token) {
+                    sessionStorage.setItem('jade_csrf_token', data.csrf_token);
+                }
+                if (data.user.id) {
+                    sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
+                }
                 loginLink.style.display = 'none';
                 loggedUser.style.display = 'flex';
                 userAvatarImg.src = data.user.avatar || '';
@@ -229,17 +220,34 @@
 
                 // Logout handler
                 if (logoutBtn) {
-                    logoutBtn.addEventListener('click', () => {
-                        localStorage.removeItem('jade_token');
-                        window.location.reload();
+                    logoutBtn.addEventListener('click', async () => {
+                        try {
+                            await fetch(`${AUTH_BASE_URL}/auth/logout`, {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: {
+                                    'X-CSRF-Token': sessionStorage.getItem('jade_csrf_token') || ''
+                                }
+                            });
+                        } catch (logoutError) {
+                            console.error('Logout failed:', logoutError);
+                        } finally {
+                            sessionStorage.removeItem('jade_csrf_token');
+                            sessionStorage.removeItem('jade_auth_user_id');
+                            window.location.reload();
+                        }
                     });
                 }
             } else {
+                sessionStorage.removeItem('jade_csrf_token');
+                sessionStorage.removeItem('jade_auth_user_id');
                 loginLink.style.display = 'flex';
                 loggedUser.style.display = 'none';
             }
         } catch (e) {
             console.error('Auth check failed:', e);
+            sessionStorage.removeItem('jade_csrf_token');
+            sessionStorage.removeItem('jade_auth_user_id');
             loginLink.style.display = 'flex';
             loggedUser.style.display = 'none';
         }

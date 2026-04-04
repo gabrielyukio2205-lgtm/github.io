@@ -278,6 +278,8 @@
             ? 'http://localhost:7860'
             : 'https://madras1-jade-port.hf.space';
 
+        localStorage.removeItem('jade_token');
+
         // Check for error in URL
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
@@ -287,34 +289,29 @@
                 'token_exchange_failed': 'Falha na autenticação. Tente novamente.',
                 'user_fetch_failed': 'Não foi possível obter seus dados do GitHub.',
                 'no_code': 'Código de autorização não recebido.',
+                'invalid_state': 'A validação de segurança do login falhou. Tente novamente.',
             };
             errorDiv.textContent = errorMessages[error] || `Erro: ${error}`;
             errorDiv.style.display = 'block';
         }
 
-        // Check if already logged in
-        const token = localStorage.getItem('jade_token');
-        if (token) {
-            // Verify token is valid
-            fetch(`${API_BASE}/auth/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.authenticated) {
-                        window.location.href = 'apps.html';
+        // Check if already logged in via secure cookie session
+        fetch(`${API_BASE}/auth/me`, {
+            credentials: 'include'
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.authenticated) {
+                    if (data.csrf_token) {
+                        sessionStorage.setItem('jade_csrf_token', data.csrf_token);
                     }
-                })
-                .catch(() => { });
-        }
-
-        // Check if token in URL (from callback)
-        const tokenParam = urlParams.get('token');
-        if (tokenParam) {
-            localStorage.setItem('jade_token', tokenParam);
-            // Clean URL and redirect
-            window.location.href = 'apps.html';
-        }
+                    if (data.user?.id) {
+                        sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
+                    }
+                    window.location.href = 'apps.html';
+                }
+            })
+            .catch(() => { });
 
         // GitHub login button
         document.getElementById('github-login-btn').addEventListener('click', (e) => {

@@ -323,41 +323,27 @@
         if (mobileBtn) mobileBtn.addEventListener('click', toggleSidebar);
 
         // ========== AUTH ==========
-        console.log('🔍 Full URL:', window.location.href);
-        console.log('🔍 Search params:', window.location.search);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const tokenParam = urlParams.get('token');
-
-        console.log('🔍 Token from URL:', tokenParam ? tokenParam.substring(0, 30) + '...' : 'NONE');
-
-        if (tokenParam) {
-            console.log('✅ Saving token to localStorage');
-            localStorage.setItem('jade_token', tokenParam);
-            // Clean URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
+        localStorage.removeItem('jade_token');
 
         async function checkAuth() {
-            const token = localStorage.getItem('jade_token');
             const loginBtn = document.getElementById('login-btn');
             const userInfo = document.getElementById('user-info');
             const userAvatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
 
-            if (!token) {
-                loginBtn.style.display = 'block';
-                userInfo.style.display = 'none';
-                return null;
-            }
-
             try {
                 const res = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    credentials: 'include'
                 });
                 const data = await res.json();
 
                 if (data.authenticated && data.user) {
+                    if (data.csrf_token) {
+                        sessionStorage.setItem('jade_csrf_token', data.csrf_token);
+                    }
+                    if (data.user.id) {
+                        sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
+                    }
                     loginBtn.style.display = 'none';
                     userInfo.style.display = 'flex';
                     userAvatar.src = data.user.avatar || '';
@@ -368,14 +354,29 @@
                 console.error('Auth check failed:', e);
             }
 
+            sessionStorage.removeItem('jade_csrf_token');
+            sessionStorage.removeItem('jade_auth_user_id');
             loginBtn.style.display = 'block';
             userInfo.style.display = 'none';
             return null;
         }
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('jade_token');
-            window.location.reload();
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API_BASE}/auth/logout`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'X-CSRF-Token': sessionStorage.getItem('jade_csrf_token') || ''
+                    }
+                });
+            } catch (e) {
+                console.error('Logout failed:', e);
+            } finally {
+                sessionStorage.removeItem('jade_csrf_token');
+                sessionStorage.removeItem('jade_auth_user_id');
+                window.location.reload();
+            }
         });
 
         // Check auth on load
