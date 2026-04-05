@@ -1,11 +1,11 @@
 /* Apps Page Styles */
 
 #apps-header {
-    padding: 1rem 1.5rem;
+    padding: 0 var(--space-lg);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 60px;
+    min-height: var(--page-header-height);
     flex-shrink: 0;
     background: rgba(15, 19, 25, 0.6);
     border-bottom: 1px solid var(--border-color);
@@ -19,15 +19,16 @@
 #apps-container {
     flex: 1;
     overflow-y: auto;
-    padding: 2rem;
-    max-width: 1200px;
+    padding: var(--space-xl);
+    max-width: var(--page-max-width);
     margin: 0 auto;
     width: 100%;
 }
 
 .apps-intro {
     text-align: center;
-    margin-bottom: 3rem;
+    max-width: 760px;
+    margin: 0 auto var(--space-2xl);
 }
 
 .apps-intro h2 {
@@ -43,23 +44,28 @@
 .apps-intro p {
     color: var(--text-secondary);
     font-size: 1.1rem;
+    line-height: 1.7;
+    max-width: 620px;
+    margin: 0 auto;
 }
 
 /* Apps Grid */
 .apps-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
+    gap: var(--space-lg);
+    align-items: stretch;
 }
 
 /* App Card */
 .app-card {
     display: flex;
-    gap: 1rem;
-    padding: 1.5rem;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: 1.625rem;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
@@ -67,6 +73,7 @@
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(12px);
+    min-height: 172px;
 }
 
 .app-card::before {
@@ -136,22 +143,45 @@
     background: linear-gradient(135deg, #f97316, #fb7185);
 }
 
+.app-icon.anything {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.app-icon.imagegen {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+}
+
+.app-icon.videogen {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+}
+
+.app-icon.sandbox {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+}
+
+.app-icon.codejade {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
 /* App Content */
 .app-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
 }
 
 .app-content h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0;
     color: var(--text-primary);
 }
 
 .app-content p {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
     margin: 0;
 }
 
@@ -175,10 +205,23 @@
     border-color: rgba(245, 158, 11, 0.3);
 }
 
+.app-badge.new {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #f8fffb;
+    border-color: transparent;
+}
+
+.app-badge.agent {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #faf5ff;
+    border-color: transparent;
+}
+
 /* App Arrow */
 .app-arrow {
     display: flex;
     align-items: center;
+    align-self: center;
     font-size: 1.5rem;
     color: var(--text-muted);
     transition: transform 0.3s, color 0.3s;
@@ -264,7 +307,7 @@
 /* Responsive */
 @media (max-width: 768px) {
     #apps-container {
-        padding: 1rem;
+        padding: var(--space-md);
     }
 
     .apps-grid {
