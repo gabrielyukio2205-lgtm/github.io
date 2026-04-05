@@ -186,17 +186,23 @@
 }
 
 .app-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    width: fit-content;
+    max-width: 100%;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 2px 8px;
-    border-radius: 4px;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 5px 10px;
+    border-radius: 999px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
 }
 
 .app-badge.beta {
