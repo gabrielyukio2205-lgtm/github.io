@@ -198,18 +198,10 @@
         const logoutBtn = document.getElementById('logout-btn');
 
         if (!loginLink || !loggedUser) return;
-        localStorage.removeItem('jade_token');
-
         try {
-            const res = await fetch(`${AUTH_BASE_URL}/auth/me`, {
-                credentials: 'include'
-            });
-            const data = await res.json();
+            const data = await window.JadeAPI.getAuthState(true);
 
             if (data.authenticated && data.user) {
-                if (data.csrf_token) {
-                    sessionStorage.setItem('jade_csrf_token', data.csrf_token);
-                }
                 if (data.user.id) {
                     sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
                 }
@@ -222,13 +214,7 @@
                 if (logoutBtn) {
                     logoutBtn.addEventListener('click', async () => {
                         try {
-                            await fetch(`${AUTH_BASE_URL}/auth/logout`, {
-                                method: 'POST',
-                                credentials: 'include',
-                                headers: {
-                                    'X-CSRF-Token': sessionStorage.getItem('jade_csrf_token') || ''
-                                }
-                            });
+                            await window.JadeAPI.logout();
                         } catch (logoutError) {
                             console.error('Logout failed:', logoutError);
                         } finally {

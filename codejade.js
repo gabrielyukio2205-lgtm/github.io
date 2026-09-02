@@ -1,18 +1,10 @@
 // CodeJade - Cursor AI Style Frontend
 
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:7860'
-    : 'https://madras1-jade-port.hf.space';
-localStorage.removeItem('jade_token');
+const API_BASE = window.JadeAPI.base;
 const authState = {
     authenticated: false,
-    csrfToken: sessionStorage.getItem('jade_csrf_token') || '',
     user: null
 };
-
-function getCsrfToken() {
-    return authState.csrfToken || sessionStorage.getItem('jade_csrf_token') || '';
-}
 
 // Auth headers for all requests
 function authHeaders(method = 'GET') {
@@ -21,7 +13,6 @@ function authHeaders(method = 'GET') {
 
     if (normalizedMethod !== 'GET' && normalizedMethod !== 'HEAD') {
         headers['Content-Type'] = 'application/json';
-        headers['X-CSRF-Token'] = getCsrfToken();
     }
 
     return headers;
@@ -34,29 +25,19 @@ function apiFetch(url, options = {}) {
         ...(options.headers || {})
     };
 
-    return fetch(url, {
+    return window.JadeAPI.fetch(url, {
         ...options,
         method,
-        credentials: 'include',
         headers
     });
 }
 
 async function refreshAuthState() {
     try {
-        const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-        const data = await res.json();
+        const data = await window.JadeAPI.getAuthState(true);
 
         authState.authenticated = !!data.authenticated;
         authState.user = data.user || null;
-        authState.csrfToken = data.csrf_token || '';
-
-        if (authState.csrfToken) {
-            sessionStorage.setItem('jade_csrf_token', authState.csrfToken);
-        } else {
-            sessionStorage.removeItem('jade_csrf_token');
-        }
-
         if (data.user?.id) {
             sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
         } else {
@@ -65,8 +46,6 @@ async function refreshAuthState() {
     } catch (e) {
         authState.authenticated = false;
         authState.user = null;
-        authState.csrfToken = '';
-        sessionStorage.removeItem('jade_csrf_token');
         sessionStorage.removeItem('jade_auth_user_id');
     }
 
@@ -356,8 +335,6 @@ async function checkStatus() {
             authState.authenticated = data.authenticated;
             if (!data.authenticated) {
                 authState.user = null;
-                authState.csrfToken = '';
-                sessionStorage.removeItem('jade_csrf_token');
                 sessionStorage.removeItem('jade_auth_user_id');
                 checkAuth();
             }

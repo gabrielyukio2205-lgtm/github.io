@@ -297,11 +297,8 @@
     </div>
 
     <script src="theme.js"></script>
+    <script src="api-client.js?v=20260902-cors"></script>
     <script>
-        const API_BASE = window.location.hostname === 'localhost'
-            ? 'http://localhost:7860'
-            : 'https://madras1-jade-port.hf.space';
-
         // Sidebar toggle
         const toggleBtn = document.getElementById('toggle-sidebar-btn');
         const mobileBtn = document.getElementById('mobile-menu-btn');
@@ -321,8 +318,6 @@
         if (mobileBtn) mobileBtn.addEventListener('click', toggleSidebar);
 
         // ========== AUTH ==========
-        localStorage.removeItem('jade_token');
-
         async function checkAuth() {
             const loginBtn = document.getElementById('login-btn');
             const userInfo = document.getElementById('user-info');
@@ -330,15 +325,9 @@
             const userName = document.getElementById('user-name');
 
             try {
-                const res = await fetch(`${API_BASE}/auth/me`, {
-                    credentials: 'include'
-                });
-                const data = await res.json();
+                const data = await window.JadeAPI.getAuthState(true);
 
                 if (data.authenticated && data.user) {
-                    if (data.csrf_token) {
-                        sessionStorage.setItem('jade_csrf_token', data.csrf_token);
-                    }
                     if (data.user.id) {
                         sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
                     }
@@ -361,13 +350,7 @@
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             try {
-                await fetch(`${API_BASE}/auth/logout`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'X-CSRF-Token': sessionStorage.getItem('jade_csrf_token') || ''
-                    }
-                });
+                await window.JadeAPI.logout();
             } catch (e) {
                 console.error('Logout failed:', e);
             } finally {
