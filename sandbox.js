@@ -7,9 +7,7 @@
     'use strict';
 
     // API Configuration
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:7860'
-        : 'https://madras1-jade-port.hf.space';
+    const API_BASE = window.JadeAPI.base;
     const SANDBOX_URL = `${API_BASE}/sandbox/execute`;
     const STATUS_URL = `${API_BASE}/sandbox/status`;
 
@@ -187,7 +185,7 @@ print("📈 Arquivo: grafico.png")`
         const startTime = Date.now();
 
         try {
-            const response = await fetch(SANDBOX_URL, {
+            const response = await window.JadeAPI.fetch(SANDBOX_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, timeout: 30 })
@@ -223,13 +221,17 @@ print("📈 Arquivo: grafico.png")`
 
     // Show output with optional images
     function showOutput(content, type = 'success', images = []) {
-        let html = `<div class="output-content ${type}">${escapeHtml(content)}</div>`;
+        const safeType = ['success', 'error', 'loading'].includes(type) ? type : 'error';
+        let html = `<div class="output-content ${safeType}">${escapeHtml(content)}</div>`;
 
         // Add images if present
         if (images && images.length > 0) {
             html += '<div class="output-images">';
             for (const img of images) {
-                html += `<img src="data:image/png;base64,${img}" class="output-image" alt="Generated chart" />`;
+                const safeImage = /^[A-Za-z0-9+/]+={0,2}$/.test(String(img || '')) ? img : '';
+                if (safeImage) {
+                    html += `<img src="data:image/png;base64,${safeImage}" class="output-image" alt="Generated chart" />`;
+                }
             }
             html += '</div>';
         }

@@ -7,11 +7,17 @@
     'use strict';
 
     // API Configuration
-    const HF_SPACE_URL = 'https://madras1-jade-port.hf.space';
-    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+    const HF_SPACE_URL = window.JadeAPI.base;
+    const PROXY_BASE_URL = window.JadeAPI.base;
     // Use HuggingFace directly for WebDev (avoids proxy timeout on Compound PRO)
     const API_URL = `${HF_SPACE_URL}/webdev/generate`;
     const PROJECT_API_URL = `${HF_SPACE_URL}/webdev/project`;
+
+    function escapeHTML(value) {
+        const div = document.createElement('div');
+        div.textContent = String(value ?? '');
+        return div.innerHTML;
+    }
 
     const SANDPACK_IMPORT_URLS = [
         'https://esm.sh/@codesandbox/sandpack-client@2?bundle',
@@ -457,7 +463,7 @@ root.render(<App />);
     }
 
     function showSandpackError(message) {
-        sandpackContainer.innerHTML = `<div class="sandpack-error">${message}</div>`;
+        sandpackContainer.innerHTML = `<div class="sandpack-error">${escapeHTML(message)}</div>`;
         sandpackContainer.classList.remove('hidden');
         previewFrame.classList.add('hidden');
         hideLoading();
@@ -492,7 +498,7 @@ root.render(<App />);
         }
 
         try {
-            const response = await fetch(API_URL, {
+            const response = await window.JadeAPI.fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -558,7 +564,7 @@ root.render(<App />);
             updateLoadingText('📝 Gerando código com IA...');
 
             // Step 1: Generate code using existing LLM pipeline
-            const genResponse = await fetch(API_URL, {
+            const genResponse = await window.JadeAPI.fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -597,7 +603,7 @@ root.render(<App />);
         let projectData = null;
 
         try {
-            const streamResponse = await fetch(PROJECT_STREAM_URL, {
+            const streamResponse = await window.JadeAPI.fetch(PROJECT_STREAM_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -651,7 +657,7 @@ root.render(<App />);
             // Fallback to non-streaming endpoint
             console.warn('⚠️ SSE streaming failed, using fallback:', streamError);
             updateLoadingText('📦 Build em andamento...');
-            const fallbackResponse = await fetch(PROJECT_API_URL, {
+            const fallbackResponse = await window.JadeAPI.fetch(PROJECT_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -714,7 +720,18 @@ root.render(<App />);
 
     function renderProjectPreview(url) {
         // Show E2B dev server URL in iframe
-        previewFrame.src = url;
+        let previewUrl;
+        try {
+            previewUrl = new URL(url);
+        } catch (_) {
+            showSandpackError('URL de preview inválida');
+            return;
+        }
+        if (!['https:', 'http:'].includes(previewUrl.protocol)) {
+            showSandpackError('Protocolo de preview não permitido');
+            return;
+        }
+        previewFrame.src = previewUrl.href;
         previewFrame.classList.remove('hidden');
         sandpackContainer.classList.add('hidden');
         reactPreviewMode = 'iframe';
@@ -744,7 +761,7 @@ root.render(<App />);
                 ? JSON.stringify({ files: currentFiles, dependencies: currentDependencies }, null, 2)
                 : currentCode;
 
-            const response = await fetch(API_URL, {
+            const response = await window.JadeAPI.fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -820,7 +837,7 @@ root.render(<App />);
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                         </svg>
-                        ${folder}/
+                        ${escapeHTML(folder)}/
                     `;
                     fileList.appendChild(folderItem);
                     lastFolder = folder;
@@ -839,7 +856,7 @@ root.render(<App />);
                 ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/></svg>'
                 : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
 
-            fileItem.innerHTML = `${icon} ${displayName}`;
+            fileItem.innerHTML = `${icon} ${escapeHTML(displayName)}`;
             fileItem.addEventListener('click', () => selectFile(fileName));
             fileList.appendChild(fileItem);
         });
@@ -1021,7 +1038,7 @@ root.render(<App />);
             cleaned = cleaned.replace(/export\s+default\s+function\s+(\w+)/g, 'function $1');
 
             // Handle: export default (props) => ... or export default () => ...
-            // Need to wrap in const App = 
+            // Need to wrap in const App =
             if (componentName === 'App') {
                 // If there's export default followed by arrow function
                 cleaned = cleaned.replace(/export\s+default\s+(\([^)]*\)\s*=>)/g, 'const App = $1');
@@ -1040,7 +1057,7 @@ root.render(<App />);
                 const hasApp = /\b(function|const|let|var)\s+App\b/.test(cleaned);
                 if (!hasApp) {
                     // Try to find the first component declaration and rename to App
-                    // Look for: function SomeName( or const SomeName = 
+                    // Look for: function SomeName( or const SomeName =
                     const funcMatch = cleaned.match(/^(function)\s+(\w+)\s*\(/m);
                     const constMatch = cleaned.match(/^(const|let|var)\s+(\w+)\s*=/m);
 
@@ -1121,21 +1138,21 @@ function App() {
 </head>
 <body class="bg-slate-900 text-white">
     <div id="root"></div>
-    
+
     <!-- Import Map for ESM.sh -->
     <script type="importmap">
 ${JSON.stringify(importMap, null, 8)}
     <\/script>
-    
+
     <!-- React UMD for Babel compatibility -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin><\/script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin><\/script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
-    
+
     <script type="text/babel" data-presets="react">
         // React hooks from global React (UMD)
         const { useState, useEffect, useRef, useCallback, useMemo, useReducer, createContext, useContext, Fragment, memo, forwardRef, lazy, Suspense } = React;
-        
+
         // Error boundary for better error messages
         class ErrorBoundary extends React.Component {
             constructor(props) {
@@ -1182,13 +1199,13 @@ ${JSON.stringify(importMap, null, 8)}
             document.getElementById('root').innerHTML = '<div class="p-6 text-red-400"><h2>Mount Error</h2><pre>' + error.toString() + '</pre></div>';
         }
     <\/script>
-    
+
     <!-- Babel error handler -->
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
             console.error('Global error:', message, error);
-            window.parent.postMessage({ 
-                type: 'react-error', 
+            window.parent.postMessage({
+                type: 'react-error',
                 error: message + (lineno ? ' (line ' + lineno + ')' : '')
             }, '*');
             return true;
@@ -1202,18 +1219,24 @@ ${JSON.stringify(importMap, null, 8)}
     // Handle messages from iframe (for auto-fix)
     function handleIframeMessage(event) {
         if (!event.data || !event.data.type) return;
+        const sandpackFrame = sandpackContainer.querySelector('iframe');
+        if (
+            event.source !== previewFrame.contentWindow
+            && event.source !== sandpackFrame?.contentWindow
+        ) return;
 
         if (event.data.type === 'react-error' && currentMode === 'react') {
-            lastError = event.data.error;
+            const safeError = String(event.data.error || 'Erro desconhecido').slice(0, 100000);
+            lastError = safeError;
 
             // Only auto-fix if we haven't exceeded max attempts
             if (fixAttempts < MAX_FIX_ATTEMPTS) {
-                autoFixReact(event.data.error);
+                autoFixReact(safeError);
             } else {
                 // Max attempts reached - stop loading and show error
                 console.log('🛑 Max fix attempts reached, showing code as-is');
                 hideLoading();
-                alert(`O código React tem erro de compilação após ${MAX_FIX_ATTEMPTS} tentativas de correção.\n\nErro: ${event.data.error}\n\nVeja o código para debug.`);
+                alert(`O código React tem erro de compilação após ${MAX_FIX_ATTEMPTS} tentativas de correção.\n\nErro: ${safeError}\n\nVeja o código para debug.`);
             }
         } else if (event.data.type === 'react-success') {
             // Reset fix attempts on success
@@ -1237,7 +1260,7 @@ ${JSON.stringify(importMap, null, 8)}
         showLoading();
 
         try {
-            const response = await fetch(API_URL, {
+            const response = await window.JadeAPI.fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1332,7 +1355,7 @@ ${JSON.stringify(importMap, null, 8)}
             }
             // Build tabs for each file
             modalTabs.innerHTML = Object.keys(currentFiles).map((fileName, i) =>
-                `<span class="modal-tab ${i === 0 ? 'active' : ''}" data-file="${fileName}">${fileName}</span>`
+                `<span class="modal-tab ${i === 0 ? 'active' : ''}" data-file="${escapeHTML(fileName)}">${escapeHTML(fileName)}</span>`
             ).join('');
 
             // Click handlers for tabs
@@ -1424,19 +1447,17 @@ ${JSON.stringify(importMap, null, 8)}
             return;
         }
 
-        if (currentMode === 'react') {
-            const iframe = reactPreviewMode === 'iframe'
-                ? previewFrame
-                : sandpackContainer.querySelector('iframe');
-            if (iframe && iframe.src) {
-                window.open(iframe.src, '_blank');
-            } else {
-                alert('Preview ainda nao esta pronto.');
-            }
-        } else {
-            const blob = new Blob([currentCode], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
+        const iframe = currentMode === 'react' && reactPreviewMode !== 'iframe'
+            ? sandpackContainer.querySelector('iframe')
+            : previewFrame;
+        if (!iframe) {
+            alert('Preview ainda não está pronto.');
+            return;
+        }
+        if (iframe.requestFullscreen) {
+            iframe.requestFullscreen().catch(() => {
+                alert('O navegador não permitiu abrir o preview em tela cheia.');
+            });
         }
     }
 
@@ -1784,7 +1805,7 @@ export default defineConfig({
         deployBtn.disabled = true;
 
         try {
-            const response = await fetch(`${PROXY_BASE_URL}/webdev/deploy`, {
+            const response = await window.JadeAPI.fetch(`${PROXY_BASE_URL}/webdev/deploy`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, files, space_name: spaceName })
@@ -1802,7 +1823,10 @@ export default defineConfig({
                     `Abrir agora?`
                 );
                 if (openSpace) {
-                    window.open(result.url, '_blank');
+                    const deployUrl = new URL(result.url);
+                    if (deployUrl.protocol === 'https:' && deployUrl.hostname === 'huggingface.co') {
+                        window.open(deployUrl.href, '_blank', 'noopener,noreferrer');
+                    }
                 }
             } else {
                 alert(`❌ Erro no deploy:\n${result.error}`);

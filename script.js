@@ -3,8 +3,8 @@
 
     // 1. URL DA API (Se estiver rodando local, mude para http://localhost:7860)
     // Se estiver no Hugging Face, use a URL direta do Space ou Proxy
-    const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
-    const AUTH_BASE_URL = 'https://madras1-jade-port.hf.space'; // Direct HF Space for auth
+    const PROXY_BASE_URL = window.JadeAPI.base;
+    const AUTH_BASE_URL = window.JadeAPI.base;
     const API_URL = `${PROXY_BASE_URL}/chat`;
     const OCR_URL = `${PROXY_BASE_URL}/ocr`;
 
@@ -44,8 +44,8 @@
     let webSearchEnabled = false;
     const webSearchBtn = document.getElementById('webSearchBtn');
 
-    // Model Selector State (Jade High = GLM 4.7, Jade Reasoning = MiniMax M2.1, Jade Flash = Cerebras)
-    let currentJadeModel = 'high'; // 'high', 'minimax', or 'flash'
+    // Model Selector State: quality (Cerebras), balanced (Groq), flash (Groq).
+    let currentJadeModel = 'high'; // 'high', 'balanced', or 'flash'
     window.currentJadeModel = currentJadeModel; // Expose for thinking animation
     const modelDropdownBtn = document.getElementById('model-dropdown-btn');
     const modelDropdownMenu = document.getElementById('model-dropdown-menu');
@@ -596,7 +596,7 @@
 
         // Render reasoning block if exists (from API reasoning_content)
         if (reasoningContent && reasoningContent.trim()) {
-            const reasoningHtml = typeof marked !== 'undefined' ? marked.parse(reasoningContent) : escapeHtml(reasoningContent).replace(/\n/g, '<br>');
+            const reasoningHtml = renderSafeMarkdown(reasoningContent);
             html += `
                 <div class="thinking-block">
                     <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -619,7 +619,7 @@
 
             // Only add if we didn't already get reasoning from API
             if (!reasoningContent) {
-                const thinkingHtml = typeof marked !== 'undefined' ? marked.parse(thinkingContent) : escapeHtml(thinkingContent).replace(/\n/g, '<br>');
+                const thinkingHtml = renderSafeMarkdown(thinkingContent);
                 html += `
                     <div class="thinking-block">
                         <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -634,7 +634,7 @@
 
         // Render main content
         if (typeof marked !== 'undefined') {
-            html += marked.parse(mainContent);
+            html += renderSafeMarkdown(mainContent);
         } else {
             let mainHtml = escapeHtml(mainContent);
             mainHtml = mainHtml.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
@@ -650,6 +650,19 @@
         html = html.replace(/<a href="http/g, '<a target="_blank" href="http');
 
         return html;
+    }
+
+    function renderSafeMarkdown(text) {
+        const rendered = typeof marked !== 'undefined'
+            ? marked.parse(String(text || ''))
+            : escapeHtml(String(text || '')).replace(/\n/g, '<br>');
+        if (window.DOMPurify) {
+            return window.DOMPurify.sanitize(rendered, {
+                USE_PROFILES: { html: true },
+                FORBID_TAGS: ['style', 'form', 'iframe', 'object', 'embed']
+            });
+        }
+        return escapeHtml(String(text || '')).replace(/\n/g, '<br>');
     }
 
     function escapeHtml(s) {
@@ -688,9 +701,9 @@
                         </div>
                     </div>
                 </div>`;
-            } else if (sender === 'J.A.D.E.' && (window.currentJadeModel === 'high' || window.currentJadeModel === 'minimax')) {
+            } else if (sender === 'J.A.D.E.' && (window.currentJadeModel === 'high' || window.currentJadeModel === 'balanced')) {
                 // Reasoning models get a "thinking" animation
-                const modelName = window.currentJadeModel === 'minimax' ? 'MiniMax M2.1' : 'GLM 4.7';
+                const modelName = 'GPT-OSS 120B';
                 textHTML = `<div class="text thinking-processing">
                     <div class="thinking-loader">
                         <div class="brain-pulse">🧠</div>
@@ -1000,7 +1013,7 @@
         try {
             console.log(`📡 Enviando para: ${API_URL}`);
 
-            const resp = await fetch(API_URL, {
+            const resp = await window.JadeAPI.fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1008,7 +1021,7 @@
                     image_base64: image_base64,
                     user_id: masterUserId,
                     agent_type: currentAgent,
-                    jade_model: currentJadeModel, // 'high' (GLM 4.7), 'minimax' (MiniMax M2.1), or 'flash' (Cerebras)
+                    jade_model: currentJadeModel,
                     web_search: webSearchEnabled && currentAgent === 'jade'
                 })
             });
@@ -1109,7 +1122,7 @@
             const base64 = await fileToBase64(file);
 
             // Call OCR API
-            const response = await fetch(OCR_URL, {
+            const response = await window.JadeAPI.fetch(OCR_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1176,7 +1189,7 @@
         if (currentModelName) {
             const modelNames = {
                 'high': 'Jade High',
-                'minimax': 'Jade Reasoning',
+                'balanced': 'Jade Balanced',
                 'flash': 'Jade Flash'
             };
             currentModelName.textContent = modelNames[model] || 'Jade High';
@@ -1191,9 +1204,9 @@
         }
 
         const modelDescriptions = {
-            'high': 'GLM 4.7 (High)',
-            'minimax': 'MiniMax M2.1 (Reasoning)',
-            'flash': 'Cerebras (Flash)'
+            'high': 'GPT-OSS 120B no Cerebras',
+            'balanced': 'GPT-OSS 120B no Groq',
+            'flash': 'GPT-OSS 20B no Groq'
         };
         console.log(`🎯 Modelo alterado para: ${modelDescriptions[model] || model}`);
     }

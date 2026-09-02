@@ -4,8 +4,32 @@
  */
 
 // ========== Configuration ==========
-const PROXY_BASE_URL = 'https://jade-proxy.onrender.com';
+const PROXY_BASE_URL = window.JadeAPI.base;
 const API_BASE = PROXY_BASE_URL;
+
+function escapeHTML(value) {
+    const div = document.createElement('div');
+    div.textContent = String(value ?? '');
+    return div.innerHTML;
+}
+
+function safeMarkdown(value) {
+    const source = String(value ?? '');
+    const rendered = typeof marked !== 'undefined'
+        ? marked.parse(source)
+        : escapeHTML(source).replace(/\n/g, '<br>');
+    return window.DOMPurify
+        ? window.DOMPurify.sanitize(rendered, {
+            USE_PROFILES: { html: true },
+            FORBID_TAGS: ['style', 'form', 'iframe', 'object', 'embed']
+        })
+        : escapeHTML(source).replace(/\n/g, '<br>');
+}
+
+function safeBase64(value) {
+    const source = String(value ?? '');
+    return /^[A-Za-z0-9+/=\r\n]+$/.test(source) ? source.replace(/[\r\n]/g, '') : '';
+}
 
 // ========== State Management ==========
 const state = {
@@ -232,11 +256,11 @@ function renderSources() {
         `;
     } else {
         elements.sourcesList.innerHTML = notebookSources.map(source => `
-            <div class="source-item ${state.selectedSources.includes(source.id) ? 'selected' : ''}" 
-                 data-id="${source.id}">
+            <div class="source-item ${state.selectedSources.includes(source.id) ? 'selected' : ''}"
+                 data-id="${escapeHTML(source.id)}">
                 <span class="source-type">${getSourceIcon(source.type)}</span>
-                <span class="source-name">${source.name}</span>
-                <button class="icon-btn remove-source" data-id="${source.id}" title="Remover">
+                <span class="source-name">${escapeHTML(source.name)}</span>
+                <button class="icon-btn remove-source" data-id="${escapeHTML(source.id)}" title="Remover">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -248,17 +272,17 @@ function renderSources() {
 
     // Render in main grid
     const cardsHtml = notebookSources.map(source => `
-        <div class="source-card ${state.selectedSources.includes(source.id) ? 'selected' : ''}" 
-             data-id="${source.id}">
-            <button class="icon-btn delete-btn" data-id="${source.id}" title="Remover">
+        <div class="source-card ${state.selectedSources.includes(source.id) ? 'selected' : ''}"
+             data-id="${escapeHTML(source.id)}">
+            <button class="icon-btn delete-btn" data-id="${escapeHTML(source.id)}" title="Remover">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
             <div class="source-icon">${getSourceIcon(source.type)}</div>
-            <div class="source-title">${source.name}</div>
-            <div class="source-preview">${source.preview || ''}</div>
+            <div class="source-title">${escapeHTML(source.name)}</div>
+            <div class="source-preview">${escapeHTML(source.preview || '')}</div>
         </div>
     `).join('');
 
@@ -296,7 +320,7 @@ function toggleSourceSelection(sourceId) {
 async function deleteSource(sourceId) {
     try {
         // Use POST since proxy only supports GET/POST
-        const response = await fetch(`${API_BASE}/scholar/source/${sourceId}/delete?user_id=${state.userId}`, {
+        const response = await window.JadeAPI.fetch(`${API_BASE}/scholar/source/${sourceId}/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: state.userId })
@@ -321,7 +345,7 @@ async function loadSources() {
 
     // Then try to sync with server
     try {
-        const response = await fetch(`${API_BASE}/scholar/sources?user_id=${state.userId}`);
+        const response = await window.JadeAPI.fetch(`${API_BASE}/scholar/sources`);
         const data = await response.json();
 
         if (data.success && data.sources && data.sources.length > 0) {
@@ -411,7 +435,7 @@ async function addSource() {
     showLoading('Processando fonte...');
 
     try {
-        const response = await fetch(`${API_BASE}/scholar/ingest`, {
+        const response = await window.JadeAPI.fetch(`${API_BASE}/scholar/ingest`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -464,7 +488,7 @@ async function generateOutput(type) {
     showLoading(loadingMessages[type] || 'Gerando conteúdo...');
 
     try {
-        const response = await fetch(`${API_BASE}/scholar/generate`, {
+        const response = await window.JadeAPI.fetch(`${API_BASE}/scholar/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -499,7 +523,7 @@ function renderOutput(type, data) {
                     <h2>📝 Resumo Estratégico</h2>
                 </div>
                 <div class="markdown-content">
-                    ${marked.parse(data.content || '')}
+                    ${safeMarkdown(data.content || '')}
                 </div>
             `;
             break;
@@ -510,12 +534,12 @@ function renderOutput(type, data) {
                     <h2>🎧 Podcast Gerado</h2>
                 </div>
                 <div class="audio-player-container">
-                    <audio controls src="data:audio/mp3;base64,${data.audio_base64}"></audio>
+                    <audio controls src="data:audio/mp3;base64,${safeBase64(data.audio_base64)}"></audio>
                 </div>
                 <div class="script-section">
                     <h3>Roteiro</h3>
                     ${data.script ? data.script.map(line => `
-                        <p><strong>${line.speaker}:</strong> ${line.text}</p>
+                        <p><strong>${escapeHTML(line.speaker)}:</strong> ${escapeHTML(line.text)}</p>
                     `).join('') : ''}
                 </div>
             `;
@@ -548,14 +572,14 @@ function renderOutput(type, data) {
             html = `
                 <div class="output-header">
                     <h2>🗺️ Mapa Mental</h2>
-                    <a href="data:image/png;base64,${data.image_base64}" 
-                       download="mindmap.png" 
+                    <a href="data:image/png;base64,${safeBase64(data.image_base64)}"
+                       download="mindmap.png"
                        class="btn-primary">
                         ⬇️ Baixar Imagem
                     </a>
                 </div>
                 <div class="mindmap-container">
-                    <img src="data:image/png;base64,${data.image_base64}" alt="Mapa Mental">
+                    <img src="data:image/png;base64,${safeBase64(data.image_base64)}" alt="Mapa Mental">
                 </div>
             `;
             break;
@@ -591,7 +615,7 @@ function renderQuizQuestion() {
 
     elements.quizOptions.innerHTML = (q.options || []).map((opt, i) => `
         <button class="quiz-option" data-option="${String.fromCharCode(65 + i)}">
-            ${opt}
+            ${escapeHTML(opt)}
         </button>
     `).join('');
 
@@ -665,7 +689,7 @@ function addChatMessage(content, isUser = false) {
     messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
     messageDiv.innerHTML = `
         <div class="message-content">
-            ${isUser ? content : marked.parse(content)}
+            ${isUser ? escapeHTML(content) : safeMarkdown(content)}
         </div>
     `;
     elements.chatMessages.appendChild(messageDiv);
@@ -680,7 +704,7 @@ async function sendChatMessage() {
     addChatMessage(message, true);
 
     try {
-        const response = await fetch(`${API_BASE}/scholar/chat`, {
+        const response = await window.JadeAPI.fetch(`${API_BASE}/scholar/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -842,15 +866,15 @@ function renderFlashcardStudy(fileBase64, filename) {
             <h2>🃏 Estudar Flashcards</h2>
             <div class="flashcard-actions">
                 ${fileBase64 ? `
-                    <a href="data:application/octet-stream;base64,${fileBase64}" 
-                       download="${filename}" 
+                    <a href="data:application/octet-stream;base64,${safeBase64(fileBase64)}"
+                       download="${escapeHTML(filename || 'flashcards.apkg')}"
                        class="btn-secondary">
                         ⬇️ Anki
                     </a>
                 ` : ''}
             </div>
         </div>
-        
+
         <div class="flashcard-study">
             <div class="flashcard-progress">
                 <span>Card ${state.flashcardIndex + 1} de ${total}</span>
@@ -858,19 +882,19 @@ function renderFlashcardStudy(fileBase64, filename) {
                     <div class="progress-fill" style="width: ${((state.flashcardIndex + 1) / total) * 100}%"></div>
                 </div>
             </div>
-            
+
             <div class="flashcard-interactive ${state.showingAnswer ? 'flipped' : ''}" id="study-card">
                 <div class="card-front">
                     <span class="card-label">Pergunta</span>
-                    <p>${card.question}</p>
+                    <p>${escapeHTML(card.question)}</p>
                     <small>Clique para ver a resposta</small>
                 </div>
                 <div class="card-back">
                     <span class="card-label">Resposta</span>
-                    <p>${card.answer}</p>
+                    <p>${escapeHTML(card.answer)}</p>
                 </div>
             </div>
-            
+
             <div class="flashcard-controls">
                 <button class="btn-secondary" id="prev-card" ${state.flashcardIndex === 0 ? 'disabled' : ''}>
                     ← Anterior
@@ -919,11 +943,11 @@ function nextFlashcard() {
 function renderNotebooks() {
     const notebooksList = document.getElementById('notebooks-list');
     notebooksList.innerHTML = state.notebooks.map(nb => `
-        <div class="notebook-item ${nb.id === state.currentNotebook ? 'active' : ''}" data-id="${nb.id}">
+        <div class="notebook-item ${nb.id === state.currentNotebook ? 'active' : ''}" data-id="${escapeHTML(nb.id)}">
             <span class="notebook-icon">📓</span>
-            <span class="notebook-name">${nb.name}</span>
+            <span class="notebook-name">${escapeHTML(nb.name)}</span>
             ${nb.id !== 'default' ? `
-                <button class="icon-btn delete-notebook" data-id="${nb.id}" title="Excluir">
+                <button class="icon-btn delete-notebook" data-id="${escapeHTML(nb.id)}" title="Excluir">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1011,13 +1035,16 @@ function renderBlocks() {
 
     blocksContainer.innerHTML = notebookBlocks.map(block => {
         const completedClass = block.completed ? 'completed' : '';
+        const safeBlockId = escapeHTML(block.id);
+        const safeBlockType = ['text', 'heading', 'heading2', 'bullet', 'todo', 'quote', 'code']
+            .includes(block.type) ? block.type : 'text';
 
         if (block.type === 'divider') {
             return `
-                <div class="block-item divider" data-id="${block.id}">
+                <div class="block-item divider" data-id="${safeBlockId}">
                     <hr>
                     <div class="block-actions">
-                        <button class="block-action-btn delete" data-id="${block.id}" title="Excluir">
+                        <button class="block-action-btn delete" data-id="${safeBlockId}" title="Excluir">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1029,7 +1056,7 @@ function renderBlocks() {
         }
 
         const checkbox = block.type === 'todo' ? `
-            <div class="todo-checkbox" data-id="${block.id}">
+            <div class="todo-checkbox" data-id="${safeBlockId}">
                 ${block.completed ? '✓' : ''}
             </div>
         ` : '';
@@ -1045,16 +1072,16 @@ function renderBlocks() {
         };
 
         return `
-            <div class="block-item ${block.type} ${completedClass}" data-id="${block.id}">
+            <div class="block-item ${safeBlockType} ${completedClass}" data-id="${safeBlockId}">
                 <div class="block-handle">⋮⋮</div>
                 ${checkbox}
-                <div class="block-content" 
-                     contenteditable="true" 
-                     data-id="${block.id}"
-                     data-placeholder="${placeholders[block.type] || 'Digite...'}"
-                >${block.content || ''}</div>
+                <div class="block-content"
+                     contenteditable="true"
+                     data-id="${safeBlockId}"
+                     data-placeholder="${placeholders[safeBlockType] || 'Digite...'}"
+                >${escapeHTML(block.content || '')}</div>
                 <div class="block-actions">
-                    <button class="block-action-btn delete" data-id="${block.id}" title="Excluir">
+                    <button class="block-action-btn delete" data-id="${safeBlockId}" title="Excluir">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>

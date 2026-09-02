@@ -193,14 +193,14 @@
                             stroke="currentColor" stroke-width="2">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                         </svg>
-                        <span class="model-name" id="selectedModelName">Qwen 3 235B</span>
+                        <span class="model-name" id="selectedModelName">GPT OSS 120B</span>
                         <span class="model-badge fast" id="selectedModelBadge">Rapido</span>
                         <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
                             <path d="M6 9l6 6 6-6" />
                         </svg>
                     </button>
-                    <input type="hidden" id="modelSelect" value="qwen-3-235b">
+                    <input type="hidden" id="modelSelect" value="gpt-oss-120b">
 
                     <div class="model-menu" id="modelMenu">
                         <!-- Fast Models -->
@@ -212,15 +212,25 @@
                                 </svg>
                                 Rapidos
                             </div>
-                            <div class="model-option" data-value="qwen-3-235b" data-name="Qwen 3 235B"
-                                data-badge="Cerebras">
-                                <span class="option-name">Qwen 3 235B</span>
-                                <span class="option-provider">Cerebras</span>
-                            </div>
                             <div class="model-option" data-value="gpt-oss-120b" data-name="GPT OSS 120B"
                                 data-badge="Cerebras">
                                 <span class="option-name">GPT OSS 120B</span>
                                 <span class="option-provider">Cerebras</span>
+                            </div>
+                            <div class="model-option" data-value="groq-gpt-oss-120b" data-name="GPT OSS 120B"
+                                data-badge="Groq">
+                                <span class="option-name">GPT OSS 120B</span>
+                                <span class="option-provider">Groq</span>
+                            </div>
+                            <div class="model-option" data-value="groq-gpt-oss-20b" data-name="GPT OSS 20B"
+                                data-badge="Groq">
+                                <span class="option-name">GPT OSS 20B</span>
+                                <span class="option-provider">Groq</span>
+                            </div>
+                            <div class="model-option" data-value="nemotron-3.5-lightning-free"
+                                data-name="Nemotron 3.5 Lightning" data-badge="Free">
+                                <span class="option-name">Nemotron 3.5 Lightning</span>
+                                <span class="option-provider free">OpenRouter grátis</span>
                             </div>
                         </div>
 
@@ -238,39 +248,30 @@
                                 <span class="option-name">Devstral</span>
                                 <span class="option-provider">Mistral</span>
                             </div>
-                            <div class="model-option" data-value="deepseek-r1" data-name="DeepSeek R1"
+                            <div class="model-option" data-value="openrouter-free" data-name="OpenRouter Free"
                                 data-badge="Free">
-                                <span class="option-name">DeepSeek R1</span>
-                                <span class="option-provider free">Gratis</span>
+                                <span class="option-name">Free Models Router</span>
+                                <span class="option-provider free">OpenRouter grátis</span>
                             </div>
-                            <div class="model-option" data-value="hermes-3-405b" data-name="Hermes 405B"
+                            <div class="model-option" data-value="minimax-m2.7-free" data-name="MiniMax M2.7"
                                 data-badge="Free">
-                                <span class="option-name">Hermes 3 Llama 405B</span>
-                                <span class="option-provider free">Gratis</span>
+                                <span class="option-name">MiniMax M2.7</span>
+                                <span class="option-provider free">OpenRouter grátis</span>
                             </div>
-                            <div class="model-option" data-value="kimi-k2-thinking" data-name="Kimi Thinking"
-                                data-badge="Chutes">
-                                <span class="option-name">Kimi K2 Thinking</span>
-                                <span class="option-provider">Chutes.ai</span>
+                            <div class="model-option" data-value="nemotron-3-ultra-free" data-name="Nemotron 3 Ultra"
+                                data-badge="Free">
+                                <span class="option-name">Nemotron 3 Ultra</span>
+                                <span class="option-provider free">OpenRouter grátis</span>
                             </div>
-                            <div class="model-option" data-value="qwen3-coder-480b" data-name="Qwen3 Coder"
-                                data-badge="Chutes">
-                                <span class="option-name">Qwen3 Coder 480B</span>
-                                <span class="option-provider">Chutes.ai</span>
+                            <div class="model-option" data-value="nemotron-3-super-free" data-name="Nemotron 3 Super"
+                                data-badge="Free">
+                                <span class="option-name">Nemotron 3 Super</span>
+                                <span class="option-provider free">OpenRouter grátis</span>
                             </div>
-                            <div class="model-option" data-value="minimax-m2.1" data-name="MiniMax M2.1"
-                                data-badge="Chutes">
-                                <span class="option-name">MiniMax M2.1</span>
-                                <span class="option-provider">Chutes.ai</span>
-                            </div>
-                            <div class="model-option" data-value="kimi-k2.5" data-name="Kimi K2.5" data-badge="Chutes">
-                                <span class="option-name">Kimi K2.5</span>
-                                <span class="option-provider">Chutes.ai</span>
-                            </div>
-                            <div class="model-option" data-value="mimo-v2-chutes" data-name="MiMo V2"
-                                data-badge="Chutes">
-                                <span class="option-name">MiMo V2 Flash</span>
-                                <span class="option-provider">Chutes.ai</span>
+                            <div class="model-option" data-value="glm-4.7-cerebras" data-name="GLM 4.7 Preview"
+                                data-badge="Preview">
+                                <span class="option-name">GLM 4.7 Preview</span>
+                                <span class="option-provider">Cerebras</span>
                             </div>
                         </div>
 
@@ -296,9 +297,9 @@
                                 <span class="option-provider pipeline">4 agentes</span>
                             </div>
                             <div class="model-option" data-value="compound_michelangelo"
-                                data-name="Compound Michelangelo" data-badge="Pipeline">
-                                <span class="option-name">Compound Michelangelo</span>
-                                <span class="option-provider ultra">+ AI Images</span>
+                                data-name="Compound Studio" data-badge="Pipeline">
+                                <span class="option-name">Compound Studio</span>
+                                <span class="option-provider ultra">acabamento visual</span>
                             </div>
                         </div>
                     </div>
@@ -403,7 +404,9 @@
                     <h3>Seu app aparecerá aqui</h3>
                     <p>Escolha um template ou descreva sua ideia</p>
                 </div>
-                <iframe id="previewFrame" class="preview-frame hidden"></iframe>
+                <iframe id="previewFrame" class="preview-frame hidden"
+                    sandbox="allow-forms allow-modals allow-popups allow-scripts allow-downloads"
+                    referrerpolicy="no-referrer"></iframe>
 
                 <!-- Sandpack Container (React mode) -->
                 <div id="sandpackContainer" class="sandpack-container hidden"></div>
@@ -504,6 +507,7 @@
         </div>
     </div>
 
+    <script src="api-client.js"></script>
     <script type="module" src="webdev.js"></script>
     <script src="model-selector.js"></script>
 </body>

@@ -80,6 +80,8 @@ let currentRepo = null;
 let openFiles = {};
 let chatHistory = []; // Current chat messages
 let currentChatId = null; // Current chat ID
+let suppressEditorChange = false;
+const pendingFileSaves = new Map();
 
 // ========== MULTI-CHAT HISTORY PER REPO ==========
 // Cada repo pode ter MÚLTIPLOS históricos de chat
@@ -327,6 +329,13 @@ require(['vs/editor/editor.main'], function () {
         automaticLayout: true,
         tabSize: 4,
     });
+    editor.onDidChangeModelContent(() => {
+        if (suppressEditorChange || !currentFile || !openFiles[currentFile]) return;
+        const content = editor.getValue();
+        openFiles[currentFile].content = content;
+        openFiles[currentFile].modified = true;
+        queueFileSave(currentFile, content);
+    });
     console.log('Monaco initialized');
 });
 
@@ -379,6 +388,7 @@ document.getElementById('clone-confirm').onclick = async () => {
 
     const repo = repoInput.value.trim();
     if (!repo) return;
+    const previousRepo = currentRepo;
 
     cloneModal.classList.add('hidden');
 
@@ -444,7 +454,7 @@ async function loadFilesFromR2(path = '') {
         const data = await res.json();
 
         if (!data.success) {
-            fileTree.innerHTML = `<div class="empty-state">${data.error}</div>`;
+            fileTree.innerHTML = `<div class="empty-state">${escapeHtml(data.error)}</div>`;
             return;
         }
 
@@ -473,7 +483,7 @@ async function loadFilesFromR2(path = '') {
         files.forEach(f => {
             const item = document.createElement('div');
             item.className = `file-item ${f.type === 'dir' ? 'folder' : ''}`;
-            item.innerHTML = `${f.type === 'dir' ? '📁' : '📄'} ${f.name}`;
+            item.textContent = `${f.type === 'dir' ? '📁' : '📄'} ${f.name}`;
             item.onclick = () => {
                 if (f.type === 'dir') {
                     loadFilesFromR2(path ? `${path}/${f.name}` : f.name);
@@ -489,7 +499,7 @@ async function loadFilesFromR2(path = '') {
         }
     } catch (e) {
         console.error('Load files error:', e);
-        fileTree.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+        fileTree.innerHTML = `<div class="empty-state">Erro: ${escapeHtml(e.message)}</div>`;
     }
 }
 
@@ -503,7 +513,8 @@ async function openFileFromR2(filePath) {
     }
 
     try {
-        const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${filePath}`;
+        const encodedPath = filePath.split('/').map(encodeURIComponent).join('/');
+        const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${encodedPath}`;
         const res = await apiFetch(url);
         const data = await res.json();
 
@@ -530,7 +541,7 @@ function addTab(path) {
     tab.className = 'tab';
     tab.dataset.path = path;
     tab.innerHTML = `
-        <span class="tab-name">${path.split('/').pop()}</span>
+        <span class="tab-name">${escapeHtml(path.split('/').pop())}</span>
         <span class="tab-close" title="Fechar">×</span>
     `;
 
@@ -551,11 +562,17 @@ function addTab(path) {
 
 // Close tab
 function closeTab(path) {
+    if (path === currentFile && editor && openFiles[path]) {
+        const content = editor.getValue();
+        openFiles[path].content = content;
+        queueFileSave(path, content, 0);
+    }
     // Remove from openFiles
     delete openFiles[path];
 
     // Remove tab element
-    const tab = editorTabs.querySelector(`[data-path="${path}"]`);
+    const tab = Array.from(editorTabs.querySelectorAll('.tab'))
+        .find(candidate => candidate.dataset.path === path);
     if (tab) tab.remove();
 
     // If this was the current file, switch to another or show welcome
@@ -573,6 +590,12 @@ function closeTab(path) {
 
 // Switch to file
 function switchToFile(path) {
+    if (currentFile && currentFile !== path && editor && openFiles[currentFile]) {
+        const previousPath = currentFile;
+        const previousContent = editor.getValue();
+        openFiles[previousPath].content = previousContent;
+        queueFileSave(previousPath, previousContent, 0);
+    }
     currentFile = path;
 
     document.querySelectorAll('.tab').forEach(t => {
@@ -588,7 +611,48 @@ function switchToFile(path) {
         const language = langMap[ext] || 'plaintext';
 
         monaco.editor.setModelLanguage(editor.getModel(), language);
+        suppressEditorChange = true;
         editor.setValue(openFiles[path].content);
+        suppressEditorChange = false;
+    }
+}
+
+function queueFileSave(path, content, delay = 700) {
+    if (!currentRepo || !path) return;
+    const repo = currentRepo;
+    const saveKey = `${repo}:${path}`;
+    const existing = pendingFileSaves.get(saveKey);
+    if (existing) clearTimeout(existing);
+    showSaveIndicator('saving');
+    const timer = setTimeout(() => {
+        pendingFileSaves.delete(saveKey);
+        persistFile(repo, path, content);
+    }, delay);
+    pendingFileSaves.set(saveKey, timer);
+}
+
+async function persistFile(repo, path, content) {
+    try {
+        const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+        const response = await apiFetch(
+            `${API_BASE}/codejade/file/${encodeURIComponent(repo)}/${encodedPath}`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ content })
+            }
+        );
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Falha ao salvar o arquivo');
+        }
+        if (currentRepo === repo && openFiles[path] && openFiles[path].content === content) {
+            openFiles[path].modified = false;
+        }
+        showSaveIndicator('saved');
+    } catch (error) {
+        console.error('File save failed:', error);
+        showSaveIndicator('error');
+        addMessage('tool', `❌ Não foi possível salvar ${path}: ${error.message}`, false);
     }
 }
 
@@ -665,7 +729,8 @@ async function refreshCurrentFile() {
     if (!currentFile || !currentRepo) return;
 
     try {
-        const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${currentFile}`;
+        const encodedPath = currentFile.split('/').map(encodeURIComponent).join('/');
+        const url = `${API_BASE}/codejade/file/${encodeURIComponent(currentRepo)}/${encodedPath}`;
         const res = await apiFetch(url);
         const data = await res.json();
 
@@ -683,7 +748,9 @@ async function refreshCurrentFile() {
 
             // Update Monaco if this is the active file
             if (editor) {
+                suppressEditorChange = true;
                 editor.setValue(newContent);
+                suppressEditorChange = false;
             }
         }
     } catch (e) {
@@ -697,7 +764,7 @@ function showVisualDiff(filename, oldContent, newContent) {
     const newLines = newContent.split('\n');
 
     let diffHtml = `<div class="diff-container">`;
-    diffHtml += `<div class="diff-header"><span>📝 ${filename}</span><span class="status-chip done">Atualizado</span></div>`;
+    diffHtml += `<div class="diff-header"><span>📝 ${escapeHtml(filename)}</span><span class="status-chip done">Atualizado</span></div>`;
     diffHtml += `<div class="diff-content">`;
 
     // Simple line-by-line diff (first 20 lines changed)
@@ -760,6 +827,7 @@ function addMessage(type, content, persist = true) {
 }
 
 function formatMessage(text) {
+    text = escapeHtml(String(text ?? ''));
     // Handle code blocks
     text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code class="lang-$1">$2</code></pre>');
     // Inline code
@@ -858,8 +926,8 @@ function showPlanApproval(plan) {
         stepEl.innerHTML = `
             <div class="plan-step-number">${idx + 1}</div>
             <div class="plan-step-content">
-                <div>${step.action || step.description || 'Ação'}</div>
-                ${step.tool ? `<div class="plan-step-tool">${step.tool}(${JSON.stringify(step.args || {}).substring(0, 50)}...)</div>` : ''}
+                <div>${escapeHtml(step.action || step.description || 'Ação')}</div>
+                ${step.tool ? `<div class="plan-step-tool">${escapeHtml(step.tool)}(${escapeHtml(JSON.stringify(step.args || {}).substring(0, 50))}...)</div>` : ''}
             </div>
         `;
         planStepsContainer.appendChild(stepEl);
@@ -1030,9 +1098,9 @@ function buildRepoSection(repoName, chats, isExpanded) {
 
     let html = `
         <div class="repo-section ${isActive ? 'active' : ''}">
-            <div class="repo-header" data-repo="${repoName}">
+            <div class="repo-header" data-repo="${escapeHtml(repoName)}">
                 <span class="repo-icon">${isActive ? '📂' : '📁'}</span>
-                <span class="repo-name">${repoName}</span>
+                <span class="repo-name">${escapeHtml(repoName)}</span>
                 <span class="repo-count">${chatCount} chats</span>
             </div>
             <div class="chats-list ${isExpanded ? '' : 'hidden'}">
@@ -1041,13 +1109,13 @@ function buildRepoSection(repoName, chats, isExpanded) {
     chats.forEach(c => {
         const isCurrent = isActive && c.id === currentChatId;
         html += `
-            <div class="chat-item ${isCurrent ? 'active' : ''}" data-repo="${repoName}" data-chat-id="${c.id}">
+            <div class="chat-item ${isCurrent ? 'active' : ''}" data-repo="${escapeHtml(repoName)}" data-chat-id="${escapeHtml(c.id)}">
                 <span class="chat-icon">${isCurrent ? '▶️' : '💬'}</span>
                 <div class="chat-info">
-                    <div class="chat-title">${c.title || 'Chat'}...</div>
-                    <div class="chat-meta">${c.count || 0} msgs • ${formatTimeAgo(c.updatedAt)}</div>
+                    <div class="chat-title">${escapeHtml(c.title || 'Chat')}...</div>
+                    <div class="chat-meta">${Number(c.count) || 0} msgs • ${escapeHtml(formatTimeAgo(c.updatedAt))}</div>
                 </div>
-                ${!isCurrent ? `<span class="chat-delete" data-repo="${repoName}" data-chat-id="${c.id}">🗑️</span>` : ''}
+                ${!isCurrent ? `<span class="chat-delete" data-repo="${escapeHtml(repoName)}" data-chat-id="${escapeHtml(c.id)}">🗑️</span>` : ''}
             </div>
         `;
     });

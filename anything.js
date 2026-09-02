@@ -2,7 +2,7 @@
     'use strict';
 
     // API Base URL
-    const API_URL = 'https://jade-proxy.onrender.com/anything';
+    const API_URL = `${window.JadeAPI.base}/anything`;
     const STORAGE_KEY = 'anything_conversations';
     const GEMS_KEY = 'anything_gems';
 
@@ -12,41 +12,28 @@
             name: 'OpenRouter',
             color: '#22c55e',
             models: [
-                { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B' },
-                { id: 'mistralai/devstral-2512:free', name: 'Devstral 2512' },
-                { id: 'arcee-ai/trinity-mini:free', name: 'Arcee Trinity Mini' },
-                { id: 'arcee-ai/trinity-large-preview:free', name: 'Arcee Trinity Large' },
-                { id: 'nvidia/nemotron-nano-12b-v2-vl:free', name: 'Nemotron Nano 12B VL' },
-                { id: 'openai/gpt-oss-120b:free', name: 'GPT-OSS 120B' },
-                { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air' },
-                { id: 'qwen/qwen3-coder:free', name: 'Qwen3 Coder' },
-                { id: 'moonshotai/kimi-k2:free', name: 'Kimi K2' },
-                { id: 'cognitivecomputations/dolphin-mistral-24b-venice-edition:free', name: 'Dolphin Mistral 24B' },
-                { id: 'tngtech/deepseek-r1t2-chimera:free', name: 'DeepSeek R1T2 Chimera' },
-                { id: 'deepseek/deepseek-r1-0528:free', name: 'DeepSeek R1' },
-                { id: 'google/gemma-3-27b-it:free', name: 'Gemma 3 27B' },
-                { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B' },
-                { id: 'qwen/qwen-2.5-vl-7b-instruct:free', name: 'Qwen 2.5 VL 7B' },
-                { id: 'nousresearch/hermes-3-llama-3.1-405b:free', name: 'Hermes 3 Llama 405B' }
+                { id: 'minimax/minimax-m2.7:free', name: 'MiniMax M2.7 (Free)' },
+                { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'Nemotron 3 Ultra (Free)' },
+                { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 3 Super (Free)' },
+                { id: 'nvidia/nemotron-3.5-lightning:free', name: 'Nemotron 3.5 Lightning (Free)' },
+                { id: 'openrouter/free', name: 'Free Models Router (automático)' }
             ]
         },
         groq: {
             name: 'Groq',
             color: '#f97316',
             models: [
-                { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant' },
-                { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17B' },
-                { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B' },
-                { id: 'moonshotai/kimi-k2-instruct-0905', name: 'Kimi K2 Instruct' }
+                { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B' },
+                { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B' },
+                { id: 'qwen/qwen3.6-27b', name: 'Qwen 3.6 27B' }
             ]
         },
         cerebras: {
             name: 'Cerebras',
             color: '#a855f7',
             models: [
-                { id: 'qwen-3-235b-a22b-instruct-2507', name: 'Qwen 3 235B' },
-                { id: 'zai-glm-4.6', name: 'ZAI GLM 4.6' },
-                { id: 'qwen-3-32b', name: 'Qwen 3 32B' }
+                { id: 'gpt-oss-120b', name: 'GPT-OSS 120B' },
+                { id: 'zai-glm-4.7', name: 'ZAI GLM 4.7' }
             ]
         },
         mistral: {
@@ -58,16 +45,6 @@
                 { id: 'magistral-medium-latest', name: 'Magistral Medium' },
                 { id: 'pixtral-large-latest', name: 'Pixtral Large (Vision)' },
                 { id: 'mistral-small-latest', name: 'Mistral Small' }
-            ]
-        },
-        chutes: {
-            name: 'Chutes',
-            color: '#06b6d4',
-            models: [
-                { id: 'deepseek-ai/DeepSeek-V3-0324-TEE', name: 'DeepSeek V3' },
-                { id: 'zai-org/GLM-4.7-TEE', name: 'GLM 4.7' },
-                { id: 'moonshotai/Kimi-K2-Thinking-TEE', name: 'Kimi K2 Thinking' },
-                { id: 'MiniMaxAI/MiniMax-M2.1-TEE', name: 'MiniMax M2.1' }
             ]
         }
     };
@@ -470,8 +447,8 @@
             const emoji = gem ? gem.emoji : '💬';
 
             div.innerHTML = `
-                <span class="history-emoji">${emoji}</span>
-                <span class="history-title">${chat.title}</span>
+                <span class="history-emoji">${escapeHtml(emoji)}</span>
+                <span class="history-title">${escapeHtml(chat.title)}</span>
                 <button class="delete-chat-btn" title="Excluir">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"></polyline>
@@ -504,10 +481,12 @@
     function updateModelBadge() {
         const provider = PROVIDERS[currentProvider];
         const model = provider.models.find(m => m.id === currentModel) || provider.models[0];
-        const gemInfo = currentGem ? `${currentGem.emoji} ${currentGem.name} · ` : '';
+        const gemInfo = currentGem
+            ? `${escapeHtml(currentGem.emoji)} ${escapeHtml(currentGem.name)} · `
+            : '';
         modelBadge.innerHTML = `
             <span style="color: ${provider.color}">●</span>
-            ${gemInfo}${model.name}
+            ${gemInfo}${escapeHtml(model.name)}
         `;
     }
 
@@ -518,8 +497,8 @@
         let welcomeText = '';
         if (currentGem) {
             welcomeText = `
-                <p><strong>${currentGem.emoji} ${currentGem.name}</strong> está ativa!</p>
-                <p>${currentGem.prompt.substring(0, 100)}${currentGem.prompt.length > 100 ? '...' : ''}</p>
+                <p><strong>${escapeHtml(currentGem.emoji)} ${escapeHtml(currentGem.name)}</strong> está ativa!</p>
+                <p>${escapeHtml(currentGem.prompt.substring(0, 100))}${currentGem.prompt.length > 100 ? '...' : ''}</p>
             `;
         } else {
             welcomeText = `
@@ -529,7 +508,7 @@
         }
 
         el.innerHTML = `
-            <div class="avatar">${currentGem ? currentGem.emoji : '🌐'}</div>
+            <div class="avatar">${currentGem ? escapeHtml(currentGem.emoji) : '🌐'}</div>
             <div class="content">
                 <div class="sender-name">Chat Anything</div>
                 <div class="text">${welcomeText}</div>
@@ -562,11 +541,11 @@
                 : renderMarkdown(text);
 
             el.innerHTML = `
-                <div class="avatar">${avatar}</div>
+                <div class="avatar">${escapeHtml(avatar)}</div>
                 <div class="content">
                     <div class="sender-name">
-                        ${currentGem ? currentGem.name : 'Assistente'}
-                        <span class="model-tag">${displayProviderName} · ${displayModelName}</span>
+                        ${currentGem ? escapeHtml(currentGem.name) : 'Assistente'}
+                        <span class="model-tag">${escapeHtml(displayProviderName)} · ${escapeHtml(displayModelName)}</span>
                     </div>
                     <div class="text">${textContent}</div>
                 </div>
@@ -622,7 +601,7 @@
 
             apiMessages.push(...messages);
 
-            const response = await fetch(API_URL, {
+            const response = await window.JadeAPI.fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -660,10 +639,17 @@
     }
 
     function renderMarkdown(text) {
+        const source = String(text || '');
         if (typeof marked !== 'undefined') {
-            return marked.parse(text);
+            const rendered = marked.parse(source);
+            return window.DOMPurify
+                ? window.DOMPurify.sanitize(rendered, {
+                    USE_PROFILES: { html: true },
+                    FORBID_TAGS: ['style', 'form', 'iframe', 'object', 'embed']
+                })
+                : escapeHtml(source).replace(/\n/g, '<br>');
         }
-        return escapeHtml(text).replace(/\n/g, '<br>');
+        return escapeHtml(source).replace(/\n/g, '<br>');
     }
 
     // Expose openGemModal to edit from select

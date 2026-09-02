@@ -261,7 +261,7 @@
             Entrar com GitHub
         </a>
 
-        <a href="apps.html" class="skip-link">Continuar sem login →</a>
+        <a id="skip-login-link" href="apps.html" class="skip-link" style="display: none">Continuar sem login →</a>
 
         <div class="features">
             <h3>Com login você pode:</h3>
@@ -283,6 +283,15 @@
         // Check for error in URL
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
+        const requestedReturn = urlParams.get('return_to');
+        const safeReturnUrl = (() => {
+            try {
+                const target = new URL(requestedReturn || 'apps.html', window.location.href);
+                return target.origin === window.location.origin ? target.href : new URL('apps.html', window.location.href).href;
+            } catch (_) {
+                return new URL('apps.html', window.location.href).href;
+            }
+        })();
         if (error) {
             const errorDiv = document.getElementById('error-message');
             const errorMessages = {
@@ -308,7 +317,16 @@
                     if (data.user?.id) {
                         sessionStorage.setItem('jade_auth_user_id', `github_${data.user.id}`);
                     }
-                    window.location.href = 'apps.html';
+                    window.location.href = safeReturnUrl;
+                }
+            })
+            .catch(() => { });
+
+        fetch(`${API_BASE}/auth/status`)
+            .then(response => response.json())
+            .then(status => {
+                if (status.required === false) {
+                    document.getElementById('skip-login-link').style.display = '';
                 }
             })
             .catch(() => { });
@@ -316,7 +334,7 @@
         // GitHub login button
         document.getElementById('github-login-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = `${API_BASE}/auth/login`;
+            window.location.href = `${API_BASE}/auth/login?return_to=${encodeURIComponent(safeReturnUrl)}`;
         });
     </script>
 </body>

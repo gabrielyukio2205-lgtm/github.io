@@ -155,19 +155,19 @@
                             <button class="dropdown-item active" data-model="high">
                                 <div class="model-info">
                                     <span class="model-name">Jade High</span>
-                                    <span class="model-desc">GLM 4.7 • Mais inteligente</span>
+                                    <span class="model-desc">GPT-OSS 120B • Cerebras</span>
                                 </div>
                             </button>
-                            <button class="dropdown-item" data-model="minimax">
+                            <button class="dropdown-item" data-model="balanced">
                                 <div class="model-info">
-                                    <span class="model-name">Jade Reasoning</span>
-                                    <span class="model-desc">MiniMax M2.1 • Deep Thinking</span>
+                                    <span class="model-name">Jade Balanced</span>
+                                    <span class="model-desc">GPT-OSS 120B • Groq</span>
                                 </div>
                             </button>
                             <button class="dropdown-item" data-model="flash">
                                 <div class="model-info">
                                     <span class="model-name">Jade Flash</span>
-                                    <span class="model-desc">Cerebras • Mais rápido</span>
+                                    <span class="model-desc">GPT-OSS 20B • Groq</span>
                                 </div>
                             </button>
                         </div>
@@ -346,8 +346,10 @@
     <audio id="audioPlayer" class="hidden"></audio>
 
     <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="api-client.js"></script>
     <script src="script.js"></script>
 </body>
 

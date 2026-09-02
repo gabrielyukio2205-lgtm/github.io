@@ -2,9 +2,7 @@
     'use strict';
 
     // API URL - ajuste conforme necessário
-    const API_BASE_URL = window.location.hostname === 'localhost'
-        ? 'http://localhost:7860'
-        : 'https://jade-proxy.onrender.com';
+    const API_BASE_URL = window.JadeAPI.base;
 
     // DOM Elements
     const uploadZone = document.getElementById('upload-zone');
@@ -114,7 +112,7 @@
 
         try {
             const endpoint = onlyEda ? '/analyze/eda' : '/analyze';
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            const response = await window.JadeAPI.fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -157,6 +155,12 @@
     }
 
     // Display EDA Results
+    function escapeHTML(value) {
+        const div = document.createElement('div');
+        div.textContent = String(value ?? '');
+        return div.innerHTML;
+    }
+
     function displayEDA(eda) {
         edaResults.classList.remove('hidden');
         const statsGrid = document.getElementById('eda-stats');
@@ -198,8 +202,8 @@
 
             metricsHtml += `
                 <div class="metric-item">
-                    <div class="value">${formattedValue}</div>
-                    <div class="label">${key.replace('_', ' ')}</div>
+                    <div class="value">${escapeHTML(formattedValue)}</div>
+                    <div class="label">${escapeHTML(key.replace('_', ' '))}</div>
                 </div>
             `;
         }
@@ -215,14 +219,17 @@
             .slice(0, 10); // Top 10
 
         for (const [feature, value] of sortedFeatures) {
-            const percentage = (value / maxImportance) * 100;
+            const numericValue = Number(value);
+            const percentage = Number.isFinite(numericValue)
+                ? Math.max(0, Math.min(100, (numericValue / maxImportance) * 100))
+                : 0;
             importanceHtml += `
                 <div class="feature-bar">
-                    <span class="name">${feature}</span>
+                    <span class="name">${escapeHTML(feature)}</span>
                     <div class="bar-container">
                         <div class="bar" style="width: ${percentage}%"></div>
                     </div>
-                    <span class="value">${value.toFixed(3)}</span>
+                    <span class="value">${Number.isFinite(numericValue) ? numericValue.toFixed(3) : '—'}</span>
                 </div>
             `;
         }

@@ -89,7 +89,7 @@
                             </svg>
                         </div>
                         <h1>Video Gen</h1>
-                        <span class="status-badge">LTX-2</span>
+                        <span class="status-badge">Pausado</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -166,9 +166,8 @@
                         <!-- Model Selector -->
                         <div class="option-item full-width">
                             <label for="model">Modelo</label>
-                            <select id="model">
-                                <option value="ltx-2" selected>LTX-2 (Rápido ~$0.02)</option>
-                                <option value="wan-2.2">Wan 2.2 I2V (Qualidade ~$0.04)</option>
+                            <select id="model" disabled>
+                                <option value="unavailable" selected>Sem provedor de vídeo configurado</option>
                             </select>
                         </div>
 
@@ -230,12 +229,12 @@
                     </div>
 
                     <!-- Generate Button -->
-                    <button class="generate-btn" id="generate-btn">
+                    <button class="generate-btn" id="generate-btn" disabled>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="23 7 16 12 23 17 23 7"></polygon>
                             <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                         </svg>
-                        <span>Gerar Vídeo</span>
+                        <span>Geração de vídeo pausada</span>
                     </button>
 
                     <!-- Cost Info -->
@@ -295,6 +294,7 @@
     </div>
 
     <script src="theme.js"></script>
+    <script src="api-client.js"></script>
     <script src="videogen.js"></script>
 </body>
 
