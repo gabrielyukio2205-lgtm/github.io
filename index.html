@@ -14,6 +14,8 @@
     <!-- Highlight.js Theme (ID added for dynamic switching) -->
     <link id="highlight-theme" rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body>
@@ -106,7 +108,7 @@
                         <img src="" alt="" id="user-avatar-img" class="user-avatar">
                         <span id="user-name-text"></span>
                         <button id="logout-btn"
-                            title="Sair">✕</button>
+                            title="Sair" aria-label="Sair"><i data-lucide="log-out" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>

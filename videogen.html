@@ -12,6 +12,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body>
@@ -122,12 +124,12 @@
                         <label>Modo</label>
                         <div class="mode-selector">
                             <button class="mode-btn active" data-mode="t2v">
-                                <span class="mode-icon">✍️</span>
+                                <span class="mode-icon"><i data-lucide="text" aria-hidden="true"></i></span>
                                 <span class="mode-name">Text to Video</span>
                                 <span class="mode-desc">Texto → Vídeo</span>
                             </button>
                             <button class="mode-btn" data-mode="i2v">
-                                <span class="mode-icon">🖼️</span>
+                                <span class="mode-icon"><i data-lucide="image" aria-hidden="true"></i></span>
                                 <span class="mode-name">Image to Video</span>
                                 <span class="mode-desc">Imagem → Vídeo</span>
                             </button>
@@ -238,8 +240,8 @@
                     </button>
 
                     <!-- Cost Info -->
-                    <div class="cost-info">
-                        💡 Custo estimado: ~$0.02 por vídeo de 5s
+                    <div class="cost-info ui-leading-icon">
+                        <i data-lucide="badge-dollar-sign" aria-hidden="true"></i> Custo estimado: ~$0.02 por vídeo de 5s
                     </div>
                 </section>
 

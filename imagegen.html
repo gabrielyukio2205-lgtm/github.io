@@ -12,6 +12,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body>
@@ -123,7 +125,7 @@
                         <label>Modelo</label>
                         <div class="model-selector">
                             <button class="model-btn active" type="button" disabled>
-                                <span class="model-icon">⏸️</span>
+                                <span class="model-icon"><i data-lucide="circle-pause" aria-hidden="true"></i></span>
                                 <span class="model-name">Sem provedor de imagem</span>
                                 <span class="model-desc">OpenRouter, Groq e Cerebras são usados para texto</span>
                             </button>
@@ -168,8 +170,8 @@
                         </div>
 
                         <!-- Dica contextual -->
-                        <div class="upload-tip">
-                            💡 No prompt, referencie como "imagem 1", "imagem 2"... Ex: "Use o vestido da imagem 1 na
+                        <div class="upload-tip ui-leading-icon">
+                            <i data-lucide="lightbulb" aria-hidden="true"></i> No prompt, referencie como "imagem 1", "imagem 2"... Ex: "Use o vestido da imagem 1 na
                             pessoa da imagem 2"
                         </div>
                     </div>

@@ -13,6 +13,8 @@
     <!-- Highlight.js for syntax highlighting -->
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body data-theme="dark">
@@ -26,7 +28,7 @@
                     </svg>
                 </a>
                 <div class="logo">
-                    <span class="logo-icon">🔲</span>
+                    <span class="logo-icon"><i data-lucide="square-terminal" aria-hidden="true"></i></span>
                     <span class="logo-text">J.A.D.E. <span class="logo-accent">Sandbox</span></span>
                 </div>
             </div>
@@ -149,33 +151,33 @@ print('Hello, J.A.D.E.!')
             <div class="modal-backdrop"></div>
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>📚 Exemplos de Código</h3>
+                    <h3><i data-lucide="library" aria-hidden="true"></i> Exemplos de Código</h3>
                     <button class="modal-close" id="modal-close">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="example-grid">
                         <button class="example-card" data-example="hello">
-                            <span class="example-icon">👋</span>
+                            <span class="example-icon"><i data-lucide="text-cursor-input" aria-hidden="true"></i></span>
                             <span class="example-title">Hello World</span>
                         </button>
                         <button class="example-card" data-example="math">
-                            <span class="example-icon">🔢</span>
+                            <span class="example-icon"><i data-lucide="sigma" aria-hidden="true"></i></span>
                             <span class="example-title">Matemática</span>
                         </button>
                         <button class="example-card" data-example="fibonacci">
-                            <span class="example-icon">🌀</span>
+                            <span class="example-icon"><i data-lucide="braces" aria-hidden="true"></i></span>
                             <span class="example-title">Fibonacci</span>
                         </button>
                         <button class="example-card" data-example="requests">
-                            <span class="example-icon">🌐</span>
+                            <span class="example-icon"><i data-lucide="globe-2" aria-hidden="true"></i></span>
                             <span class="example-title">HTTP Request</span>
                         </button>
                         <button class="example-card" data-example="pandas">
-                            <span class="example-icon">📊</span>
+                            <span class="example-icon"><i data-lucide="table-2" aria-hidden="true"></i></span>
                             <span class="example-title">Pandas</span>
                         </button>
                         <button class="example-card" data-example="matplotlib">
-                            <span class="example-icon">📈</span>
+                            <span class="example-icon"><i data-lucide="chart-line" aria-hidden="true"></i></span>
                             <span class="example-title">Matplotlib</span>
                         </button>
                     </div>

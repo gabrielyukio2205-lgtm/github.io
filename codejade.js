@@ -1,4 +1,4 @@
-// CodeJade - Cursor AI Style Frontend
+// CodeJade - Engineering Workspace Frontend
 
 const API_BASE = window.JadeAPI.base;
 const authState = {

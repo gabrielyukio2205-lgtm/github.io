@@ -12,6 +12,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body>
@@ -109,7 +111,7 @@
                     <div class="user-info" id="user-info" style="display: none;">
                         <img src="" alt="" class="user-avatar" id="user-avatar">
                         <span id="user-name"></span>
-                        <button class="logout-btn" id="logout-btn" title="Sair">✕</button>
+                        <button class="logout-btn" id="logout-btn" title="Sair" aria-label="Sair"><i data-lucide="log-out" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </header>

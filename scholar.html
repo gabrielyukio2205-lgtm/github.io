@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body>
@@ -33,7 +35,7 @@
                     </svg>
                 </a>
                 <div class="logo">
-                    <span class="logo-icon">📚</span>
+                    <span class="logo-icon"><i data-lucide="library-big" aria-hidden="true"></i></span>
                     <span class="logo-text">Scholar</span>
                 </div>
                 <button id="theme-toggle" class="icon-btn" title="Alternar tema">
@@ -68,7 +70,7 @@
                 </div>
                 <div id="notebooks-list" class="items-list">
                     <div class="notebook-item active" data-id="default">
-                        <span class="notebook-icon">📓</span>
+                        <span class="notebook-icon"><i data-lucide="notebook-tabs" aria-hidden="true"></i></span>
                         <span class="notebook-name">Meus Estudos</span>
                     </div>
                 </div>
@@ -159,29 +161,30 @@
                 </h2>
                 <div class="tools-grid">
                     <button class="tool-card" data-type="summary" disabled>
-                        <div class="tool-icon">📝</div>
+                        <div class="tool-icon"><i data-lucide="file-text" aria-hidden="true"></i></div>
                         <span class="tool-name">Resumo</span>
                         <small>Resumo estratégico</small>
                     </button>
                     <button class="tool-card" data-type="podcast" disabled>
-                        <div class="tool-icon">🎧</div>
+                        <div class="tool-icon"><i data-lucide="headphones" aria-hidden="true"></i></div>
                         <span class="tool-name">Podcast</span>
                         <small>Aula em áudio</small>
                     </button>
                     <button class="tool-card" data-type="quiz" disabled>
-                        <div class="tool-icon">🎮</div>
+                        <div class="tool-icon"><i data-lucide="list-checks" aria-hidden="true"></i></div>
                         <span class="tool-name">Quiz</span>
                         <small>Teste seu conhecimento</small>
                     </button>
                     <button class="tool-card" data-type="flashcards" disabled>
-                        <div class="tool-icon">🃏</div>
+                        <div class="tool-icon"><i data-lucide="gallery-horizontal-end" aria-hidden="true"></i></div>
                         <span class="tool-name">Flashcards</span>
                         <small>Deck Anki</small>
                     </button>
                     <button class="tool-card" data-type="mindmap" disabled>
-                        <div class="tool-icon">🗺️</div>
+                        <div class="tool-icon"><i data-lucide="network" aria-hidden="true"></i></div>
                         <span class="tool-name">Mapa Mental</span>
                         <small>Visualização</small>
+                    </button>
                 </div>
             </section>
 
@@ -208,7 +211,7 @@
                 <div id="blocks-container" class="blocks-container">
                     <!-- Blocks will be rendered here -->
                     <div class="empty-blocks">
-                        <div class="empty-icon">📝</div>
+                        <div class="empty-icon"><i data-lucide="file-pen-line" aria-hidden="true"></i></div>
                         <p>Suas anotações aparecerão aqui</p>
                         <div class="hint">
                             Clique <kbd>Novo bloco</kbd> ou digite <kbd>/</kbd> para comandos
@@ -219,21 +222,21 @@
                 <div id="slash-menu" class="slash-menu hidden">
                     <div class="slash-menu-section">Básicos</div>
                     <button class="slash-menu-item" data-type="text">
-                        <div class="menu-icon">📝</div>
+                        <div class="menu-icon"><i data-lucide="type" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Texto</div>
                             <div class="menu-desc">Parágrafo simples</div>
                         </div>
                     </button>
                     <button class="slash-menu-item" data-type="heading">
-                        <div class="menu-icon">📌</div>
+                        <div class="menu-icon"><i data-lucide="heading-1" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Título</div>
                             <div class="menu-desc">Título grande</div>
                         </div>
                     </button>
                     <button class="slash-menu-item" data-type="heading2">
-                        <div class="menu-icon">📎</div>
+                        <div class="menu-icon"><i data-lucide="heading-2" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Subtítulo</div>
                             <div class="menu-desc">Título médio</div>
@@ -241,14 +244,14 @@
                     </button>
                     <div class="slash-menu-section">Listas</div>
                     <button class="slash-menu-item" data-type="bullet">
-                        <div class="menu-icon">•</div>
+                        <div class="menu-icon"><i data-lucide="list" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Lista</div>
                             <div class="menu-desc">Lista com marcadores</div>
                         </div>
                     </button>
                     <button class="slash-menu-item" data-type="todo">
-                        <div class="menu-icon">☑️</div>
+                        <div class="menu-icon"><i data-lucide="list-checks" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Checklist</div>
                             <div class="menu-desc">Lista de tarefas</div>
@@ -256,14 +259,14 @@
                     </button>
                     <div class="slash-menu-section">Outros</div>
                     <button class="slash-menu-item" data-type="quote">
-                        <div class="menu-icon">💬</div>
+                        <div class="menu-icon"><i data-lucide="quote" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Citação</div>
                             <div class="menu-desc">Bloco de destaque</div>
                         </div>
                     </button>
                     <button class="slash-menu-item" data-type="divider">
-                        <div class="menu-icon">―</div>
+                        <div class="menu-icon"><i data-lucide="minus" aria-hidden="true"></i></div>
                         <div class="menu-text">
                             <div class="menu-title">Divisor</div>
                             <div class="menu-desc">Linha horizontal</div>
@@ -277,7 +280,7 @@
                 <div id="output-content" class="output-content">
                     <!-- Generated content will be rendered here -->
                     <div class="empty-output">
-                        <div class="empty-icon">✨</div>
+                        <div class="empty-icon"><i data-lucide="sparkles" aria-hidden="true"></i></div>
                         <h3>Adicione fontes e gere conteúdo</h3>
                         <p>Suas fontes serão analisadas por IA para criar resumos, podcasts, quizzes e mais.</p>
                     </div>
@@ -288,7 +291,7 @@
         <!-- Chat Panel (Right Sidebar) -->
         <aside class="chat-panel" id="chat-panel">
             <div class="chat-header">
-                <h3>💬 Assistente de Estudos</h3>
+                <h3><i data-lucide="message-square-text" aria-hidden="true"></i> Assistente de Estudos</h3>
                 <button id="close-chat-btn" class="icon-btn">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -332,19 +335,19 @@
             <div class="modal-body">
                 <div class="source-type-tabs">
                     <button class="tab-btn active" data-type="pdf">
-                        <span class="tab-icon">📄</span>
+                        <span class="tab-icon"><i data-lucide="file-text" aria-hidden="true"></i></span>
                         <span>PDF</span>
                     </button>
                     <button class="tab-btn" data-type="url">
-                        <span class="tab-icon">🔗</span>
+                        <span class="tab-icon"><i data-lucide="link" aria-hidden="true"></i></span>
                         <span>URL</span>
                     </button>
                     <button class="tab-btn" data-type="youtube">
-                        <span class="tab-icon">🎥</span>
+                        <span class="tab-icon"><i data-lucide="video" aria-hidden="true"></i></span>
                         <span>YouTube</span>
                     </button>
                     <button class="tab-btn" data-type="topic">
-                        <span class="tab-icon">🔍</span>
+                        <span class="tab-icon"><i data-lucide="search" aria-hidden="true"></i></span>
                         <span>Tópico</span>
                     </button>
                 </div>
@@ -354,7 +357,7 @@
                     <div id="pdf-input" class="input-section active">
                         <label class="file-drop-zone" id="pdf-drop-zone">
                             <input type="file" id="pdf-file-input" accept=".pdf" hidden>
-                            <div class="drop-icon">📄</div>
+                            <div class="drop-icon"><i data-lucide="file-up" aria-hidden="true"></i></div>
                             <span>Arraste um PDF ou clique para selecionar</span>
                             <small id="pdf-file-name"></small>
                         </label>
@@ -394,7 +397,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content quiz-modal-content">
             <div class="modal-header">
-                <h2>🎮 Quiz Time!</h2>
+                <h2><i data-lucide="list-checks" aria-hidden="true"></i> Quiz</h2>
                 <div class="quiz-progress">
                     <span id="quiz-progress-text">Questão 1 de 5</span>
                     <div class="xp-badge">XP: <span id="quiz-xp">0</span></div>

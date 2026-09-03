@@ -1,0 +1,816 @@
+/* J.A.D.E. Precision UI — shared visual language for every product surface */
+
+:root {
+    color-scheme: dark;
+    --ui-canvas: #080b10;
+    --ui-panel: #0d1118;
+    --ui-panel-2: #121722;
+    --ui-elevated: #171d29;
+    --ui-hover: #1c2431;
+    --ui-border: #252d3a;
+    --ui-border-strong: #354052;
+    --ui-text: #eef2f7;
+    --ui-text-2: #a6b0bf;
+    --ui-text-3: #6f7b8d;
+    --ui-jade: #55d6b2;
+    --ui-jade-strong: #2fc89c;
+    --ui-violet: #8b80ff;
+    --ui-cyan: #62c8ff;
+    --ui-danger: #ff7181;
+    --ui-warning: #efbd64;
+    --ui-success: #55d6a0;
+    --ui-shadow: 0 18px 55px rgba(0, 0, 0, 0.32);
+    --ui-shadow-soft: 0 8px 28px rgba(0, 0, 0, 0.2);
+    --ui-radius-sm: 7px;
+    --ui-radius: 10px;
+    --ui-radius-lg: 14px;
+    --ui-font: 'Sora', 'Inter', 'Segoe UI', sans-serif;
+    --ui-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Normalize the naming used by the older page-level stylesheets. */
+    --bg: var(--ui-canvas);
+    --bg-color: var(--ui-canvas);
+    --bg-primary: var(--ui-canvas);
+    --bg-secondary: var(--ui-panel);
+    --bg-tertiary: var(--ui-panel-2);
+    --bg-hover: var(--ui-hover);
+    --surface: var(--ui-panel);
+    --surface-2: var(--ui-panel-2);
+    --surface-color: var(--ui-panel-2);
+    --surface-hover: var(--ui-hover);
+    --input-bg: #0a0e15;
+    --sidebar-bg: var(--ui-panel);
+    --glass-bg: rgba(13, 17, 24, 0.94);
+    --glass-border: var(--ui-border);
+    --border: var(--ui-border);
+    --border-color: var(--ui-border);
+    --border-highlight: var(--ui-border-strong);
+    --text: var(--ui-text);
+    --text-primary: var(--ui-text);
+    --text-secondary: var(--ui-text-2);
+    --text-tertiary: var(--ui-text-3);
+    --text-muted: var(--ui-text-3);
+    --primary: var(--ui-violet);
+    --primary-hover: #9d94ff;
+    --primary-color: var(--ui-jade);
+    --secondary-color: var(--ui-cyan);
+    --accent-1: var(--ui-jade);
+    --accent-2: var(--ui-cyan);
+    --accent-3: var(--ui-violet);
+    --success: var(--ui-success);
+    --error: var(--ui-danger);
+    --warning: var(--ui-warning);
+    --font: var(--ui-font);
+    --font-sans: var(--ui-font);
+    --mono: var(--ui-mono);
+    --font-mono: var(--ui-mono);
+    --radius-sm: var(--ui-radius-sm);
+    --radius-md: var(--ui-radius);
+    --radius-lg: var(--ui-radius-lg);
+    --radius-xl: 16px;
+    --radius-2xl: 18px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.18);
+    --shadow-md: var(--ui-shadow-soft);
+    --shadow-lg: var(--ui-shadow);
+    --primary-gradient: linear-gradient(135deg, var(--ui-jade), var(--ui-cyan));
+    --accent-gradient: linear-gradient(110deg, var(--ui-jade), var(--ui-cyan) 48%, var(--ui-violet));
+    --bg-gradient: radial-gradient(900px circle at 12% -35%, rgba(85, 214, 178, 0.08), transparent 55%),
+        radial-gradient(800px circle at 94% -30%, rgba(139, 128, 255, 0.07), transparent 55%);
+}
+
+[data-theme="light"] {
+    color-scheme: light;
+    --ui-canvas: #f4f6f8;
+    --ui-panel: #ffffff;
+    --ui-panel-2: #f7f8fa;
+    --ui-elevated: #ffffff;
+    --ui-hover: #edf1f5;
+    --ui-border: #dce2e8;
+    --ui-border-strong: #c4cdd7;
+    --ui-text: #17202c;
+    --ui-text-2: #566273;
+    --ui-text-3: #7d8998;
+    --ui-jade: #118d72;
+    --ui-jade-strong: #08745d;
+    --ui-violet: #6758d9;
+    --ui-cyan: #167fab;
+    --ui-danger: #c94154;
+    --ui-warning: #9b6618;
+    --ui-success: #16835d;
+    --ui-shadow: 0 18px 48px rgba(30, 44, 60, 0.12);
+    --ui-shadow-soft: 0 7px 22px rgba(30, 44, 60, 0.08);
+    --input-bg: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.96);
+    --bg-gradient: radial-gradient(900px circle at 12% -35%, rgba(17, 141, 114, 0.08), transparent 55%),
+        radial-gradient(800px circle at 94% -30%, rgba(103, 88, 217, 0.06), transparent 55%);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--ui-canvas);
+}
+
+body {
+    background-color: var(--ui-canvas);
+    background-image: var(--bg-gradient);
+    color: var(--ui-text);
+    font-family: var(--ui-font);
+    font-size: 15px;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    color: #07110e;
+    background: rgba(85, 214, 178, 0.82);
+}
+
+:focus-visible {
+    outline: 2px solid var(--ui-jade) !important;
+    outline-offset: 2px;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button,
+a,
+select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Quiet technical background: the product, not decoration, is the focus. */
+.background-effects {
+    opacity: 0.38 !important;
+}
+
+.glow-orb,
+.gradient-orb,
+.orb {
+    opacity: 0.12 !important;
+    filter: blur(120px) !important;
+    animation: none !important;
+}
+
+.grid-overlay {
+    opacity: 0.12 !important;
+    background-size: 72px 72px !important;
+    mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+/* Icon language */
+.ui-icon,
+svg.lucide {
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    vertical-align: -0.14em;
+}
+
+.ui-leading-icon:not(.message) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.message.ui-leading-icon .ui-icon,
+.message.ui-leading-icon svg.lucide {
+    margin-right: 0.45rem;
+}
+
+.btn-icon .ui-icon,
+.btn-icon-small .ui-icon,
+.modal-close .ui-icon,
+.header-actions .ui-icon,
+.controls .ui-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.logo-icon .ui-icon,
+.welcome-icon .ui-icon,
+.msg-icon .ui-icon {
+    width: 1em;
+    height: 1em;
+}
+
+[data-lucide] {
+    display: inline-block;
+}
+
+h1 > svg.lucide,
+h2 > svg.lucide,
+h3 > svg.lucide,
+.editor-title > svg.lucide,
+.terminal-title > svg.lucide {
+    margin-right: 0.42rem;
+    color: var(--ui-jade);
+}
+
+.upload-tip > svg.lucide,
+.cost-info > svg.lucide {
+    margin-right: 0.45rem;
+    color: var(--ui-warning);
+}
+
+/* Shared workspace chrome */
+.header,
+#chat-header,
+#apps-header,
+#imagegen-header,
+#videogen-header,
+.notebook-header {
+    background: rgba(13, 17, 24, 0.96) !important;
+    border-color: var(--ui-border) !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(18px) saturate(120%) !important;
+}
+
+[data-theme="light"] .header,
+[data-theme="light"] #chat-header,
+[data-theme="light"] #apps-header,
+[data-theme="light"] #imagegen-header,
+[data-theme="light"] #videogen-header,
+[data-theme="light"] .notebook-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+#sidebar,
+.sidebar,
+.chat-panel,
+.editor-panel,
+.control-panel,
+.preview-panel,
+.terminal-panel {
+    background-color: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+    box-shadow: none !important;
+}
+
+.sidebar-header,
+.chat-header,
+.panel-header,
+.editor-header,
+.terminal-header,
+.preview-header,
+.sessions-header {
+    min-height: 44px;
+    color: var(--ui-text-2) !important;
+    background: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+    font-size: 0.78rem !important;
+    font-weight: 650 !important;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.logo-text,
+.brand h1,
+.nav-brand,
+.header-title {
+    letter-spacing: -0.025em;
+}
+
+.accent {
+    color: var(--ui-jade) !important;
+}
+
+.status-badge,
+.app-badge,
+.badge,
+.status-chip {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 999px !important;
+    background: var(--ui-panel-2) !important;
+    color: var(--ui-text-2) !important;
+    box-shadow: none !important;
+}
+
+.status-badge.online,
+.status-chip.done,
+.app-badge.new {
+    color: var(--ui-success) !important;
+    border-color: color-mix(in srgb, var(--ui-success) 32%, transparent) !important;
+    background: color-mix(in srgb, var(--ui-success) 9%, var(--ui-panel-2)) !important;
+}
+
+/* Navigation: a precise rail replaces oversized pills and gradients. */
+#nav-switcher {
+    gap: 4px !important;
+}
+
+.nav-btn,
+.history-item,
+.file-item,
+.session-item,
+.source-item {
+    position: relative;
+    border: 1px solid transparent !important;
+    border-radius: var(--ui-radius-sm) !important;
+    color: var(--ui-text-2) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.nav-btn:hover,
+.history-item:hover,
+.file-item:hover,
+.session-item:hover,
+.source-item:hover {
+    color: var(--ui-text) !important;
+    background: var(--ui-hover) !important;
+    border-color: var(--ui-border) !important;
+    transform: none !important;
+}
+
+.nav-btn.active,
+.history-item.active,
+.file-item.active,
+.session-item.active {
+    color: var(--ui-text) !important;
+    background: linear-gradient(90deg, rgba(85, 214, 178, 0.1), rgba(98, 200, 255, 0.035)) !important;
+    border-color: rgba(85, 214, 178, 0.2) !important;
+}
+
+.nav-btn.active::before,
+.file-item.active::before,
+.session-item.active::before {
+    content: '';
+    position: absolute;
+    inset: 7px auto 7px -1px;
+    width: 2px;
+    border-radius: 3px;
+    background: var(--ui-jade);
+}
+
+/* Controls */
+.btn-icon,
+.btn-icon-small,
+.icon-btn,
+.action-btn,
+.theme-toggle,
+.close-btn,
+.modal-close,
+#toggle-sidebar-btn,
+#mobile-menu-btn,
+#theme-toggle-btn,
+.back-btn {
+    color: var(--ui-text-2) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--ui-radius-sm) !important;
+    transition: color 140ms ease, background 140ms ease, border-color 140ms ease !important;
+}
+
+.btn-icon:hover,
+.btn-icon-small:hover,
+.icon-btn:hover,
+.action-btn:hover,
+.theme-toggle:hover,
+.close-btn:hover,
+.modal-close:hover,
+#toggle-sidebar-btn:hover,
+#mobile-menu-btn:hover,
+#theme-toggle-btn:hover,
+.back-btn:hover {
+    color: var(--ui-text) !important;
+    background: var(--ui-hover) !important;
+    border-color: var(--ui-border) !important;
+    transform: none !important;
+}
+
+.btn-primary,
+.primary-btn,
+.generate-btn,
+.run-btn,
+.action-btn.primary,
+.send-btn,
+#new-chat-btn,
+.nav-cta,
+.cta-primary {
+    border: 1px solid color-mix(in srgb, var(--ui-jade) 46%, transparent) !important;
+    border-radius: var(--ui-radius) !important;
+    background: var(--ui-jade-strong) !important;
+    color: #04110d !important;
+    box-shadow: 0 8px 22px rgba(47, 200, 156, 0.14) !important;
+    font-weight: 650 !important;
+    transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease !important;
+}
+
+.btn-primary:hover,
+.primary-btn:hover,
+.generate-btn:hover,
+.run-btn:hover,
+.action-btn.primary:hover,
+.send-btn:hover,
+#new-chat-btn:hover,
+.nav-cta:hover,
+.cta-primary:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 26px rgba(47, 200, 156, 0.2) !important;
+}
+
+.btn-secondary,
+.secondary-btn,
+.repo-btn,
+.model-btn,
+.mode-btn,
+.tab-btn,
+.hint {
+    color: var(--ui-text-2) !important;
+    background: var(--ui-panel-2) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-sm) !important;
+    box-shadow: none !important;
+}
+
+.btn-secondary:hover,
+.secondary-btn:hover,
+.repo-btn:hover,
+.model-btn:hover,
+.mode-btn:hover,
+.tab-btn:hover,
+.hint:hover {
+    color: var(--ui-text) !important;
+    background: var(--ui-hover) !important;
+    border-color: var(--ui-border-strong) !important;
+    transform: none !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.input-field,
+.chat-input-container,
+.input-wrapper {
+    color: var(--ui-text) !important;
+    background: #0a0e15 !important;
+    border-color: var(--ui-border) !important;
+    border-radius: var(--ui-radius) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="light"] textarea,
+[data-theme="light"] select,
+[data-theme="light"] .input-field,
+[data-theme="light"] .chat-input-container,
+[data-theme="light"] .input-wrapper {
+    background: #fff !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.input-field:focus,
+.chat-input-container:focus-within,
+.input-wrapper:focus-within {
+    border-color: color-mix(in srgb, var(--ui-jade) 60%, var(--ui-border)) !important;
+    box-shadow: 0 0 0 3px rgba(85, 214, 178, 0.1) !important;
+}
+
+/* Surfaces and cards */
+.app-card,
+.feature-card,
+.tool-card,
+.stat-card,
+.model-card,
+.upload-card,
+.config-card,
+.result-card,
+.login-card,
+.modal-content,
+.dropdown-menu,
+.chat-sessions,
+.glass-card {
+    color: var(--ui-text) !important;
+    background: var(--ui-panel-2) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    box-shadow: var(--ui-shadow-soft) !important;
+    backdrop-filter: none !important;
+}
+
+.controls-panel,
+.result-panel,
+.analyst-section,
+.prompt-card,
+.preview-section,
+.editor-section,
+.terminal-section,
+.output-panel,
+.output-section,
+.notes-section,
+.system-specs,
+.login-container {
+    color: var(--ui-text) !important;
+    background: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.login-container {
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    box-shadow: var(--ui-shadow-soft) !important;
+}
+
+.login-container .logo {
+    color: var(--ui-jade) !important;
+    background: rgba(85, 214, 178, 0.08) !important;
+    border: 1px solid rgba(85, 214, 178, 0.2) !important;
+    box-shadow: none !important;
+}
+
+button:disabled,
+select:disabled,
+.disabled {
+    opacity: 0.48 !important;
+    cursor: not-allowed !important;
+    filter: saturate(0.55) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.app-card::before,
+.feature-card::before,
+.tool-card::before {
+    opacity: 0 !important;
+}
+
+.app-card:hover,
+.feature-card:hover,
+.tool-card:hover,
+.model-card:hover {
+    border-color: var(--ui-border-strong) !important;
+    background: var(--ui-elevated) !important;
+    box-shadow: var(--ui-shadow-soft) !important;
+    transform: translateY(-2px) !important;
+}
+
+.app-icon,
+.feature-icon,
+.tool-icon,
+.menu-icon,
+.example-icon,
+.mode-icon,
+.model-icon {
+    color: var(--ui-jade) !important;
+    background: rgba(85, 214, 178, 0.08) !important;
+    border: 1px solid rgba(85, 214, 178, 0.16) !important;
+    border-radius: var(--ui-radius) !important;
+    box-shadow: none !important;
+}
+
+.app-icon svg,
+.feature-icon svg,
+.tool-icon svg,
+.menu-icon svg,
+.example-icon svg,
+.mode-icon svg,
+.model-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.apps-intro {
+    text-align: left !important;
+    margin-left: 0 !important;
+}
+
+.apps-intro h2,
+.section-header h2 {
+    color: var(--ui-text) !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    font-size: clamp(1.6rem, 3vw, 2.15rem) !important;
+    letter-spacing: -0.04em;
+}
+
+.apps-intro p,
+.section-header p,
+.app-content p {
+    color: var(--ui-text-2) !important;
+}
+
+/* Messages */
+.message,
+.chat-message,
+.message-content,
+.msg-content {
+    border-color: var(--ui-border) !important;
+}
+
+.message.user,
+.chat-message.user .message-content {
+    background: rgba(139, 128, 255, 0.13) !important;
+    color: var(--ui-text) !important;
+    border: 1px solid rgba(139, 128, 255, 0.22) !important;
+    border-radius: 12px 12px 3px 12px !important;
+    box-shadow: none !important;
+}
+
+.message.assistant,
+.message.tool,
+.message.system,
+.chat-message.assistant .message-content {
+    color: var(--ui-text-2) !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.message.tool {
+    color: var(--ui-jade) !important;
+    font-family: var(--ui-mono);
+    font-size: 0.78rem !important;
+}
+
+.msg-icon,
+.avatar.bot,
+.welcome-icon {
+    color: var(--ui-jade) !important;
+    background: rgba(85, 214, 178, 0.08) !important;
+    border: 1px solid rgba(85, 214, 178, 0.18) !important;
+    box-shadow: none !important;
+}
+
+pre,
+code,
+.diff-view,
+.code-editor,
+.monaco-editor,
+.xterm {
+    font-family: var(--ui-mono) !important;
+}
+
+pre,
+.diff-view {
+    background: #080b10 !important;
+    border-color: var(--ui-border) !important;
+    border-radius: var(--ui-radius) !important;
+}
+
+/* CodeJade: calm, high-density IDE silhouette */
+body[data-page="codejade"] .header {
+    height: 54px !important;
+    padding: 0 14px !important;
+}
+
+body[data-page="codejade"] .main-content {
+    grid-template-columns: 236px 1px minmax(360px, 1fr) 1px minmax(320px, 30vw) !important;
+    background: var(--ui-canvas);
+}
+
+body[data-page="codejade"] .resize-divider {
+    width: 1px !important;
+    background: var(--ui-border) !important;
+}
+
+body[data-page="codejade"] .resize-divider:hover,
+body[data-page="codejade"] .resize-divider.dragging {
+    background: var(--ui-jade) !important;
+}
+
+body[data-page="codejade"] .editor-tabs {
+    min-height: 42px;
+    background: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+}
+
+body[data-page="codejade"] .tab {
+    border-radius: 0 !important;
+    color: var(--ui-text-3) !important;
+}
+
+body[data-page="codejade"] .tab.active {
+    color: var(--ui-text) !important;
+    background: var(--ui-panel-2) !important;
+    box-shadow: inset 0 -2px var(--ui-violet) !important;
+}
+
+body[data-page="codejade"] .welcome-content > p {
+    color: var(--ui-text-3) !important;
+}
+
+body[data-page="codejade"] .features-grid {
+    gap: 8px !important;
+}
+
+body[data-page="codejade"] .feature {
+    background: var(--ui-panel-2) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius) !important;
+}
+
+body[data-page="codejade"] .chat-input-container {
+    margin: 12px !important;
+    padding: 5px !important;
+}
+
+body[data-page="codejade"] .send-btn {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+}
+
+/* Scholar and builder retain their specialized density without visual noise. */
+body[data-page="scholar"] .notebook-canvas,
+body[data-page="webdev"] .workspace,
+body[data-page="sandbox"] .workspace {
+    background: var(--ui-canvas) !important;
+}
+
+body[data-page="scholar"] .block,
+body[data-page="scholar"] .source-card,
+body[data-page="webdev"] .generation-panel {
+    background: var(--ui-panel-2) !important;
+    border-color: var(--ui-border) !important;
+    box-shadow: none !important;
+}
+
+/* Landing/login: same brand, less template-like glow. */
+body[data-page="landing"] .nav,
+body[data-page="landing"] .hero,
+body[data-page="login"] .login-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+body[data-page="landing"] .feature-card,
+body[data-page="landing"] .stat-card {
+    background: rgba(13, 17, 24, 0.9) !important;
+}
+
+/* Scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ui-border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--ui-border-strong);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ui-text-3);
+}
+
+@media (max-width: 900px) {
+    body[data-page="codejade"] .main-content {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    body[data-page="codejade"] .sidebar,
+    body[data-page="codejade"] .resize-divider {
+        display: none !important;
+    }
+
+    body[data-page="codejade"] .chat-panel {
+        position: fixed;
+        inset: 54px 0 0 auto;
+        width: min(92vw, 390px);
+        z-index: 80;
+        box-shadow: var(--ui-shadow) !important;
+    }
+
+    .apps-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

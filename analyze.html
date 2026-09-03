@@ -12,6 +12,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body>
@@ -135,7 +137,7 @@
             <main id="analyst-container">
                 <!-- Upload Section -->
                 <section class="analyst-section upload-section">
-                    <h2>📊 Upload de Dados</h2>
+                    <h2><i data-lucide="database" aria-hidden="true"></i> Upload de Dados</h2>
                     <div class="upload-zone" id="upload-zone">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.5">
@@ -148,13 +150,13 @@
                     </div>
                     <div id="file-info" class="hidden">
                         <span id="file-name"></span>
-                        <button id="remove-file-btn">✕</button>
+                        <button id="remove-file-btn" title="Remover arquivo" aria-label="Remover arquivo"><i data-lucide="x" aria-hidden="true"></i></button>
                     </div>
                 </section>
 
                 <!-- Config Section -->
                 <section class="analyst-section config-section">
-                    <h2>⚙️ Configuração</h2>
+                    <h2><i data-lucide="sliders-horizontal" aria-hidden="true"></i> Configuração</h2>
 
                     <div class="config-row">
                         <label for="user-prompt">O que você quer analisar?</label>
@@ -200,7 +202,7 @@
 
                 <!-- Results Section -->
                 <section class="analyst-section results-section hidden" id="results-section">
-                    <h2>📈 Resultados</h2>
+                    <h2><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i> Resultados</h2>
 
                     <div id="loading-indicator" class="hidden">
                         <div class="spinner"></div>
@@ -210,13 +212,13 @@
                     <div id="results-content">
                         <!-- EDA Results -->
                         <div id="eda-results" class="result-card hidden">
-                            <h3>🔍 Análise Exploratória</h3>
+                            <h3><i data-lucide="scan-search" aria-hidden="true"></i> Análise Exploratória</h3>
                             <div class="stats-grid" id="eda-stats"></div>
                         </div>
 
                         <!-- Training Results -->
                         <div id="training-results" class="result-card hidden">
-                            <h3>🎯 Resultados do Treino</h3>
+                            <h3><i data-lucide="target" aria-hidden="true"></i> Resultados do Treino</h3>
                             <div class="metrics-grid" id="metrics-grid"></div>
 
                             <h4>Feature Importance</h4>
@@ -236,7 +238,7 @@
 
                         <!-- Error Display -->
                         <div id="error-display" class="result-card error hidden">
-                            <h3>❌ Erro</h3>
+                            <h3><i data-lucide="circle-alert" aria-hidden="true"></i> Erro</h3>
                             <p id="error-message"></p>
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 /**
- * Jade Web Dev - AI Vibe Coder
+ * Jade Studio - AI Web Builder
  * Supports HTML and React (Sandpack) modes
  */
 

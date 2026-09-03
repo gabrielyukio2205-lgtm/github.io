@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jade Web Dev - AI Vibe Coder</title>
+    <title>Jade Studio — AI Web Builder</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -16,6 +16,8 @@
     <!-- XTerm.js for Terminal -->
     <link rel="stylesheet" href="https://unpkg.com/xterm@5.3.0/css/xterm.css">
     <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body data-theme="dark">
@@ -39,7 +41,7 @@
             </div>
             <div class="header-text">
                 <h1>Jade Web Dev</h1>
-                <span class="subtitle">AI Vibe Coder</span>
+                <span class="subtitle">AI Web Builder</span>
             </div>
         </div>
 
@@ -181,9 +183,9 @@
             <textarea id="promptInput" placeholder="Ou descreva seu próprio componente..."></textarea>
             <div class="prompt-footer">
                 <div class="prompt-hints">
-                    <span class="hint" data-prompt="Landing page completa para SaaS">🚀 Página</span>
-                    <span class="hint" data-prompt="Modal de login com email e senha">🔐 Login</span>
-                    <span class="hint" data-prompt="Dashboard com sidebar e stats">📊 Dashboard</span>
+                    <span class="hint" data-prompt="Landing page completa para SaaS"><i data-lucide="layout-template" aria-hidden="true"></i> Página</span>
+                    <span class="hint" data-prompt="Modal de login com email e senha"><i data-lucide="log-in" aria-hidden="true"></i> Login</span>
+                    <span class="hint" data-prompt="Dashboard com sidebar e stats"><i data-lucide="layout-dashboard" aria-hidden="true"></i> Dashboard</span>
                 </div>
 
                 <!-- Model Selector - Custom Dropdown -->
@@ -364,8 +366,8 @@
                     </svg>
                     StackBlitz
                 </button>
-                <button id="hfDeployBtn" class="action-btn hf-deploy-btn" title="Deploy to HuggingFace Space">
-                    🤗 HF Space
+                <button id="hfDeployBtn" class="action-btn hf-deploy-btn" title="Publicar no Hugging Face Spaces">
+                    <i data-lucide="cloud-upload" aria-hidden="true"></i> HF Spaces
                 </button>
             </div>
         </div>
@@ -416,7 +418,7 @@
         <!-- Monaco Editor Section (hidden by default) -->
         <div id="editorSection" class="editor-section hidden">
             <div class="editor-header">
-                <span class="editor-title">📝 Editor</span>
+                <span class="editor-title"><i data-lucide="file-code-2" aria-hidden="true"></i> Editor</span>
                 <div class="editor-tabs" id="editorTabs"></div>
                 <button id="closeEditorBtn" class="action-btn" title="Fechar Editor">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -431,7 +433,7 @@
         <!-- Terminal Section (hidden by default) -->
         <div id="terminalSection" class="terminal-section hidden">
             <div class="terminal-header">
-                <span class="terminal-title">💻 Terminal</span>
+                <span class="terminal-title"><i data-lucide="terminal" aria-hidden="true"></i> Terminal</span>
                 <button id="closeTerminalBtn" class="action-btn" title="Fechar Terminal">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18" />
@@ -460,7 +462,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-tabs" id="modalTabs">
-                    <span class="modal-tab active" data-file="main">📄 Código</span>
+                    <span class="modal-tab active" data-file="main"><i data-lucide="file-code-2" aria-hidden="true"></i> Código</span>
                 </div>
                 <button id="closeModalBtn" class="close-btn">&times;</button>
             </div>
@@ -482,7 +484,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content deploy-modal">
             <div class="modal-header">
-                <h3>🤗 Deploy to HuggingFace Space</h3>
+                <h3><i data-lucide="cloud-upload" aria-hidden="true"></i> Publicar no Hugging Face Spaces</h3>
                 <button class="close-btn" id="closeHfModal">&times;</button>
             </div>
             <div class="modal-body">
@@ -502,7 +504,7 @@
             </div>
             <div class="modal-footer">
                 <button id="cancelHfDeploy" class="btn-secondary">Cancelar</button>
-                <button id="confirmHfDeploy" class="btn-primary">🚀 Deploy</button>
+                <button id="confirmHfDeploy" class="btn-primary"><i data-lucide="rocket" aria-hidden="true"></i> Publicar</button>
             </div>
         </div>
     </div>

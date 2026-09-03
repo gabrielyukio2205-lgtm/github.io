@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="codejade.css">
     <!-- Monaco Editor CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <link rel="stylesheet" href="design-system.css">
+    <script src="platform-ui.js" defer></script>
 </head>
 
 <body data-theme="dark">
@@ -21,7 +23,7 @@
             <div class="header-left">
                 <a href="apps.html" class="back-btn">←</a>
                 <div class="logo">
-                    <span class="logo-icon">🤖</span>
+                    <span class="logo-icon"><i data-lucide="code-2"></i></span>
                     <span class="logo-text">Code<span class="accent">Jade</span></span>
                 </div>
             </div>
@@ -40,9 +42,9 @@
             </div>
 
             <div class="header-right">
-                <button class="btn-icon" id="diff-btn" title="Ver Diff">📊</button>
-                <button class="btn-icon" id="commit-btn" title="Commit">💾</button>
-                <button class="btn-icon" id="theme-toggle">🌙</button>
+                <button class="btn-icon" id="diff-btn" title="Ver diferenças" aria-label="Ver diferenças"><i data-lucide="git-compare-arrows"></i></button>
+                <button class="btn-icon" id="commit-btn" title="Commit e push" aria-label="Commit e push"><i data-lucide="git-commit-horizontal"></i></button>
+                <button class="btn-icon" id="theme-toggle" title="Alternar tema" aria-label="Alternar tema"><i data-lucide="moon"></i></button>
             </div>
         </header>
 
@@ -51,8 +53,8 @@
             <!-- File Tree Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <span>📁 Arquivos</span>
-                    <button class="btn-icon-small" id="refresh-files">🔄</button>
+                    <span><i data-lucide="folder-tree"></i> Arquivos</span>
+                    <button class="btn-icon-small" id="refresh-files" title="Atualizar arquivos" aria-label="Atualizar arquivos"><i data-lucide="refresh-cw"></i></button>
                 </div>
                 <div class="file-tree" id="file-tree">
                     <div class="empty-state">
@@ -74,24 +76,24 @@
                 <div class="editor-container" id="editor-container">
                     <div class="welcome-editor" id="welcome-editor">
                         <div class="welcome-content">
-                            <div class="welcome-icon">🤖</div>
+                            <div class="welcome-icon"><i data-lucide="code-2"></i></div>
                             <h2>CodeJade</h2>
-                            <p>Agente de código estilo Cursor AI</p>
+                            <p>Workspace de engenharia assistida por IA</p>
                             <div class="features-grid">
                                 <div class="feature">
-                                    <span class="feature-icon">📂</span>
+                                    <span class="feature-icon"><i data-lucide="folder-git-2"></i></span>
                                     <span>Clone GitHub</span>
                                 </div>
                                 <div class="feature">
-                                    <span class="feature-icon">✏️</span>
+                                    <span class="feature-icon"><i data-lucide="square-pen"></i></span>
                                     <span>Monaco Editor</span>
                                 </div>
                                 <div class="feature">
-                                    <span class="feature-icon">🌳</span>
+                                    <span class="feature-icon"><i data-lucide="git-branch"></i></span>
                                     <span>AST Editing</span>
                                 </div>
                                 <div class="feature">
-                                    <span class="feature-icon">🚀</span>
+                                    <span class="feature-icon"><i data-lucide="git-pull-request-arrow"></i></span>
                                     <span>Git Commit/Push</span>
                                 </div>
                             </div>
@@ -109,21 +111,21 @@
                 <!-- Chat Sessions Header -->
                 <div class="chat-header">
                     <div class="chat-header-left">
-                        <span>💬 Chat</span>
-                        <span class="save-indicator" id="save-indicator" title="Histórico salvo">💾</span>
+                        <span><i data-lucide="message-square"></i> Chat</span>
+                        <span class="save-indicator" id="save-indicator" title="Histórico salvo"><i data-lucide="cloud-check"></i></span>
                     </div>
                     <div class="chat-header-actions">
-                        <button class="btn-icon-small" id="new-chat-btn" title="Nova conversa">➕</button>
-                        <button class="btn-icon-small" id="sessions-btn" title="Ver sessões">📋</button>
-                        <button class="btn-icon-small" id="clear-chat" title="Limpar chat">🗑️</button>
+                        <button class="btn-icon-small" id="new-chat-btn" title="Nova conversa" aria-label="Nova conversa"><i data-lucide="plus"></i></button>
+                        <button class="btn-icon-small" id="sessions-btn" title="Ver sessões" aria-label="Ver sessões"><i data-lucide="panels-top-left"></i></button>
+                        <button class="btn-icon-small" id="clear-chat" title="Limpar chat" aria-label="Limpar chat"><i data-lucide="trash-2"></i></button>
                     </div>
                 </div>
 
                 <!-- Sessions Sidebar (Hidden by default) -->
                 <div class="chat-sessions hidden" id="chat-sessions">
                     <div class="sessions-header">
-                        <span>📁 Sessões Salvas</span>
-                        <button class="btn-icon-small" id="close-sessions">✕</button>
+                        <span><i data-lucide="history"></i> Sessões salvas</span>
+                        <button class="btn-icon-small" id="close-sessions" title="Fechar sessões" aria-label="Fechar sessões"><i data-lucide="x"></i></button>
                     </div>
                     <div class="sessions-list" id="sessions-list">
                         <!-- Sessions loaded dynamically -->
@@ -133,7 +135,7 @@
                 <!-- Login Required Banner -->
                 <div class="login-banner hidden" id="login-banner">
                     <div class="login-banner-content">
-                        <span class="login-icon">🔐</span>
+                        <span class="login-icon"><i data-lucide="lock-keyhole"></i></span>
                         <div class="login-text">
                             <strong>Login Necessário</strong>
                             <p>Faça login com GitHub para usar o CodeJade</p>
@@ -145,7 +147,7 @@
                 <!-- Chat Messages -->
                 <div class="chat-messages" id="chat-messages">
                     <div class="message assistant welcome-msg">
-                        <div class="msg-icon">🤖</div>
+                        <div class="msg-icon"><i data-lucide="bot"></i></div>
                         <div class="msg-content">
                             <strong>CodeJade</strong>
                             <p>Olá! Clone um repositório ou me peça para editar código.</p>
@@ -157,8 +159,8 @@
                 <div class="chat-input-container">
                     <textarea id="chat-input" placeholder="Peça edições, análise, refatoração..." rows="2"></textarea>
                     <button class="send-btn" id="send-btn" title="Enviar">
-                        <span class="send-icon">▶</span>
-                        <span class="loading-icon hidden">⏳</span>
+                        <span class="send-icon"><i data-lucide="arrow-up"></i></span>
+                        <span class="loading-icon hidden"><i data-lucide="loader-circle"></i></span>
                     </button>
                 </div>
             </aside>
@@ -170,7 +172,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📂 Clonar Repositório</h3>
+                <h3><i data-lucide="folder-git-2"></i> Clonar repositório</h3>
                 <button class="modal-close" id="clone-close">×</button>
             </div>
             <div class="modal-body">
@@ -188,7 +190,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content modal-large">
             <div class="modal-header">
-                <h3>📊 Diferenças</h3>
+                <h3><i data-lucide="file-diff"></i> Diferenças</h3>
                 <button class="modal-close" id="diff-close">×</button>
             </div>
             <div class="modal-body">
@@ -202,7 +204,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content modal-large">
             <div class="modal-header">
-                <h3>📋 Plano de Execução</h3>
+                <h3><i data-lucide="list-checks"></i> Plano de execução</h3>
                 <button class="modal-close" id="plan-close">×</button>
             </div>
             <div class="modal-body">
@@ -213,8 +215,8 @@
                     <!-- Steps will be inserted here -->
                 </div>
                 <div class="modal-actions">
-                    <button class="btn-secondary" id="plan-cancel">❌ Cancelar</button>
-                    <button class="btn-primary" id="plan-approve">✅ Aprovar e Executar</button>
+                    <button class="btn-secondary" id="plan-cancel"><i data-lucide="x"></i> Cancelar</button>
+                    <button class="btn-primary" id="plan-approve"><i data-lucide="check"></i> Aprovar e executar</button>
                 </div>
             </div>
         </div>
@@ -225,7 +227,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>💾 Commit & Push</h3>
+                <h3><i data-lucide="git-commit-horizontal"></i> Commit e push</h3>
                 <button class="modal-close" id="commit-close">×</button>
             </div>
             <div class="modal-body">
