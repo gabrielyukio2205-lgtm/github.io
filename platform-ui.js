@@ -57,6 +57,16 @@
             .replace(/\.html$/i, '') || 'index';
         document.body.dataset.page = filename.toLowerCase();
         document.documentElement.dataset.platformUi = 'precision';
+        syncThemeToRoot();
+    }
+
+    function syncThemeToRoot() {
+        const theme = document.body?.dataset.theme;
+        if (theme) {
+            document.documentElement.dataset.theme = theme;
+        } else {
+            delete document.documentElement.dataset.theme;
+        }
     }
 
     function loadLucide() {
@@ -150,6 +160,8 @@
 
     async function initialize() {
         identifyPage();
+        const themeObserver = new MutationObserver(syncThemeToRoot);
+        themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
         try {
             await loadLucide();
             renderIcons(document);

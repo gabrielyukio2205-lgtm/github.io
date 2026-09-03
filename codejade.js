@@ -61,6 +61,8 @@ let chatHistory = []; // Current chat messages
 let currentChatId = null; // Current chat ID
 let suppressEditorChange = false;
 const pendingFileSaves = new Map();
+const expandedFolders = new Set();
+let fileTreeRequestId = 0;
 
 // ========== MULTI-CHAT HISTORY PER REPO ==========
 // Cada repo pode ter MÚLTIPLOS históricos de chat
@@ -416,7 +418,130 @@ document.getElementById('clone-confirm').onclick = async () => {
     }
 };
 
-// Load files DIRECTLY from R2 (auth required)
+function sortFileEntries(files) {
+    return [...files].sort((a, b) => {
+        if (a.type === 'dir' && b.type !== 'dir') return -1;
+        if (a.type !== 'dir' && b.type === 'dir') return 1;
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+    });
+}
+
+function getFileIconName(filename) {
+    const extension = filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
+    if (['js', 'jsx', 'ts', 'tsx', 'html', 'css', 'py', 'java', 'go', 'rs', 'php'].includes(extension)) {
+        return 'file-code-2';
+    }
+    if (['json', 'yaml', 'yml', 'toml', 'xml'].includes(extension)) return 'braces';
+    if (['md', 'mdx', 'txt', 'rst'].includes(extension)) return 'file-text';
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico'].includes(extension)) return 'image';
+    if (['lock'].includes(extension)) return 'lock-keyhole';
+    return 'file';
+}
+
+async function fetchRepoDirectory(path) {
+    const url = `${API_BASE}/codejade/files/${encodeURIComponent(currentRepo)}?path=${encodeURIComponent(path)}`;
+    const response = await apiFetch(url);
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Não foi possível carregar os arquivos');
+    }
+    return sortFileEntries(Array.isArray(data.files) ? data.files : []);
+}
+
+function setActiveFileInTree(path) {
+    fileTree.querySelectorAll('.file-item.file').forEach(item => {
+        item.classList.toggle('active', item.dataset.path === path);
+    });
+}
+
+function getFolderStateKey(path) {
+    return `${currentRepo || ''}::${path}`;
+}
+
+async function expandFolderNode(row, children, fullPath, depth, requestId) {
+    row.classList.add('expanded');
+    row.setAttribute('aria-expanded', 'true');
+    children.classList.remove('hidden');
+    expandedFolders.add(getFolderStateKey(fullPath));
+
+    if (children.dataset.loaded === 'true') return;
+    children.innerHTML = '<div class="tree-loading">Carregando...</div>';
+
+    try {
+        const files = await fetchRepoDirectory(fullPath);
+        if (requestId !== fileTreeRequestId) return;
+        children.innerHTML = '';
+        children.dataset.loaded = 'true';
+        renderFileEntries(children, files, fullPath, depth + 1, requestId);
+        if (files.length === 0) {
+            children.innerHTML = '<div class="tree-empty">Pasta vazia</div>';
+        }
+        window.JadePlatformUI?.refresh();
+    } catch (error) {
+        children.innerHTML = `<div class="tree-error">${escapeHtml(error.message)}</div>`;
+    }
+}
+
+function renderFileEntries(container, files, parentPath, depth, requestId) {
+    files.forEach(file => {
+        const isDirectory = file.type === 'dir';
+        const fullPath = parentPath ? `${parentPath}/${file.name}` : file.name;
+        const node = document.createElement('div');
+        node.className = `tree-node ${isDirectory ? 'directory' : 'leaf'}`;
+
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = `file-item ${isDirectory ? 'folder' : 'file'}`;
+        row.dataset.path = fullPath;
+        row.style.setProperty('--tree-depth', depth);
+        row.setAttribute('title', fullPath);
+        if (isDirectory) row.setAttribute('aria-expanded', 'false');
+
+        row.innerHTML = `
+            <span class="tree-chevron" aria-hidden="true">
+                ${isDirectory ? '<i data-lucide="chevron-right"></i>' : ''}
+            </span>
+            <span class="file-type-icon" aria-hidden="true">
+                <i data-lucide="${isDirectory ? 'folder' : getFileIconName(file.name)}"></i>
+            </span>
+            <span class="file-name">${escapeHtml(file.name)}</span>
+        `;
+        node.appendChild(row);
+
+        if (isDirectory) {
+            const children = document.createElement('div');
+            children.className = 'tree-children hidden';
+            children.style.setProperty('--tree-depth', depth);
+            children.setAttribute('role', 'group');
+            node.appendChild(children);
+
+            row.onclick = async () => {
+                if (row.classList.contains('expanded')) {
+                    row.classList.remove('expanded');
+                    row.setAttribute('aria-expanded', 'false');
+                    children.classList.add('hidden');
+                    expandedFolders.delete(getFolderStateKey(fullPath));
+                    return;
+                }
+                await expandFolderNode(row, children, fullPath, depth, requestId);
+            };
+        } else {
+            row.onclick = async () => {
+                await openFileFromR2(fullPath);
+                setActiveFileInTree(fullPath);
+            };
+        }
+
+        container.appendChild(node);
+
+        if (isDirectory && expandedFolders.has(getFolderStateKey(fullPath))) {
+            const children = node.querySelector('.tree-children');
+            expandFolderNode(row, children, fullPath, depth, requestId);
+        }
+    });
+}
+
+// Lazy, expandable repository tree backed by R2 (auth required).
 async function loadFilesFromR2(path = '') {
     if (!currentRepo) {
         fileTree.innerHTML = '<div class="empty-state">Clone um repositório<br>para começar</div>';
@@ -425,58 +550,30 @@ async function loadFilesFromR2(path = '') {
 
     if (!checkAuth()) return;
 
+    const requestId = ++fileTreeRequestId;
+    fileTree.innerHTML = `
+        <div class="tree-context">
+            <span class="tree-context-label">REPOSITÓRIO</span>
+            <span class="tree-context-name">${escapeHtml(currentRepo)}</span>
+        </div>
+        <div class="tree-loading">Carregando arquivos...</div>
+    `;
+
     try {
-        const url = `${API_BASE}/codejade/files/${encodeURIComponent(currentRepo)}?path=${encodeURIComponent(path)}`;
-        const res = await apiFetch(url);
-        const data = await res.json();
-
-        if (!data.success) {
-            fileTree.innerHTML = `<div class="empty-state">${escapeHtml(data.error)}</div>`;
-            return;
-        }
-
-        fileTree.innerHTML = '';
-
-        // Add back button if in subfolder
-        if (path) {
-            const backBtn = document.createElement('div');
-            backBtn.className = 'file-item folder back-btn';
-            backBtn.innerHTML = '⬅️ .. (voltar)';
-            backBtn.onclick = () => {
-                const parentPath = path.includes('/')
-                    ? path.substring(0, path.lastIndexOf('/'))
-                    : '';
-                loadFilesFromR2(parentPath);
-            };
-            fileTree.appendChild(backBtn);
-        }
-
-        const files = data.files.sort((a, b) => {
-            if (a.type === 'dir' && b.type !== 'dir') return -1;
-            if (a.type !== 'dir' && b.type === 'dir') return 1;
-            return a.name.localeCompare(b.name);
-        });
-
-        files.forEach(f => {
-            const item = document.createElement('div');
-            item.className = `file-item ${f.type === 'dir' ? 'folder' : ''}`;
-            item.textContent = `${f.type === 'dir' ? '📁' : '📄'} ${f.name}`;
-            item.onclick = () => {
-                if (f.type === 'dir') {
-                    loadFilesFromR2(path ? `${path}/${f.name}` : f.name);
-                } else {
-                    openFileFromR2(path ? `${path}/${f.name}` : f.name);
-                }
-            };
-            fileTree.appendChild(item);
-        });
-
+        const files = await fetchRepoDirectory(path);
+        if (requestId !== fileTreeRequestId) return;
+        fileTree.querySelector('.tree-loading')?.remove();
+        renderFileEntries(fileTree, files, path, 0, requestId);
         if (files.length === 0) {
-            fileTree.innerHTML += '<div class="empty-state">Pasta vazia</div>';
+            fileTree.insertAdjacentHTML('beforeend', '<div class="tree-empty">Pasta vazia</div>');
         }
+        setActiveFileInTree(currentFile);
+        window.JadePlatformUI?.refresh();
     } catch (e) {
         console.error('Load files error:', e);
-        fileTree.innerHTML = `<div class="empty-state">Erro: ${escapeHtml(e.message)}</div>`;
+        if (requestId === fileTreeRequestId) {
+            fileTree.innerHTML = `<div class="empty-state">Erro ao carregar arquivos<br><small>${escapeHtml(e.message)}</small></div>`;
+        }
     }
 }
 
@@ -559,6 +656,7 @@ function closeTab(path) {
             switchToFile(remainingTabs[remainingTabs.length - 1]);
         } else {
             currentFile = null;
+            setActiveFileInTree(null);
             welcomeEditor.style.display = 'flex';
             monacoContainer.style.display = 'none';
         }
@@ -578,6 +676,7 @@ function switchToFile(path) {
     document.querySelectorAll('.tab').forEach(t => {
         t.classList.toggle('active', t.dataset.path === path);
     });
+    setActiveFileInTree(path);
 
     welcomeEditor.style.display = 'none';
     monacoContainer.style.display = 'block';

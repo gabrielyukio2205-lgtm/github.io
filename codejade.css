@@ -255,6 +255,119 @@ body {
     font-weight: 500;
 }
 
+/* Repository tree */
+.file-tree {
+    display: block;
+    padding: 0 8px 12px;
+}
+
+.tree-context {
+    display: grid;
+    gap: 2px;
+    margin: 0 -8px 8px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.tree-context-label {
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.11em;
+}
+
+.tree-context-name {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tree-node {
+    min-width: 0;
+}
+
+.file-tree .file-item {
+    width: 100%;
+    min-height: 31px;
+    display: grid;
+    grid-template-columns: 14px 16px minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    margin: 1px 0;
+    padding: 5px 8px 5px calc(7px + var(--tree-depth, 0) * 13px);
+    border: 1px solid transparent;
+    font-family: var(--font);
+    text-align: left;
+}
+
+.file-tree .file-item::before {
+    display: none;
+}
+
+.tree-chevron,
+.file-type-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.tree-chevron svg,
+.file-type-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.tree-chevron {
+    transition: transform 140ms ease;
+}
+
+.file-item.expanded .tree-chevron {
+    transform: rotate(90deg);
+}
+
+.file-item.folder .file-type-icon {
+    color: var(--primary);
+}
+
+.file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tree-children {
+    position: relative;
+}
+
+.tree-children::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 3px;
+    left: calc(14px + var(--tree-depth, 0) * 13px);
+    width: 1px;
+    background: var(--border);
+    pointer-events: none;
+}
+
+.tree-loading,
+.tree-empty,
+.tree-error {
+    padding: 8px 10px 8px 28px;
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    font-size: 0.66rem;
+}
+
+.tree-error {
+    color: var(--error);
+}
+
 /* Editor Panel */
 .editor-panel {
     display: flex;

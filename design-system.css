@@ -178,10 +178,14 @@ svg.lucide {
     vertical-align: -0.14em;
 }
 
-.ui-leading-icon:not(.message) {
+.ui-leading-icon:not(.message):not(.file-item) {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.file-item.ui-leading-icon {
+    display: flex;
 }
 
 .message.ui-leading-icon .ui-icon,
@@ -812,5 +816,498 @@ body[data-page="landing"] .stat-card {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================================================== */
+/* Jade Technical Editorial — high-contrast product system                    */
+/* ========================================================================== */
+
+:root {
+    --ui-canvas: #08080a;
+    --ui-panel: #0e0e11;
+    --ui-panel-2: #141418;
+    --ui-elevated: #1b1b20;
+    --ui-hover: #202027;
+    --ui-border: #29292f;
+    --ui-border-strong: #44444d;
+    --ui-text: #f2efe7;
+    --ui-text-2: #b2afa9;
+    --ui-text-3: #77757a;
+    --ui-accent: #ff5738;
+    --ui-accent-strong: #ff4b2b;
+    --ui-accent-soft: rgba(255, 87, 56, 0.11);
+    --ui-jade: var(--ui-accent);
+    --ui-jade-strong: var(--ui-accent-strong);
+    --ui-violet: #9d91ff;
+    --ui-cyan: #77bdfb;
+    --ui-danger: #ff6b72;
+    --ui-warning: #f2b950;
+    --ui-success: #45d59b;
+    --ui-radius-sm: 3px;
+    --ui-radius: 5px;
+    --ui-radius-lg: 7px;
+    --ui-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    --ui-shadow-soft: 0 12px 35px rgba(0, 0, 0, 0.22);
+    --input-bg: #0b0b0e;
+    --glass-bg: var(--ui-panel);
+    --primary: var(--ui-accent);
+    --primary-hover: #ff6b50;
+    --primary-color: var(--ui-accent);
+    --accent: var(--ui-accent);
+    --accent-1: var(--ui-accent);
+    --accent-2: #ff866d;
+    --accent-3: var(--ui-text);
+    --accent-primary: var(--ui-accent);
+    --accent-secondary: #ff866d;
+    --primary-gradient: linear-gradient(135deg, var(--ui-accent), #ff7a5d);
+    --accent-gradient: linear-gradient(110deg, var(--ui-accent), #ff7a5d);
+    --primary-glow: rgba(255, 87, 56, 0.18);
+    --accent-glow: rgba(255, 87, 56, 0.13);
+    --user-msg-bg: rgba(255, 87, 56, 0.1);
+    --user-msg-text: var(--ui-text);
+    --bg-gradient: none;
+}
+
+[data-theme="light"] {
+    --ui-canvas: #efede6;
+    --ui-panel: #f8f6f0;
+    --ui-panel-2: #f2efe8;
+    --ui-elevated: #fffdf8;
+    --ui-hover: #e8e4db;
+    --ui-border: #d5d0c5;
+    --ui-border-strong: #aaa49a;
+    --ui-text: #17171a;
+    --ui-text-2: #5d5a57;
+    --ui-text-3: #858079;
+    --ui-accent: #e64325;
+    --ui-accent-strong: #dc3c1f;
+    --ui-accent-soft: rgba(230, 67, 37, 0.09);
+    --ui-jade: var(--ui-accent);
+    --ui-jade-strong: var(--ui-accent-strong);
+    --ui-violet: #6659c8;
+    --ui-cyan: #176d9a;
+    --ui-danger: #c83d46;
+    --ui-warning: #986315;
+    --ui-success: #157852;
+    --input-bg: #fffdf8;
+    --glass-bg: var(--ui-panel);
+    --primary: var(--ui-accent);
+    --primary-hover: #ef5131;
+    --primary-color: var(--ui-accent);
+    --accent: var(--ui-accent);
+    --accent-1: var(--ui-accent);
+    --accent-2: #c9381e;
+    --accent-3: var(--ui-text);
+    --accent-primary: var(--ui-accent);
+    --accent-secondary: #c9381e;
+    --primary-gradient: linear-gradient(135deg, var(--ui-accent), #f06647);
+    --accent-gradient: linear-gradient(110deg, var(--ui-accent), #f06647);
+    --primary-glow: rgba(230, 67, 37, 0.14);
+    --accent-glow: rgba(230, 67, 37, 0.1);
+    --user-msg-bg: rgba(230, 67, 37, 0.08);
+    --user-msg-text: var(--ui-text);
+    --ui-shadow: 0 24px 60px rgba(54, 45, 34, 0.13);
+    --ui-shadow-soft: 0 10px 28px rgba(54, 45, 34, 0.08);
+}
+
+html,
+body {
+    background-color: var(--ui-canvas) !important;
+}
+
+body {
+    background-image:
+        linear-gradient(to right, color-mix(in srgb, var(--ui-border) 42%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--ui-border) 42%, transparent) 1px, transparent 1px) !important;
+    background-size: 72px 72px !important;
+}
+
+.background-effects,
+.bg-gradient,
+.bg-glow,
+.hero-bg {
+    display: none !important;
+}
+
+::selection {
+    color: #fffaf2;
+    background: var(--ui-accent);
+}
+
+:focus-visible {
+    outline-color: var(--ui-accent) !important;
+}
+
+/* Hard-edged application chrome, matching the supplied portfolio system. */
+.header,
+#chat-header,
+#apps-header,
+#imagegen-header,
+#videogen-header,
+.notebook-header,
+.nav {
+    background: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] .header,
+[data-theme="light"] #chat-header,
+[data-theme="light"] #apps-header,
+[data-theme="light"] #imagegen-header,
+[data-theme="light"] #videogen-header,
+[data-theme="light"] .notebook-header,
+[data-theme="light"] .nav {
+    background: var(--ui-panel) !important;
+}
+
+#sidebar,
+.sidebar {
+    background: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+    backdrop-filter: none !important;
+}
+
+.editor-panel,
+.chat-panel,
+.main-content,
+.workspace,
+.notebook-canvas {
+    background-color: var(--ui-canvas) !important;
+}
+
+.sidebar-header,
+.chat-header,
+.panel-header,
+.editor-header,
+.terminal-header,
+.preview-header,
+.sessions-header {
+    background: var(--ui-panel) !important;
+    color: var(--ui-text-2) !important;
+    border-color: var(--ui-border) !important;
+    font-family: var(--ui-mono) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.085em;
+}
+
+.logo-text,
+.brand h1,
+.nav-brand,
+.header-title {
+    letter-spacing: -0.045em;
+}
+
+.accent,
+h1 > svg.lucide,
+h2 > svg.lucide,
+h3 > svg.lucide,
+.editor-title > svg.lucide,
+.terminal-title > svg.lucide {
+    color: var(--ui-accent) !important;
+}
+
+/* Controls are deliberately flatter and more decisive than the first pass. */
+.btn-primary,
+.primary-btn,
+.generate-btn,
+.run-btn,
+.action-btn.primary,
+.send-btn,
+#new-chat-btn,
+.nav-cta,
+.cta-primary {
+    color: #160b08 !important;
+    background: var(--ui-accent) !important;
+    border: 1px solid var(--ui-accent) !important;
+    border-radius: var(--ui-radius) !important;
+    box-shadow: none !important;
+}
+
+.btn-primary:hover,
+.primary-btn:hover,
+.generate-btn:hover,
+.run-btn:hover,
+.action-btn.primary:hover,
+.send-btn:hover,
+#new-chat-btn:hover,
+.nav-cta:hover,
+.cta-primary:hover {
+    background: #ff6b4e !important;
+    border-color: #ff6b4e !important;
+    box-shadow: 4px 4px 0 color-mix(in srgb, var(--ui-accent) 25%, transparent) !important;
+    transform: translate(-1px, -1px) !important;
+}
+
+.btn-secondary,
+.secondary-btn,
+.repo-btn,
+.model-btn,
+.mode-btn,
+.tab-btn,
+.hint,
+.action-btn {
+    color: var(--ui-text-2) !important;
+    background: var(--ui-panel-2) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-sm) !important;
+    box-shadow: none !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.input-field,
+.chat-input-container,
+.input-wrapper {
+    color: var(--ui-text) !important;
+    background: var(--input-bg) !important;
+    border-color: var(--ui-border) !important;
+    border-radius: var(--ui-radius) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.input-field:focus,
+.chat-input-container:focus-within,
+.input-wrapper:focus-within {
+    border-color: var(--ui-accent) !important;
+    box-shadow: 0 0 0 2px var(--ui-accent-soft) !important;
+}
+
+.nav-btn.active,
+.history-item.active,
+.file-item.active,
+.session-item.active {
+    color: var(--ui-text) !important;
+    background: var(--ui-accent-soft) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 42%, var(--ui-border)) !important;
+}
+
+.nav-btn.active::before,
+.file-item.active::before,
+.session-item.active::before {
+    background: var(--ui-accent) !important;
+}
+
+/* Distinct surface roles: controls, results and canvases no longer share one tone. */
+.controls-panel,
+.analyst-section,
+.prompt-card,
+.notes-section,
+.login-container,
+.system-specs {
+    background: var(--ui-panel) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+}
+
+.result-panel,
+.preview-section,
+.editor-section,
+.terminal-section,
+.output-panel,
+.output-section {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.preview-container,
+.result-container,
+.monaco-container,
+.terminal-container,
+.output-container {
+    background: var(--ui-panel-2) !important;
+    border-color: var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    box-shadow: none !important;
+}
+
+.app-card,
+.feature-card,
+.tool-card,
+.stat-card,
+.model-card,
+.upload-card,
+.config-card,
+.result-card,
+.modal-content,
+.dropdown-menu,
+.chat-sessions,
+.glass-card {
+    background: var(--ui-panel-2) !important;
+    border-color: var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    box-shadow: none !important;
+}
+
+.app-card:hover,
+.feature-card:hover,
+.tool-card:hover,
+.model-card:hover {
+    background: var(--ui-elevated) !important;
+    border-color: var(--ui-accent) !important;
+    box-shadow: 5px 5px 0 var(--ui-accent-soft) !important;
+    transform: translate(-2px, -2px) !important;
+}
+
+.app-icon,
+.feature-icon,
+.tool-icon,
+.menu-icon,
+.example-icon,
+.mode-icon,
+.model-icon {
+    color: var(--ui-accent) !important;
+    background: transparent !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 55%, var(--ui-border)) !important;
+    border-radius: var(--ui-radius-sm) !important;
+}
+
+/* The apps directory reads like a technical index instead of a card template. */
+body[data-page="apps"] .apps-intro {
+    max-width: none;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+body[data-page="apps"] .apps-grid {
+    gap: 1px !important;
+    padding: 1px;
+    background: var(--ui-border);
+    border: 1px solid var(--ui-border);
+}
+
+body[data-page="apps"] .app-card {
+    min-height: 164px;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+body[data-page="apps"] .app-card.featured {
+    background: linear-gradient(105deg, var(--ui-panel-2), var(--ui-accent-soft)) !important;
+}
+
+body[data-page="apps"] .app-card::before,
+body[data-page="landing"] .app-card::before,
+body[data-page="landing"] .feature-card::before {
+    opacity: 1 !important;
+    background: var(--ui-accent) !important;
+}
+
+/* Chat: style the actual bubble, never the full message row. */
+body[data-page="index"] .message.user {
+    width: 100%;
+    padding-inline: var(--space-md) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+body[data-page="index"] .message.user .text {
+    width: fit-content;
+    max-width: min(64ch, 78vw);
+    color: var(--ui-text) !important;
+    background: var(--ui-accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 48%, var(--ui-border)) !important;
+    border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 2px var(--ui-radius-lg) !important;
+}
+
+body[data-page="index"] .message.bot,
+body[data-page="index"] .message.assistant {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+body[data-page="index"] .thinking-block {
+    background: var(--ui-panel-2) !important;
+    border-color: var(--ui-border) !important;
+    border-left-color: var(--ui-accent) !important;
+    border-radius: var(--ui-radius) !important;
+}
+
+body[data-page="index"] .thinking-header {
+    color: var(--ui-accent) !important;
+    border-color: var(--ui-border) !important;
+}
+
+/* CodeJade is a dense IDE, with clearer separation and a real explorer rail. */
+body[data-page="codejade"] .main-content {
+    grid-template-columns: 252px 1px minmax(380px, 1fr) 1px minmax(340px, 30vw) !important;
+}
+
+body[data-page="codejade"] .sidebar {
+    background: var(--ui-panel) !important;
+}
+
+body[data-page="codejade"] .editor-panel {
+    background: #08080a !important;
+}
+
+body[data-page="codejade"] .chat-panel {
+    background: var(--ui-panel) !important;
+}
+
+body[data-page="codejade"] .message.user {
+    width: fit-content;
+    max-width: 88%;
+    color: var(--ui-text) !important;
+    background: var(--ui-accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 48%, var(--ui-border)) !important;
+    border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 2px var(--ui-radius-lg) !important;
+}
+
+body[data-page="codejade"] .message.assistant {
+    background: transparent !important;
+    border: 0 !important;
+    border-left: 2px solid var(--ui-border-strong) !important;
+    border-radius: 0 !important;
+}
+
+body[data-page="codejade"] .feature {
+    border-radius: var(--ui-radius-sm) !important;
+}
+
+/* WebDev: fill the viewport and prevent the dark root from leaking below. */
+body[data-page="webdev"] {
+    min-height: 100vh;
+    padding-bottom: 2.5rem;
+    background-color: var(--ui-canvas) !important;
+}
+
+body[data-page="webdev"] .preview-section {
+    margin-bottom: 0 !important;
+}
+
+body[data-page="webdev"] .preview-container {
+    min-height: 500px;
+}
+
+/* Landing adopts the editorial silhouette while product screens stay utilitarian. */
+body[data-page="landing"] .hero-title-ascii,
+body[data-page="landing"] .hero h1 {
+    letter-spacing: -0.06em;
+}
+
+body[data-page="landing"] .feature-card,
+body[data-page="landing"] .app-card,
+body[data-page="landing"] .stat-card {
+    background: var(--ui-panel) !important;
+    border-radius: var(--ui-radius-sm) !important;
+}
+
+@media (max-width: 900px) {
+    body[data-page="codejade"] .main-content {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    body[data-page="apps"] .apps-grid {
+        display: grid;
+        grid-template-columns: 1fr !important;
     }
 }
