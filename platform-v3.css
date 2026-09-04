@@ -909,7 +909,7 @@ body[data-page="webdev"] .hero-subtitle {
 
 body[data-page="webdev"] .template-grid {
     width: min(calc(100% - 3rem), 980px);
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.3rem;
     margin: 1.35rem auto 1rem;
     padding: 0.55rem;
@@ -1193,7 +1193,7 @@ body[data-page="login"] .features {
     }
 
     body[data-page="webdev"] .template-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 
