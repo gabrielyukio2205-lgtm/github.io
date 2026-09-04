@@ -1370,6 +1370,148 @@ body[data-page="index"] .thinking-header {
     border-color: var(--ui-border) !important;
 }
 
+/* Chat Anything: compact command bar and bubble-only user messages. */
+body[data-page="anything"] #chat-header {
+    height: 52px;
+    min-height: 52px;
+    padding-inline: 24px;
+}
+
+body[data-page="anything"] #chat-header .brand {
+    gap: 0.65rem;
+}
+
+body[data-page="anything"] #chat-header .brand h1 {
+    font-size: 0.95rem !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+body[data-page="anything"] #chat-header .status-badge {
+    padding: 0.25rem 0.58rem;
+    font-size: 0.68rem;
+}
+
+body[data-page="anything"] #theme-toggle-btn {
+    width: 34px;
+    height: 34px;
+}
+
+body[data-page="anything"] #model-selector-bar {
+    display: grid;
+    grid-template-columns:
+        minmax(190px, 0.78fr)
+        minmax(230px, 1.05fr)
+        minmax(250px, 1fr)
+        max-content;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 62px;
+    padding: 0.625rem 1.5rem;
+    flex: 0 0 auto;
+    background: var(--ui-panel) !important;
+    border-color: var(--ui-border) !important;
+    backdrop-filter: none;
+}
+
+body[data-page="anything"] #model-selector-bar .selector-group {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+body[data-page="anything"] #model-selector-bar .gem-selector {
+    grid-template-columns: max-content minmax(0, 1fr) 34px;
+}
+
+body[data-page="anything"] #model-selector-bar .selector-group label {
+    font-family: var(--ui-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+}
+
+body[data-page="anything"] #model-selector-bar .selector-group select {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding-block: 0.35rem;
+}
+
+body[data-page="anything"] #model-selector-bar .icon-btn {
+    width: 34px;
+    height: 34px;
+}
+
+body[data-page="anything"] #model-selector-bar .model-info {
+    min-width: 0;
+    margin-left: 0;
+    justify-self: end;
+}
+
+body[data-page="anything"] #current-model-badge {
+    max-width: 190px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+body[data-page="anything"] #chatbox {
+    padding-top: 1.35rem;
+}
+
+body[data-page="anything"] .message.user {
+    width: 100%;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+body[data-page="anything"] .message.user .content {
+    width: 100%;
+    max-width: 100%;
+}
+
+body[data-page="anything"] .message.user .text {
+    width: fit-content;
+    max-width: min(64ch, 78vw);
+    padding: 0.68rem 0.9rem;
+    color: var(--ui-text) !important;
+    background: var(--ui-accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 48%, var(--ui-border)) !important;
+    border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 2px var(--ui-radius-lg) !important;
+}
+
+@media (max-width: 1180px) {
+    body[data-page="anything"] #model-selector-bar {
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+    }
+
+    body[data-page="anything"] #model-selector-bar .model-info {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 640px) {
+    body[data-page="anything"] #chat-header {
+        padding-inline: 1rem;
+    }
+
+    body[data-page="anything"] #model-selector-bar {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+
+    body[data-page="anything"] #model-selector-bar .model-info {
+        display: none;
+    }
+}
+
 /* CodeJade is a dense IDE, with clearer separation and a real explorer rail. */
 body[data-page="codejade"] .main-content {
     grid-template-columns: 252px 1px minmax(380px, 1fr) 1px minmax(340px, 30vw) !important;
