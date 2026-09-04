@@ -17,11 +17,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="design-system.css?v=20260903-anything4">
-    <script src="platform-ui.js?v=20260903-anything4" defer></script>
+    <link rel="stylesheet" href="design-system.css?v=20260903-anything5">
+    <link rel="stylesheet" href="platform-v3.css?v=20260904-studio1">
+    <script src="platform-ui.js?v=20260903-anything5" defer></script>
 </head>
 
-<body>
+<body data-page="anything">
     <div class="background-effects">
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
@@ -93,6 +94,40 @@
                         <span class="status-badge">Multi-Provider</span>
                     </div>
                 </div>
+
+                <!-- Provider, model and GEM share the workspace command bar. -->
+                <div id="model-selector-bar" aria-label="Configuração do modelo">
+                    <div class="selector-group">
+                        <label for="provider-select">Provider</label>
+                        <select id="provider-select" title="Selecionar provider">
+                            <option value="openrouter">OpenRouter</option>
+                            <option value="groq">Groq</option>
+                            <option value="cerebras">Cerebras</option>
+                            <option value="mistral">Mistral</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label for="model-select">Modelo</label>
+                        <select id="model-select" title="Selecionar modelo"></select>
+                    </div>
+                    <div class="selector-group gem-selector">
+                        <label for="gem-select">GEM</label>
+                        <select id="gem-select" title="Selecionar GEM">
+                            <option value="">Sem GEM</option>
+                        </select>
+                        <button id="create-gem-btn" class="icon-btn" title="Criar ou editar GEM" aria-label="Criar ou editar GEM">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="model-info" aria-live="polite">
+                        <span id="current-model-badge"></span>
+                    </div>
+                </div>
+
                 <div class="header-right">
                     <button id="theme-toggle-btn" aria-label="Alternar tema">
                         <svg id="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -114,39 +149,6 @@
                     </button>
                 </div>
             </header>
-
-            <!-- Model & GEM Selector Bar -->
-            <div id="model-selector-bar">
-                <div class="selector-group">
-                    <label>Provider:</label>
-                    <select id="provider-select">
-                        <option value="openrouter">OpenRouter</option>
-                        <option value="groq">Groq</option>
-                        <option value="cerebras">Cerebras</option>
-                        <option value="mistral">Mistral</option>
-                    </select>
-                </div>
-                <div class="selector-group">
-                    <label>Modelo:</label>
-                    <select id="model-select"></select>
-                </div>
-                <div class="selector-group gem-selector">
-                    <label>GEM:</label>
-                    <select id="gem-select">
-                        <option value="">Sem GEM</option>
-                    </select>
-                    <button id="create-gem-btn" class="icon-btn" title="Criar/Editar GEM">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="model-info">
-                    <span id="current-model-badge"></span>
-                </div>
-            </div>
 
             <!-- Chat Area -->
             <div id="chatbox"></div>
