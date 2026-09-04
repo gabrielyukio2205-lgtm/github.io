@@ -808,6 +808,140 @@ body[data-page="landing"] .stat-card {
     }
 }
 
+/* Apps catalog — original turquoise identity with generous card rhythm. */
+body[data-page="apps"] {
+    --ui-accent: #34d6b6;
+    --ui-accent-strong: #20bfa0;
+    --ui-accent-soft: rgba(52, 214, 182, 0.11);
+    --primary-glow: rgba(52, 214, 182, 0.16);
+    --accent-glow: rgba(52, 214, 182, 0.12);
+}
+
+body[data-page="apps"][data-theme="light"] {
+    --ui-accent: #079d83;
+    --ui-accent-strong: #07846f;
+    --ui-accent-soft: rgba(7, 157, 131, 0.09);
+    --primary-glow: rgba(7, 157, 131, 0.13);
+    --accent-glow: rgba(7, 157, 131, 0.1);
+}
+
+body[data-page="apps"] #apps-container {
+    max-width: 1320px;
+    padding: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 3.5vw, 3rem) 4rem;
+}
+
+body[data-page="apps"] .apps-intro {
+    margin: 0 0 clamp(2rem, 4vw, 3rem) !important;
+    padding: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+}
+
+body[data-page="apps"] .apps-intro h2 {
+    margin-bottom: 0.75rem;
+    font-size: clamp(2rem, 4vw, 2.8rem) !important;
+}
+
+body[data-page="apps"] .apps-intro p {
+    max-width: 720px;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+body[data-page="apps"] .apps-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: clamp(1rem, 2vw, 1.5rem) !important;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+body[data-page="apps"] .app-card {
+    min-height: 208px;
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    gap: 1.25rem;
+    padding: clamp(1.4rem, 2.5vw, 1.8rem);
+    background: var(--ui-panel) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+}
+
+body[data-page="apps"] .app-card.featured {
+    min-height: 188px;
+    padding: clamp(1.6rem, 3vw, 2.15rem);
+    background: linear-gradient(105deg, var(--ui-panel), var(--ui-accent-soft)) !important;
+}
+
+body[data-page="apps"] .app-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+}
+
+body[data-page="apps"] .app-content {
+    min-width: 0;
+    gap: 0.7rem;
+}
+
+body[data-page="apps"] .app-content h3 {
+    padding-right: 2rem;
+    font-size: 1.08rem;
+    line-height: 1.35;
+}
+
+body[data-page="apps"] .app-content p {
+    font-size: 0.94rem;
+    line-height: 1.72;
+}
+
+body[data-page="apps"] .app-badge {
+    margin: 0 0 0.15rem;
+}
+
+body[data-page="apps"] .app-arrow {
+    position: absolute;
+    top: 1.65rem;
+    right: 1.65rem;
+    color: var(--ui-text-3);
+    font-size: 1.25rem;
+}
+
+body[data-page="apps"] .app-card:hover {
+    border-color: color-mix(in srgb, var(--ui-accent) 65%, var(--ui-border)) !important;
+    box-shadow: 4px 4px 0 var(--ui-accent-soft) !important;
+}
+
+body[data-page="apps"] .app-card:hover .app-arrow {
+    color: var(--ui-accent);
+}
+
+@media (max-width: 720px) {
+    body[data-page="apps"] #apps-container {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    body[data-page="apps"] .app-card,
+    body[data-page="apps"] .app-card.featured {
+        min-height: 0;
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 1rem;
+        padding: 1.25rem;
+    }
+
+    body[data-page="apps"] .app-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+    }
+
+    body[data-page="apps"] .app-arrow {
+        top: 1.25rem;
+        right: 1.25rem;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -834,9 +968,9 @@ body[data-page="landing"] .stat-card {
     --ui-text: #f2efe7;
     --ui-text-2: #b2afa9;
     --ui-text-3: #77757a;
-    --ui-accent: #ff5738;
-    --ui-accent-strong: #ff4b2b;
-    --ui-accent-soft: rgba(255, 87, 56, 0.11);
+    --ui-accent: #34d6b6;
+    --ui-accent-strong: #20bfa0;
+    --ui-accent-soft: rgba(52, 214, 182, 0.11);
     --ui-jade: var(--ui-accent);
     --ui-jade-strong: var(--ui-accent-strong);
     --ui-violet: #9d91ff;
@@ -852,19 +986,19 @@ body[data-page="landing"] .stat-card {
     --input-bg: #0b0b0e;
     --glass-bg: var(--ui-panel);
     --primary: var(--ui-accent);
-    --primary-hover: #ff6b50;
+    --primary-hover: #5be3c9;
     --primary-color: var(--ui-accent);
     --accent: var(--ui-accent);
     --accent-1: var(--ui-accent);
-    --accent-2: #ff866d;
+    --accent-2: #6de8d0;
     --accent-3: var(--ui-text);
     --accent-primary: var(--ui-accent);
-    --accent-secondary: #ff866d;
-    --primary-gradient: linear-gradient(135deg, var(--ui-accent), #ff7a5d);
-    --accent-gradient: linear-gradient(110deg, var(--ui-accent), #ff7a5d);
-    --primary-glow: rgba(255, 87, 56, 0.18);
-    --accent-glow: rgba(255, 87, 56, 0.13);
-    --user-msg-bg: rgba(255, 87, 56, 0.1);
+    --accent-secondary: #6de8d0;
+    --primary-gradient: linear-gradient(135deg, var(--ui-accent), #6de8d0);
+    --accent-gradient: linear-gradient(110deg, var(--ui-accent), #6de8d0);
+    --primary-glow: rgba(52, 214, 182, 0.18);
+    --accent-glow: rgba(52, 214, 182, 0.13);
+    --user-msg-bg: rgba(52, 214, 182, 0.1);
     --user-msg-text: var(--ui-text);
     --bg-gradient: none;
 }
@@ -880,9 +1014,9 @@ body[data-page="landing"] .stat-card {
     --ui-text: #17171a;
     --ui-text-2: #5d5a57;
     --ui-text-3: #858079;
-    --ui-accent: #e64325;
-    --ui-accent-strong: #dc3c1f;
-    --ui-accent-soft: rgba(230, 67, 37, 0.09);
+    --ui-accent: #079d83;
+    --ui-accent-strong: #07846f;
+    --ui-accent-soft: rgba(7, 157, 131, 0.09);
     --ui-jade: var(--ui-accent);
     --ui-jade-strong: var(--ui-accent-strong);
     --ui-violet: #6659c8;
@@ -893,19 +1027,19 @@ body[data-page="landing"] .stat-card {
     --input-bg: #fffdf8;
     --glass-bg: var(--ui-panel);
     --primary: var(--ui-accent);
-    --primary-hover: #ef5131;
+    --primary-hover: #0aae92;
     --primary-color: var(--ui-accent);
     --accent: var(--ui-accent);
     --accent-1: var(--ui-accent);
-    --accent-2: #c9381e;
+    --accent-2: #087d6b;
     --accent-3: var(--ui-text);
     --accent-primary: var(--ui-accent);
-    --accent-secondary: #c9381e;
-    --primary-gradient: linear-gradient(135deg, var(--ui-accent), #f06647);
-    --accent-gradient: linear-gradient(110deg, var(--ui-accent), #f06647);
-    --primary-glow: rgba(230, 67, 37, 0.14);
-    --accent-glow: rgba(230, 67, 37, 0.1);
-    --user-msg-bg: rgba(230, 67, 37, 0.08);
+    --accent-secondary: #087d6b;
+    --primary-gradient: linear-gradient(135deg, var(--ui-accent), #18b89d);
+    --accent-gradient: linear-gradient(110deg, var(--ui-accent), #18b89d);
+    --primary-glow: rgba(7, 157, 131, 0.14);
+    --accent-glow: rgba(7, 157, 131, 0.1);
+    --user-msg-bg: rgba(7, 157, 131, 0.08);
     --user-msg-text: var(--ui-text);
     --ui-shadow: 0 24px 60px rgba(54, 45, 34, 0.13);
     --ui-shadow-soft: 0 10px 28px rgba(54, 45, 34, 0.08);
@@ -1020,7 +1154,7 @@ h3 > svg.lucide,
 #new-chat-btn,
 .nav-cta,
 .cta-primary {
-    color: #160b08 !important;
+    color: #041410 !important;
     background: var(--ui-accent) !important;
     border: 1px solid var(--ui-accent) !important;
     border-radius: var(--ui-radius) !important;
@@ -1036,8 +1170,8 @@ h3 > svg.lucide,
 #new-chat-btn:hover,
 .nav-cta:hover,
 .cta-primary:hover {
-    background: #ff6b4e !important;
-    border-color: #ff6b4e !important;
+    background: #54dfc4 !important;
+    border-color: #54dfc4 !important;
     box-shadow: 4px 4px 0 color-mix(in srgb, var(--ui-accent) 25%, transparent) !important;
     transform: translate(-1px, -1px) !important;
 }
@@ -1309,5 +1443,36 @@ body[data-page="landing"] .stat-card {
     body[data-page="apps"] .apps-grid {
         display: grid;
         grid-template-columns: 1fr !important;
+    }
+}
+
+/* Final Apps spacing pass: intentionally after the shared editorial rules. */
+body[data-page="apps"] .apps-intro {
+    margin: 0 0 clamp(2rem, 4vw, 3rem) !important;
+    padding: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+}
+
+body[data-page="apps"] .apps-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: clamp(1rem, 2vw, 1.5rem) !important;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+body[data-page="apps"] .app-card {
+    min-height: 208px;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+}
+
+body[data-page="apps"] .app-card.featured {
+    min-height: 188px;
+}
+
+@media (max-width: 720px) {
+    body[data-page="apps"] .app-card,
+    body[data-page="apps"] .app-card.featured {
+        min-height: 0;
     }
 }
