@@ -118,6 +118,9 @@ body[data-page] {
     font-size: 16px;
     line-height: 1.55;
     background-image: var(--calm-canvas-glow) !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-position: center top !important;
     background-attachment: fixed !important;
 }
 
