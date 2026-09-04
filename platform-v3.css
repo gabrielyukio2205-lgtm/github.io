@@ -831,6 +831,14 @@ body[data-page="scholar"] :is(.sidebar, .main-content, .chat-panel) {
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.07) !important;
 }
 
+body[data-page="scholar"] .main-content {
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
 body[data-page="scholar"] .notes-section {
     max-width: 940px;
     margin-inline: auto;
