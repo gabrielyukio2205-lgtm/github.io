@@ -1,37 +1,42 @@
 /*
- * J.A.D.E. Studio UI
- * Final visual layer shared by the complete product suite.
- * Direction: editorial engineering workspace — quiet chrome, strong hierarchy,
- * turquoise as signal, and no glass/gradient/card-template decoration.
+ * J.A.D.E. Calm Workspace
+ * Visual direction derived from Gabriel's Lancer interface:
+ * warm canvas, generous space, soft depth and turquoise as the only signal color.
  */
 
 :root {
-    --ui-canvas: #07090b;
-    --ui-panel: #0b0e12;
-    --ui-panel-2: #10151a;
-    --ui-elevated: #161c22;
-    --ui-hover: #192128;
-    --ui-border: #222a30;
-    --ui-border-strong: #364149;
-    --ui-text: #f1f4f2;
-    --ui-text-2: #a9b3af;
-    --ui-text-3: #707d78;
-    --ui-jade: #35d8b1;
-    --ui-jade-strong: #1fc89f;
-    --ui-accent: #35d8b1;
-    --ui-accent-strong: #1fc89f;
-    --ui-accent-soft: rgba(53, 216, 177, 0.1);
-    --ui-danger: #ff6f7d;
-    --ui-warning: #e9b45f;
-    --ui-success: #35d8b1;
-    --ui-radius-sm: 4px;
-    --ui-radius: 7px;
-    --ui-radius-lg: 10px;
-    --ui-shadow: 0 22px 60px rgba(0, 0, 0, 0.34);
-    --ui-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.2);
-    --studio-sidebar: 248px;
-    --studio-header: 56px;
-    --studio-content: 1240px;
+    color-scheme: dark;
+    --ui-canvas: #101411;
+    --ui-panel: #151a17;
+    --ui-panel-2: #1b211d;
+    --ui-elevated: #222925;
+    --ui-hover: #27302b;
+    --ui-border: rgba(223, 234, 228, 0.1);
+    --ui-border-strong: rgba(223, 234, 228, 0.18);
+    --ui-text: #f1f4ef;
+    --ui-text-2: #aeb8b1;
+    --ui-text-3: #7e8982;
+    --ui-jade: #32cdaa;
+    --ui-jade-strong: #5cdbbd;
+    --ui-accent: #32cdaa;
+    --ui-accent-strong: #5cdbbd;
+    --ui-accent-soft: rgba(50, 205, 170, 0.13);
+    --ui-danger: #ff7c86;
+    --ui-warning: #e7b96b;
+    --ui-success: #32cdaa;
+    --ui-font: 'Sora', 'Inter', 'Segoe UI', sans-serif;
+    --ui-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --ui-radius-sm: 9px;
+    --ui-radius: 13px;
+    --ui-radius-lg: 20px;
+    --ui-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    --ui-shadow-soft: 0 14px 42px rgba(0, 0, 0, 0.2);
+    --calm-sidebar: 260px;
+    --calm-header: 64px;
+    --calm-content: 1260px;
+    --calm-canvas-glow:
+        radial-gradient(circle at 72% 18%, rgba(50, 205, 170, 0.08), transparent 31%),
+        radial-gradient(circle at 42% 8%, rgba(192, 137, 101, 0.05), transparent 27%);
 
     --bg: var(--ui-canvas);
     --bg-color: var(--ui-canvas);
@@ -44,8 +49,8 @@
     --surface-color: var(--ui-panel-2);
     --surface-hover: var(--ui-hover);
     --sidebar-bg: var(--ui-panel);
-    --input-bg: #090c0f;
-    --glass-bg: var(--ui-panel);
+    --input-bg: var(--ui-panel-2);
+    --glass-bg: rgba(21, 26, 23, 0.9);
     --glass-border: var(--ui-border);
     --border: var(--ui-border);
     --border-color: var(--ui-border);
@@ -61,53 +66,59 @@
     --accent-1: var(--ui-accent);
     --accent-2: var(--ui-accent);
     --accent-3: var(--ui-text-2);
-    --page-header-height: var(--studio-header);
+    --page-header-height: var(--calm-header);
     --radius-sm: var(--ui-radius-sm);
     --radius-md: var(--ui-radius);
     --radius-lg: var(--ui-radius-lg);
-    --radius-xl: 12px;
-    --radius-2xl: 14px;
-    --shadow-sm: none;
+    --radius-xl: 22px;
+    --radius-2xl: 28px;
+    --shadow-sm: 0 6px 22px rgba(0, 0, 0, 0.13);
     --shadow-md: var(--ui-shadow-soft);
     --shadow-lg: var(--ui-shadow);
     --primary-gradient: linear-gradient(var(--ui-accent), var(--ui-accent));
     --accent-gradient: linear-gradient(var(--ui-accent), var(--ui-accent));
-    --bg-gradient: none;
+    --bg-gradient: var(--calm-canvas-glow);
 }
 
 [data-theme="light"] {
-    --ui-canvas: #f1f2ee;
-    --ui-panel: #f8f9f6;
-    --ui-panel-2: #eceee9;
-    --ui-elevated: #ffffff;
-    --ui-hover: #e4e8e2;
-    --ui-border: #d2d7d1;
-    --ui-border-strong: #adb7b0;
-    --ui-text: #111614;
-    --ui-text-2: #525e59;
-    --ui-text-3: #78837e;
-    --ui-jade: #078b71;
-    --ui-jade-strong: #006e59;
-    --ui-accent: #078b71;
-    --ui-accent-strong: #006e59;
-    --ui-accent-soft: rgba(7, 139, 113, 0.09);
-    --ui-shadow: 0 22px 60px rgba(31, 44, 39, 0.13);
-    --ui-shadow-soft: 0 10px 30px rgba(31, 44, 39, 0.08);
-    --input-bg: #ffffff;
+    color-scheme: light;
+    --ui-canvas: #f7f3eb;
+    --ui-panel: #f1ede4;
+    --ui-panel-2: #fbf8f2;
+    --ui-elevated: #fffdf8;
+    --ui-hover: #e9f2ed;
+    --ui-border: rgba(43, 58, 51, 0.12);
+    --ui-border-strong: rgba(43, 58, 51, 0.2);
+    --ui-text: #1b2823;
+    --ui-text-2: #66736c;
+    --ui-text-3: #8d9892;
+    --ui-jade: #09866c;
+    --ui-jade-strong: #066e59;
+    --ui-accent: #09866c;
+    --ui-accent-strong: #066e59;
+    --ui-accent-soft: rgba(9, 134, 108, 0.1);
+    --ui-shadow: 0 28px 80px rgba(53, 57, 48, 0.13);
+    --ui-shadow-soft: 0 14px 42px rgba(53, 57, 48, 0.09);
+    --input-bg: #fffdf8;
+    --glass-bg: rgba(247, 243, 235, 0.88);
+    --calm-canvas-glow:
+        radial-gradient(circle at 72% 18%, rgba(70, 178, 148, 0.14), transparent 31%),
+        radial-gradient(circle at 44% 7%, rgba(226, 183, 139, 0.14), transparent 28%);
 }
 
 html,
 body[data-page] {
-    background: var(--ui-canvas) !important;
+    min-height: 100%;
+    background-color: var(--ui-canvas) !important;
 }
 
 body[data-page] {
-    min-height: 100vh;
     color: var(--ui-text);
     font-family: var(--ui-font);
     font-size: 16px;
     line-height: 1.55;
-    background-image: none !important;
+    background-image: var(--calm-canvas-glow) !important;
+    background-attachment: fixed !important;
 }
 
 body[data-page] .background-effects,
@@ -120,21 +131,19 @@ body[data-page] .hero-bg {
 body[data-page] h1,
 body[data-page] h2,
 body[data-page] h3,
-body[data-page] h4,
+body[data-page] h4 {
+    color: var(--ui-text);
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+}
+
 body[data-page] p {
     text-wrap: pretty;
 }
 
-body[data-page] h1,
-body[data-page] h2,
-body[data-page] h3 {
-    color: var(--ui-text);
-    letter-spacing: -0.035em;
-}
-
 body[data-page] ::selection {
-    color: #03100c;
-    background: rgba(53, 216, 177, 0.88);
+    color: #04120e;
+    background: rgba(50, 205, 170, 0.8);
 }
 
 body[data-page] ::-webkit-scrollbar {
@@ -147,39 +156,39 @@ body[data-page] ::-webkit-scrollbar-track {
 }
 
 body[data-page] ::-webkit-scrollbar-thumb {
-    background: var(--ui-border-strong);
+    background: color-mix(in srgb, var(--ui-text-3) 55%, transparent);
     border: 2px solid transparent;
     border-radius: 999px;
     background-clip: padding-box;
 }
 
-/* Application chrome */
+/* Soft application shell */
 body[data-page] :is(#chat-header, #apps-header, #imagegen-header, #videogen-header, .header, .notebook-header) {
-    min-height: var(--studio-header) !important;
-    height: var(--studio-header);
-    padding-inline: 1.25rem !important;
+    min-height: var(--calm-header) !important;
+    height: var(--calm-header);
+    padding-inline: 1.35rem !important;
     color: var(--ui-text);
-    background: var(--ui-panel) !important;
+    background: color-mix(in srgb, var(--ui-panel) 90%, transparent) !important;
     border-color: var(--ui-border) !important;
     box-shadow: none !important;
-    backdrop-filter: none !important;
+    backdrop-filter: blur(18px) saturate(115%) !important;
 }
 
 body[data-page] :is(.brand h1, #header-title, .header-title, .logo-text, .notebook-name) {
     margin: 0;
     color: var(--ui-text) !important;
-    font-size: 0.95rem !important;
-    font-weight: 650 !important;
-    letter-spacing: -0.02em !important;
+    font-size: 0.96rem !important;
+    font-weight: 680 !important;
+    letter-spacing: -0.025em !important;
     text-transform: none !important;
 }
 
 body[data-page] :is(.status-badge, .app-badge, .model-badge, .mode-indicator, .quality-badge, .xp-badge) {
     color: var(--ui-text-2) !important;
-    background: transparent !important;
+    background: color-mix(in srgb, var(--ui-elevated) 76%, transparent) !important;
     border: 1px solid var(--ui-border) !important;
     border-radius: 999px !important;
-    box-shadow: none !important;
+    box-shadow: 0 3px 12px rgba(34, 45, 39, 0.04) !important;
     animation: none !important;
     font-family: var(--ui-mono);
     font-size: 0.68rem;
@@ -189,25 +198,24 @@ body[data-page] :is(.status-badge, .app-badge, .model-badge, .mode-indicator, .q
 
 body[data-page] :is(.status-dot, .preview-dot) {
     background: var(--ui-accent) !important;
-    box-shadow: none !important;
+    box-shadow: 0 0 0 4px var(--ui-accent-soft) !important;
 }
 
 body[data-page] :is(.logo-icon, .imagegen-icon, .videogen-icon, .notebook-icon) {
     color: var(--ui-accent) !important;
     background: transparent !important;
     border: 0 !important;
-    border-radius: 0 !important;
     box-shadow: none !important;
     filter: none !important;
 }
 
-/* Navigation is indicated by type and a signal line, never by a large filled tile. */
+/* Lancer-like side navigation */
 body[data-page] :is(#sidebar, .sidebar) {
     color: var(--ui-text-2);
-    background: var(--ui-panel) !important;
+    background: color-mix(in srgb, var(--ui-panel) 95%, transparent) !important;
     border-color: var(--ui-border) !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
+    box-shadow: 10px 0 34px rgba(46, 50, 42, 0.035) !important;
+    backdrop-filter: blur(18px) !important;
 }
 
 body:is(
@@ -218,8 +226,8 @@ body:is(
     [data-page="videogen"],
     [data-page="anything"]
 ) #sidebar {
-    width: var(--studio-sidebar) !important;
-    padding: 0.8rem 0.7rem !important;
+    width: var(--calm-sidebar) !important;
+    padding: 0.9rem 1rem !important;
 }
 
 body:is(
@@ -230,12 +238,12 @@ body:is(
     [data-page="videogen"],
     [data-page="anything"]
 ) #sidebar.collapsed {
-    margin-left: calc(var(--studio-sidebar) * -1) !important;
+    margin-left: calc(var(--calm-sidebar) * -1) !important;
 }
 
 body[data-page] :is(.sidebar-header, .panel-header, .editor-header, .terminal-header, .preview-header, .chat-header, .sessions-header) {
     color: var(--ui-text-2) !important;
-    background: var(--ui-panel) !important;
+    background: transparent !important;
     border-color: var(--ui-border) !important;
     box-shadow: none !important;
 }
@@ -244,29 +252,25 @@ body[data-page] :is(.nav-btn, .about-link, .history-item, .notebook-item, .sourc
     position: relative;
     color: var(--ui-text-2) !important;
     background: transparent !important;
-    border-color: transparent !important;
-    border-radius: 6px !important;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
     box-shadow: none !important;
     transform: none !important;
 }
 
 body[data-page] :is(.nav-btn, .about-link, .history-item, .notebook-item, .source-item, .session-item, .chat-item, .file-item):hover {
     color: var(--ui-text) !important;
-    background: var(--ui-hover) !important;
+    background: color-mix(in srgb, var(--ui-elevated) 62%, transparent) !important;
 }
 
 body[data-page] :is(.nav-btn.active, .history-item.active, .notebook-item.active, .source-item.selected, .session-item.active, .chat-item.active, .file-item.active) {
     color: var(--ui-text) !important;
     background: var(--ui-accent-soft) !important;
-    border-color: transparent !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 17%, var(--ui-border)) !important;
 }
 
 body[data-page] :is(.nav-btn.active, .history-item.active, .notebook-item.active, .source-item.selected, .session-item.active, .chat-item.active)::before {
-    content: "";
-    position: absolute;
-    inset: 8px auto 8px 0;
-    width: 2px;
-    background: var(--ui-accent) !important;
+    display: none !important;
 }
 
 body[data-page] .sidebar-footer {
@@ -276,25 +280,41 @@ body[data-page] .sidebar-footer {
 body[data-page] :is(.history-label, .section-title, .panel-title, .editor-title, .terminal-title, .spec-header, .category-header) {
     color: var(--ui-text-3) !important;
     font-family: var(--ui-mono);
-    font-size: 0.72rem !important;
+    font-size: 0.7rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.075em;
+    letter-spacing: 0.11em;
     text-transform: uppercase;
 }
 
-/* Controls */
+body:is([data-page="index"], [data-page="anything"]) #sidebar #new-chat-btn {
+    min-height: 46px;
+    color: var(--ui-text) !important;
+    background: color-mix(in srgb, var(--ui-accent-soft) 72%, var(--ui-elevated)) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 15%, var(--ui-border)) !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+body:is([data-page="index"], [data-page="anything"]) #sidebar #new-chat-btn:hover {
+    background: color-mix(in srgb, var(--ui-accent-soft) 90%, var(--ui-elevated)) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 34%, var(--ui-border)) !important;
+}
+
+/* Friendly controls instead of desktop-form chrome */
 body[data-page] :is(input:not([type="range"]):not([type="file"]):not([type="checkbox"]), textarea, select, .input-field) {
     color: var(--ui-text) !important;
     background: var(--input-bg) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 7px !important;
-    box-shadow: none !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
 }
 
 body[data-page] :is(input, textarea, select, .input-field):focus {
     outline: none !important;
-    border-color: var(--ui-accent) !important;
-    box-shadow: 0 0 0 3px var(--ui-accent-soft) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 50%, var(--ui-border)) !important;
+    box-shadow: 0 0 0 4px var(--ui-accent-soft) !important;
 }
 
 body[data-page] :is(.control-group, .control-row, .config-row, .form-group, .input-section) > label,
@@ -303,34 +323,34 @@ body[data-page] .config-grid label {
     font-family: var(--ui-mono);
     font-size: 0.72rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.055em;
     text-transform: uppercase;
 }
 
 body[data-page] :is(.btn-primary, .primary-btn, .generate-btn, .run-btn, .github-btn, .send-btn, .refine-btn, .nav-cta, .action-btn.primary) {
-    color: #04110d !important;
+    color: #f7fffc !important;
     background: var(--ui-accent) !important;
     border: 1px solid var(--ui-accent) !important;
-    border-radius: 7px !important;
-    box-shadow: none !important;
+    border-radius: 13px !important;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--ui-accent) 18%, transparent) !important;
     animation: none !important;
-    font-weight: 650 !important;
+    font-weight: 660 !important;
     transform: none !important;
 }
 
 body[data-page] :is(.btn-primary, .primary-btn, .generate-btn, .run-btn, .github-btn, .send-btn, .refine-btn, .nav-cta, .action-btn.primary):hover:not(:disabled) {
-    color: #020a07 !important;
+    color: #ffffff !important;
     background: var(--ui-accent-strong) !important;
     border-color: var(--ui-accent-strong) !important;
-    box-shadow: none !important;
-    transform: none !important;
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--ui-accent) 24%, transparent) !important;
+    transform: translateY(-1px) !important;
 }
 
 body[data-page] :is(.btn-secondary, .secondary-btn, .action-btn, .icon-btn, .btn-icon, .btn-icon-small, .back-btn, .theme-btn, .theme-toggle) {
     color: var(--ui-text-2) !important;
-    background: transparent !important;
+    background: color-mix(in srgb, var(--ui-elevated) 72%, transparent) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 7px !important;
+    border-radius: 11px !important;
     box-shadow: none !important;
     animation: none !important;
     transform: none !important;
@@ -338,40 +358,40 @@ body[data-page] :is(.btn-secondary, .secondary-btn, .action-btn, .icon-btn, .btn
 
 body[data-page] :is(.btn-secondary, .secondary-btn, .action-btn, .icon-btn, .btn-icon, .btn-icon-small, .back-btn, .theme-btn, .theme-toggle):hover:not(:disabled) {
     color: var(--ui-text) !important;
-    background: var(--ui-hover) !important;
+    background: var(--ui-elevated) !important;
     border-color: var(--ui-border-strong) !important;
-    transform: none !important;
+    transform: translateY(-1px) !important;
 }
 
 body[data-page] button:disabled {
     cursor: not-allowed;
-    opacity: 0.46;
+    opacity: 0.48;
 }
 
-/* Surface roles */
+/* Layered surfaces */
 body[data-page] :is(.analyst-section, .controls-panel, .prompt-card, .modal-content, .login-container, .system-specs, .source-card, .tool-card, .block-item, .model-menu, .chat-sessions) {
     color: var(--ui-text);
-    background: var(--ui-panel) !important;
+    background: color-mix(in srgb, var(--ui-elevated) 94%, transparent) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 9px !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
+    border-radius: 20px !important;
+    box-shadow: var(--ui-shadow-soft) !important;
+    backdrop-filter: blur(18px) !important;
 }
 
 body[data-page] :is(.result-container, .preview-container, .output-container, .monaco-container, .terminal-container, .diff-view) {
-    background: var(--ui-panel-2) !important;
+    background: var(--ui-elevated) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 9px !important;
-    box-shadow: none !important;
+    border-radius: 22px !important;
+    box-shadow: var(--ui-shadow-soft) !important;
 }
 
 body[data-page] :is(.app-card, .feature-card, .template-card, .model-btn, .mode-btn, .example-card, .result-card, .stat-card, .config-card) {
     color: var(--ui-text);
-    background: var(--ui-panel) !important;
+    background: color-mix(in srgb, var(--ui-elevated) 94%, transparent) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 30px rgba(53, 57, 48, 0.055) !important;
+    backdrop-filter: blur(14px) !important;
     animation: none !important;
     transform: none !important;
 }
@@ -379,182 +399,224 @@ body[data-page] :is(.app-card, .feature-card, .template-card, .model-btn, .mode-
 body[data-page] :is(.app-card, .feature-card, .template-card, .model-btn, .mode-btn, .example-card):hover {
     color: var(--ui-text);
     background: var(--ui-elevated) !important;
-    border-color: var(--ui-border-strong) !important;
-    box-shadow: none !important;
-    transform: none !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 24%, var(--ui-border)) !important;
+    box-shadow: var(--ui-shadow-soft) !important;
+    transform: translateY(-2px) !important;
 }
 
 body[data-page] :is(.model-btn.active, .mode-btn.active, .template-card.active) {
-    background: var(--ui-accent-soft) !important;
-    border-color: var(--ui-accent) !important;
+    background: color-mix(in srgb, var(--ui-accent-soft) 76%, var(--ui-elevated)) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 36%, var(--ui-border)) !important;
 }
 
 body[data-page] :is(.app-icon, .feature-icon, .tool-icon, .model-icon, .mode-icon, .template-icon, .example-icon, .empty-icon) {
     color: var(--ui-accent) !important;
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
+    background: var(--ui-accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 14%, var(--ui-border)) !important;
+    border-radius: 13px !important;
     box-shadow: none !important;
 }
 
 body[data-page] :is(.upload-zone, .file-drop-zone, .add-source-card) {
     color: var(--ui-text-2) !important;
-    background: var(--ui-panel-2) !important;
-    border: 1px solid var(--ui-border-strong) !important;
-    border-radius: 8px !important;
+    background: color-mix(in srgb, var(--ui-panel-2) 86%, transparent) !important;
+    border: 1px dashed var(--ui-border-strong) !important;
+    border-radius: 18px !important;
 }
 
 body[data-page] :is(.upload-zone, .file-drop-zone, .add-source-card):hover {
     color: var(--ui-text) !important;
     background: var(--ui-accent-soft) !important;
-    border-color: var(--ui-accent) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 52%, var(--ui-border)) !important;
 }
 
 body[data-page] :is(.modal-backdrop, .loading-overlay) {
-    background: rgba(2, 5, 7, 0.74) !important;
-    backdrop-filter: blur(7px) !important;
+    background: rgba(12, 17, 14, 0.58) !important;
+    backdrop-filter: blur(12px) !important;
 }
 
-/* Primary chat */
+/* Main chat mirrors Lancer's calm center and floating input dock. */
 body[data-page="index"] #chatbox {
     width: 100%;
-    max-width: 900px;
-    padding: 2.4rem 1.5rem 10.5rem !important;
-    gap: 1.8rem;
+    max-width: 920px;
+    padding: 3.2rem 1.6rem 11.5rem !important;
+    gap: 2rem;
 }
 
-body[data-page="index"] .message.user {
+body[data-page="index"] .welcome-message {
+    min-height: 38vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+body[data-page="index"] .welcome-message .avatar {
+    margin-inline: auto;
+}
+
+body[data-page="index"] :is(.message.user, .message.bot, .message.assistant) {
     background: transparent !important;
     border: 0 !important;
+    box-shadow: none !important;
 }
 
 body[data-page="index"] .message.user .text {
-    padding: 0.75rem 1rem;
-    background: var(--ui-accent-soft) !important;
-    border: 1px solid color-mix(in srgb, var(--ui-accent) 36%, var(--ui-border)) !important;
-    border-radius: 14px 14px 3px 14px !important;
-}
-
-body[data-page="index"] :is(.message.bot, .message.assistant) {
-    background: transparent !important;
-    border: 0 !important;
+    padding: 0.78rem 1rem;
+    background: color-mix(in srgb, var(--ui-accent-soft) 74%, var(--ui-elevated)) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 20%, var(--ui-border)) !important;
+    border-radius: 18px 18px 5px 18px !important;
 }
 
 body[data-page="index"] #input-container {
-    bottom: 1.25rem;
-    width: min(90%, 820px);
+    bottom: 1.4rem;
+    width: min(90%, 860px);
 }
 
 body[data-page="index"] .input-wrapper {
-    padding: 0.52rem 0.55rem 0.52rem 1rem !important;
-    background: color-mix(in srgb, var(--ui-panel) 95%, transparent) !important;
-    border: 1px solid var(--ui-border-strong) !important;
-    border-radius: 16px !important;
-    box-shadow: var(--ui-shadow-soft) !important;
-    backdrop-filter: blur(18px) !important;
+    padding: 0.62rem 0.65rem 0.62rem 1.15rem !important;
+    background: color-mix(in srgb, var(--ui-elevated) 94%, transparent) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 24px !important;
+    box-shadow: var(--ui-shadow) !important;
+    backdrop-filter: blur(22px) saturate(118%) !important;
 }
 
 body[data-page="index"] .input-wrapper:focus-within {
-    border-color: var(--ui-accent) !important;
-    box-shadow: var(--ui-shadow-soft), 0 0 0 3px var(--ui-accent-soft) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 38%, var(--ui-border)) !important;
+    box-shadow: var(--ui-shadow), 0 0 0 4px var(--ui-accent-soft) !important;
 }
 
-body[data-page="index"] :is(#new-chat-btn, #agent-mode-selector, #model-dropdown-btn) {
+body[data-page="index"] :is(#agent-mode-selector, #model-dropdown-btn) {
     color: var(--ui-text) !important;
-    background: transparent !important;
+    background: color-mix(in srgb, var(--ui-elevated) 82%, transparent) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 8px !important;
+    border-radius: 13px !important;
     box-shadow: none !important;
     animation: none !important;
 }
 
-/* Chat Anything keeps all model controls in one command bar. */
+/* Chat Anything uses the same product language without losing model controls. */
 body[data-page="anything"] #chat-header {
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr) max-content;
     gap: 1rem;
-    height: 58px !important;
-    min-height: 58px !important;
+    height: 68px !important;
+    min-height: 68px !important;
 }
 
 body[data-page="anything"] #model-selector-bar {
-    background: transparent !important;
-    border: 0 !important;
+    padding: 0.38rem !important;
+    background: color-mix(in srgb, var(--ui-elevated) 74%, transparent) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 16px !important;
 }
 
-body[data-page="anything"] #new-chat-btn {
-    color: var(--ui-text) !important;
+body[data-page="anything"] #model-selector-bar .selector-group {
+    border-color: var(--ui-border) !important;
+}
+
+body[data-page="anything"] #model-selector-bar .selector-group select {
     background: transparent !important;
-    border: 1px solid var(--ui-border-strong) !important;
+    border: 0 !important;
+    border-radius: 11px !important;
     box-shadow: none !important;
 }
 
 body[data-page="anything"] #chatbox {
-    background: var(--ui-canvas) !important;
+    max-width: 900px;
+    padding: 3rem 1.5rem 11rem !important;
+    background: transparent !important;
 }
 
 body[data-page="anything"] .message.user {
     background: transparent !important;
     border: 0 !important;
+    box-shadow: none !important;
+}
+
+body[data-page="anything"] .message.user .text {
+    background: color-mix(in srgb, var(--ui-accent-soft) 74%, var(--ui-elevated)) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 20%, var(--ui-border)) !important;
+    border-radius: 18px 18px 5px 18px !important;
+}
+
+body[data-page="anything"] #input-container {
+    width: min(90%, 840px);
 }
 
 body[data-page="anything"] #input-container .input-wrapper {
-    background: color-mix(in srgb, var(--ui-panel) 95%, transparent) !important;
-    border: 1px solid var(--ui-border-strong) !important;
-    box-shadow: var(--ui-shadow-soft) !important;
+    background: color-mix(in srgb, var(--ui-elevated) 94%, transparent) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 22px !important;
+    box-shadow: var(--ui-shadow) !important;
 }
 
-/* Apps directory: a spacious product index, not a tile dashboard. */
+/* App directory: generous, welcoming and product-led. */
 body[data-page="apps"] #apps-container {
     width: 100%;
-    max-width: 1260px;
-    padding: clamp(2.25rem, 4vw, 4.5rem) clamp(1.5rem, 4vw, 3.5rem) 5rem;
+    max-width: 1280px;
+    padding: clamp(3rem, 6vw, 6.5rem) clamp(1.5rem, 5vw, 4.5rem) 6rem;
 }
 
 body[data-page="apps"] .apps-intro {
-    display: grid;
-    grid-template-columns: minmax(260px, 0.8fr) minmax(300px, 1.2fr);
-    align-items: end;
-    gap: 3rem;
-    margin-bottom: clamp(2.5rem, 5vw, 4.5rem) !important;
-    padding-bottom: 2rem;
-    text-align: left !important;
-    border-bottom: 1px solid var(--ui-border);
+    max-width: 760px;
+    margin: 0 auto clamp(3.2rem, 6vw, 5.5rem) !important;
+    padding: 0 !important;
+    text-align: center !important;
+    border: 0 !important;
+}
+
+body[data-page="apps"] .apps-intro::before {
+    content: "J.A.D.E. WORKSPACE";
+    display: inline-flex;
+    margin-bottom: 1.35rem;
+    padding: 0.48rem 0.82rem;
+    color: var(--ui-text-2);
+    background: color-mix(in srgb, var(--ui-elevated) 80%, transparent);
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    box-shadow: 0 5px 20px rgba(53, 57, 48, 0.05);
+    font-family: var(--ui-mono);
+    font-size: 0.69rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
 }
 
 body[data-page="apps"] .apps-intro h2 {
-    margin: 0;
-    font-size: clamp(2.4rem, 5vw, 4.8rem) !important;
-    line-height: 0.95;
-    letter-spacing: -0.065em;
+    margin: 0 0 1rem;
+    font-size: clamp(2.9rem, 6vw, 5.8rem) !important;
+    line-height: 0.96;
+    letter-spacing: -0.075em;
 }
 
 body[data-page="apps"] .apps-intro p {
-    max-width: 54ch;
-    margin: 0 !important;
-    font-size: 1rem;
+    max-width: 58ch;
+    margin: 0 auto !important;
+    color: var(--ui-text-2) !important;
+    font-size: 1.04rem;
     line-height: 1.7;
 }
 
 body[data-page="apps"] .apps-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 1rem !important;
+    gap: 1.15rem !important;
     padding: 0 !important;
     background: transparent !important;
     border: 0 !important;
 }
 
 body[data-page="apps"] .app-card {
-    min-height: 224px !important;
-    padding: 1.5rem !important;
-    border-radius: 8px !important;
+    min-height: 230px !important;
+    padding: 1.55rem !important;
+    border-radius: 20px !important;
 }
 
 body[data-page="apps"] .app-card.featured {
     grid-column: 1 / -1;
-    min-height: 176px !important;
-    background: linear-gradient(100deg, var(--ui-panel), var(--ui-accent-soft)) !important;
-    border-top-color: var(--ui-accent) !important;
+    min-height: 188px !important;
+    background: color-mix(in srgb, var(--ui-accent-soft) 58%, var(--ui-elevated)) !important;
+    border-color: color-mix(in srgb, var(--ui-accent) 18%, var(--ui-border)) !important;
 }
 
 body[data-page="apps"] .app-card::before {
@@ -562,37 +624,34 @@ body[data-page="apps"] .app-card::before {
 }
 
 body[data-page="apps"] .app-icon {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    color: var(--ui-accent) !important;
-    border: 1px solid var(--ui-border-strong) !important;
-    border-radius: 6px !important;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
 }
 
 body[data-page="apps"] .app-content h3 {
-    font-size: 1.08rem;
+    font-size: 1.1rem;
 }
 
 body[data-page="apps"] .app-arrow {
-    color: var(--ui-text-3);
+    color: var(--ui-accent);
     font-family: var(--ui-mono);
 }
 
-/* Analyst uses a real two-column work surface. */
+/* Analyst: two calm task panels and a wide result area. */
 body[data-page="analyze"] #analyst-container {
     display: grid;
     grid-template-columns: minmax(300px, 0.82fr) minmax(400px, 1.18fr);
     align-content: start;
-    gap: 1rem;
+    gap: 1.25rem;
     width: 100%;
-    max-width: 1180px;
-    padding: clamp(1.5rem, 3vw, 2.75rem);
+    max-width: 1200px;
+    padding: clamp(2rem, 4vw, 4rem);
 }
 
 body[data-page="analyze"] .analyst-section {
     margin: 0;
-    padding: 1.4rem;
+    padding: 1.6rem;
 }
 
 body[data-page="analyze"] .upload-section {
@@ -609,12 +668,12 @@ body[data-page="analyze"] .results-section {
 }
 
 body[data-page="analyze"] .analyst-section > h2 {
-    margin-bottom: 1.3rem;
-    font-size: 0.95rem;
+    margin-bottom: 1.4rem;
+    font-size: 1rem;
 }
 
 body[data-page="analyze"] .upload-zone {
-    min-height: 190px;
+    min-height: 210px;
     display: grid;
     place-content: center;
     padding: 2rem;
@@ -623,20 +682,21 @@ body[data-page="analyze"] .upload-zone {
 body[data-page="analyze"] :is(.stat-item, .metric-item) {
     background: var(--ui-panel-2) !important;
     border: 1px solid var(--ui-border);
-    border-radius: 6px;
+    border-radius: 14px;
 }
 
-/* Image and video generation share the same production-bay geometry. */
+/* Image and video tools feel like creative desks. */
 body:is([data-page="imagegen"], [data-page="videogen"]) :is(#imagegen-main, #videogen-main) {
-    width: min(100%, 1400px) !important;
-    padding: 1.4rem !important;
-    gap: 1.1rem !important;
+    width: min(100%, 1420px) !important;
+    padding: 1.5rem !important;
+    gap: 1.3rem !important;
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) .controls-panel {
     align-self: start;
-    gap: 1.15rem !important;
-    padding: 1.35rem !important;
+    gap: 1.25rem !important;
+    padding: 1.5rem !important;
+    border-radius: 22px !important;
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) .result-panel {
@@ -646,52 +706,69 @@ body:is([data-page="imagegen"], [data-page="videogen"]) .result-panel {
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) .result-container {
-    min-height: 540px;
+    min-height: 550px;
+    border-radius: 24px !important;
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) :is(.model-selector, .mode-selector) {
-    gap: 0.45rem;
+    gap: 0.55rem;
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) :is(.model-btn, .mode-btn) {
-    min-height: 76px;
-    padding: 0.75rem;
+    min-height: 82px;
+    padding: 0.8rem;
+    border-radius: 15px !important;
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) :is(.advanced-controls, .options-grid) {
     padding: 1rem;
     background: var(--ui-panel-2) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 7px !important;
+    border-radius: 16px !important;
 }
 
 body:is([data-page="imagegen"], [data-page="videogen"]) .generate-btn {
-    min-height: 44px;
+    min-height: 46px;
 }
 
-/* CodeJade and Sandbox are dense engineering workspaces. */
+/* Engineering tools keep density, but become composed floating workspaces. */
+body[data-page="codejade"] .app-container,
+body[data-page="sandbox"] .app-container {
+    background-image: var(--calm-canvas-glow) !important;
+}
+
 body[data-page="codejade"] .main-content {
-    height: calc(100vh - var(--studio-header));
-    grid-template-columns: 240px 1px minmax(360px, 1fr) 1px minmax(320px, 28vw) !important;
+    height: calc(100vh - var(--calm-header));
+    grid-template-columns: 240px 10px minmax(360px, 1fr) 10px minmax(320px, 28vw) !important;
+    padding: 12px;
+    background: transparent !important;
+}
+
+body[data-page="codejade"] .resize-divider {
+    background: transparent !important;
 }
 
 body[data-page="codejade"] :is(.sidebar, .editor-panel, .chat-panel) {
-    background: var(--ui-panel) !important;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--ui-panel) 94%, transparent) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08) !important;
 }
 
 body[data-page="codejade"] .editor-container {
-    background: #07090b !important;
+    background: #0c100e !important;
 }
 
 body[data-page="codejade"] :is(.editor-tabs, .chat-header, .sidebar-header) {
-    min-height: 42px;
+    min-height: 44px;
 }
 
 body[data-page="codejade"] .tab {
-    min-height: 42px;
+    min-height: 44px;
     color: var(--ui-text-2);
     background: transparent !important;
-    border-radius: 0 !important;
+    border-radius: 10px 10px 0 0 !important;
 }
 
 body[data-page="codejade"] .tab.active {
@@ -701,61 +778,77 @@ body[data-page="codejade"] .tab.active {
 }
 
 body[data-page="codejade"] .message.assistant {
-    padding-left: 0.9rem;
-    border-left: 2px solid var(--ui-border-strong) !important;
+    padding: 0.9rem;
+    background: color-mix(in srgb, var(--ui-panel-2) 70%, transparent) !important;
+    border: 0 !important;
+    border-radius: 14px !important;
 }
 
 body[data-page="codejade"] .chat-input-container {
-    background: var(--ui-panel) !important;
-    border-color: var(--ui-border) !important;
+    margin: 0.75rem;
+    background: var(--ui-elevated) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 16px !important;
 }
 
 body[data-page="sandbox"] .main-content {
-    height: calc(100vh - var(--studio-header));
-    gap: 1px;
-    padding: 1px;
-    background: var(--ui-border) !important;
+    height: calc(100vh - var(--calm-header));
+    gap: 1rem;
+    padding: 1rem;
+    background: transparent !important;
 }
 
 body[data-page="sandbox"] :is(.editor-panel, .output-panel) {
-    background: var(--ui-panel) !important;
-    border: 0 !important;
-    border-radius: 0 !important;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--ui-panel) 94%, transparent) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 18px !important;
+    box-shadow: var(--ui-shadow-soft) !important;
 }
 
 body[data-page="sandbox"] :is(.editor-container, .output-container) {
+    border: 0 !important;
     border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
-/* Scholar keeps notebook hierarchy while removing the card wall. */
+/* Scholar becomes a soft three-pane notebook. */
 body[data-page="scholar"] .app-layout {
-    grid-template-columns: 250px minmax(460px, 1fr) minmax(300px, 340px) !important;
-    background: var(--ui-canvas) !important;
+    grid-template-columns: 260px minmax(460px, 1fr) minmax(300px, 350px) !important;
+    gap: 10px;
+    padding: 10px;
+    background-image: var(--calm-canvas-glow) !important;
 }
 
-body[data-page="scholar"] .main-content {
-    background: var(--ui-canvas) !important;
+body[data-page="scholar"] :is(.sidebar, .main-content, .chat-panel) {
+    overflow: hidden;
+    background: color-mix(in srgb, var(--ui-panel) 94%, transparent) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.07) !important;
 }
 
 body[data-page="scholar"] .notes-section {
-    max-width: 900px;
+    max-width: 940px;
     margin-inline: auto;
-    padding: 2.5rem clamp(1.5rem, 4vw, 4rem);
+    padding: 2.8rem clamp(1.5rem, 4vw, 4.5rem);
 }
 
 body[data-page="scholar"] .tools-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.65rem;
+    gap: 0.75rem;
 }
 
 body[data-page="scholar"] .tool-card {
-    min-height: 104px;
+    min-height: 108px;
     padding: 1rem;
+    border-radius: 16px !important;
 }
 
 body[data-page="scholar"] .block-item {
     border-color: transparent !important;
     background: transparent !important;
+    box-shadow: none !important;
 }
 
 body[data-page="scholar"] .block-item:hover,
@@ -764,15 +857,10 @@ body[data-page="scholar"] .block-item:focus-within {
     border-color: var(--ui-border) !important;
 }
 
-body[data-page="scholar"] .chat-panel {
-    background: var(--ui-panel) !important;
-    border-color: var(--ui-border) !important;
-}
-
-/* WebDev starts as a compact builder, then gives the preview visual priority. */
+/* WebDev follows Lancer's large center, mode rail and prominent creation dock. */
 body[data-page="webdev"] {
     min-height: 100vh;
-    padding-bottom: 1.5rem !important;
+    padding-bottom: 2rem !important;
 }
 
 body[data-page="webdev"] .header {
@@ -782,50 +870,84 @@ body[data-page="webdev"] .header {
 }
 
 body[data-page="webdev"] .hero {
-    width: min(100%, 1180px);
+    width: min(100%, 1120px);
     margin: 0 auto;
-    padding: 2.4rem 1.5rem 1.25rem;
+    padding: clamp(4rem, 8vw, 7rem) 1.5rem 1.4rem;
+    text-align: center;
+}
+
+body[data-page="webdev"] .hero::before {
+    content: "AI WEB CREATION";
+    display: inline-flex;
+    margin-bottom: 1.25rem;
+    padding: 0.45rem 0.8rem;
+    color: var(--ui-text-2);
+    background: color-mix(in srgb, var(--ui-elevated) 82%, transparent);
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    box-shadow: 0 5px 20px rgba(53, 57, 48, 0.05);
+    font-family: var(--ui-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
 }
 
 body[data-page="webdev"] .hero-title {
-    margin-bottom: 0.4rem;
-    font-size: clamp(2rem, 4vw, 3.4rem) !important;
-    line-height: 1;
-    letter-spacing: -0.06em;
+    margin-bottom: 0.65rem;
+    font-size: clamp(3rem, 7vw, 6.2rem) !important;
+    line-height: 0.95;
+    letter-spacing: -0.08em;
 }
 
 body[data-page="webdev"] .hero-subtitle {
     color: var(--ui-text-2);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 body[data-page="webdev"] .template-grid {
-    width: min(100%, 1180px);
+    width: min(calc(100% - 3rem), 980px);
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0.5rem;
-    margin: 1.25rem auto;
-    padding-inline: 1.5rem;
+    gap: 0.3rem;
+    margin: 1.35rem auto 1rem;
+    padding: 0.55rem;
+    background: color-mix(in srgb, var(--ui-elevated) 92%, transparent);
+    border: 1px solid var(--ui-border);
+    border-radius: 22px;
+    box-shadow: var(--ui-shadow-soft);
 }
 
 body[data-page="webdev"] .template-card {
-    min-height: 80px;
-    padding: 0.75rem;
+    min-height: 72px;
+    padding: 0.65rem;
+    background: transparent !important;
+    border-color: transparent !important;
+    border-radius: 15px !important;
+    box-shadow: none !important;
+}
+
+body[data-page="webdev"] .template-card:hover {
+    background: var(--ui-accent-soft) !important;
+    transform: none !important;
 }
 
 body[data-page="webdev"] .prompt-card {
-    width: min(calc(100% - 3rem), 960px);
-    margin: 1rem auto 2rem;
-    padding: 0.7rem;
+    width: min(calc(100% - 3rem), 900px);
+    margin: 1rem auto 3rem;
+    padding: 0.75rem;
+    border-radius: 26px !important;
+    box-shadow: var(--ui-shadow) !important;
 }
 
 body[data-page="webdev"] .prompt-card textarea {
-    min-height: 72px;
+    min-height: 78px;
+    padding: 1rem;
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
 }
 
 body[data-page="webdev"] .prompt-footer {
+    padding-top: 0.65rem;
     border-color: var(--ui-border) !important;
 }
 
@@ -833,55 +955,62 @@ body[data-page="webdev"] .preview-section {
     width: min(calc(100% - 3rem), 1280px);
     margin: 0 auto !important;
     padding: 0 !important;
-    background: var(--ui-panel) !important;
+    background: color-mix(in srgb, var(--ui-elevated) 94%, transparent) !important;
     border: 1px solid var(--ui-border) !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
+    border-radius: 24px !important;
+    box-shadow: var(--ui-shadow-soft) !important;
     overflow: hidden;
 }
 
 body[data-page="webdev"] .preview-header {
-    min-height: 52px !important;
+    min-height: 58px !important;
     padding-inline: 1rem !important;
 }
 
 body[data-page="webdev"] .preview-container {
-    min-height: 520px;
+    min-height: 530px;
     border: 0 !important;
     border-top: 1px solid var(--ui-border) !important;
     border-radius: 0 !important;
-}
-
-body[data-page="webdev"] :is(.model-trigger, .mode-toggle) {
-    background: var(--ui-panel-2) !important;
-    border-color: var(--ui-border) !important;
-    border-radius: 7px !important;
     box-shadow: none !important;
 }
 
-/* Public and utility pages */
+body[data-page="webdev"] :is(.model-trigger, .mode-toggle) {
+    background: color-mix(in srgb, var(--ui-elevated) 82%, transparent) !important;
+    border-color: var(--ui-border) !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+}
+
+/* Public pages keep the same warmth and scale. */
 body[data-page="landing"] .nav {
     width: min(calc(100% - 2rem), 1320px);
-    min-height: 72px;
+    min-height: 76px;
     margin: 0 auto;
     padding-inline: 1rem;
-    background: var(--ui-canvas) !important;
+    background: color-mix(in srgb, var(--ui-canvas) 90%, transparent) !important;
     border-color: var(--ui-border) !important;
+    backdrop-filter: blur(18px);
 }
 
 body[data-page="landing"] .hero.hero-centered {
-    min-height: min(760px, calc(100vh - 72px));
-    padding: clamp(5rem, 10vw, 8rem) 1.5rem;
-    background: var(--ui-canvas) !important;
+    min-height: min(780px, calc(100vh - 76px));
+    padding: clamp(5rem, 10vw, 8.5rem) 1.5rem;
+    background: transparent !important;
 }
 
 body[data-page="landing"] .hero.hero-centered::before {
-    opacity: 0.42;
-    background-image:
-        linear-gradient(to right, var(--ui-border) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--ui-border) 1px, transparent 1px) !important;
-    background-size: 72px 72px !important;
-    mask-image: linear-gradient(to bottom, transparent, black 20%, transparent 92%);
+    content: "";
+    position: absolute;
+    width: min(76vw, 920px);
+    aspect-ratio: 1.8;
+    inset: 12% auto auto 50%;
+    transform: translateX(-50%);
+    opacity: 1;
+    background:
+        radial-gradient(circle at 38% 48%, rgba(50, 205, 170, 0.13), transparent 28%),
+        radial-gradient(circle at 68% 38%, rgba(226, 183, 139, 0.13), transparent 30%) !important;
+    filter: blur(28px);
 }
 
 body[data-page="landing"] .hero.hero-centered::after {
@@ -904,42 +1033,42 @@ body[data-page="landing"] .section-badge {
 body[data-page="landing"] :is(.features, .apps, .cta-section) {
     width: min(100%, 1240px);
     margin-inline: auto;
-    padding: clamp(4rem, 7vw, 7rem) 1.5rem;
+    padding: clamp(4.5rem, 8vw, 7.5rem) 1.5rem;
 }
 
 body[data-page="landing"] .section-header {
     max-width: 820px;
-    margin-bottom: 3rem;
-    text-align: left;
+    margin: 0 auto 3.2rem;
+    text-align: center;
 }
 
 body[data-page="landing"] .section-header h2 {
-    font-size: clamp(2.2rem, 5vw, 4.5rem) !important;
-    line-height: 1;
-    letter-spacing: -0.06em;
+    font-size: clamp(2.5rem, 5vw, 4.8rem) !important;
+    line-height: 0.98;
+    letter-spacing: -0.07em;
 }
 
 body[data-page="landing"] :is(.features-grid, .apps-grid) {
-    gap: 1px;
-    padding: 1px;
-    background: var(--ui-border);
+    gap: 1rem;
+    padding: 0;
+    background: transparent;
 }
 
 body[data-page="landing"] :is(.feature-card, .app-card) {
-    min-height: 210px;
-    padding: 1.5rem;
-    border: 0 !important;
-    border-radius: 0 !important;
+    min-height: 220px;
+    padding: 1.6rem;
+    border-radius: 20px !important;
 }
 
 body[data-page="landing"] .app-card::before {
-    height: 2px;
-    background: var(--ui-accent) !important;
+    display: none;
 }
 
 body[data-page="landing"] .cta-section {
-    border-top: 1px solid var(--ui-border);
-    border-bottom: 1px solid var(--ui-border);
+    margin-bottom: 4rem;
+    background: color-mix(in srgb, var(--ui-accent-soft) 44%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 13%, var(--ui-border));
+    border-radius: 28px;
 }
 
 body[data-page="about"] #about-container {
@@ -949,39 +1078,40 @@ body[data-page="about"] #about-container {
 }
 
 body[data-page="about"] #about-container > h1 {
-    margin: 3.5rem 0 0.6rem;
-    font-size: clamp(2.5rem, 6vw, 5.8rem) !important;
-    line-height: 0.94;
-    letter-spacing: -0.065em;
+    margin: 4rem 0 0.8rem;
+    font-size: clamp(3rem, 7vw, 6.4rem) !important;
+    line-height: 0.93;
+    letter-spacing: -0.075em;
 }
 
 body[data-page="about"] .subtitle {
     max-width: 62ch;
     color: var(--ui-text-2);
-    font-size: 1rem;
+    font-size: 1.05rem;
 }
 
 body[data-page="about"] .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    margin-top: 3.5rem;
+    gap: 1.1rem;
+    margin-top: 4rem;
 }
 
 body[data-page="about"] .feature-card {
-    min-height: 230px;
-    padding: 1.5rem;
+    min-height: 240px;
+    padding: 1.65rem;
 }
 
 body[data-page="about"] .tech-tag {
     color: var(--ui-accent) !important;
-    background: transparent !important;
+    background: var(--ui-accent-soft) !important;
     border: 0 !important;
+    border-radius: 999px !important;
     font-family: var(--ui-mono);
 }
 
 body[data-page="about"] .system-specs {
-    margin-top: 1rem;
-    padding: 1.5rem;
+    margin-top: 1.2rem;
+    padding: 1.6rem;
     line-height: 1.85;
 }
 
@@ -992,30 +1122,26 @@ body[data-page="login"] {
 }
 
 body[data-page="login"] .login-container {
-    width: min(100%, 440px);
-    padding: clamp(2rem, 5vw, 3rem) !important;
-    border-top-color: var(--ui-accent) !important;
+    width: min(100%, 450px);
+    padding: clamp(2.2rem, 5vw, 3.2rem) !important;
+    border-radius: 26px !important;
+    box-shadow: var(--ui-shadow) !important;
 }
 
 body[data-page="login"] .login-container .logo {
-    width: 44px;
-    height: 44px;
-    margin: 0 0 1.5rem;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 1.5rem;
     color: var(--ui-accent);
-    background: transparent !important;
-    border: 1px solid var(--ui-border-strong);
-    border-radius: 6px !important;
+    background: var(--ui-accent-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--ui-accent) 16%, var(--ui-border));
+    border-radius: 15px !important;
     box-shadow: none !important;
     animation: none !important;
 }
 
-body[data-page="login"] .login-container h1,
-body[data-page="login"] .login-container .subtitle {
-    text-align: left;
-}
-
 body[data-page="login"] .github-btn {
-    min-height: 46px;
+    min-height: 48px;
 }
 
 body[data-page="login"] .features {
@@ -1024,7 +1150,7 @@ body[data-page="login"] .features {
     border-top: 1px solid var(--ui-border);
 }
 
-/* Responsive system */
+/* Responsive behavior */
 @media (max-width: 1100px) {
     body[data-page="apps"] .apps-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1043,7 +1169,7 @@ body[data-page="login"] .features {
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 920px) {
     body[data-page="analyze"] #analyst-container {
         grid-template-columns: 1fr;
     }
@@ -1055,6 +1181,7 @@ body[data-page="login"] .features {
 
     body[data-page="codejade"] .main-content {
         grid-template-columns: minmax(0, 1fr) !important;
+        padding: 0.65rem;
     }
 
     body[data-page="scholar"] .app-layout {
@@ -1063,8 +1190,8 @@ body[data-page="login"] .features {
 
     body[data-page="scholar"] .chat-panel {
         position: fixed;
-        inset: var(--studio-header) 0 0 auto;
-        width: min(92vw, 360px);
+        inset: 0 0 0 auto;
+        width: min(92vw, 370px);
         z-index: 90;
         box-shadow: var(--ui-shadow) !important;
     }
@@ -1079,14 +1206,9 @@ body[data-page="login"] .features {
         padding-inline: 0.8rem !important;
     }
 
-    body[data-page="apps"] .apps-intro,
     body[data-page="apps"] .apps-grid,
     body[data-page="about"] .feature-grid {
         grid-template-columns: 1fr !important;
-    }
-
-    body[data-page="apps"] .apps-intro {
-        gap: 1.25rem;
     }
 
     body[data-page="apps"] .app-card.featured {
@@ -1099,13 +1221,19 @@ body[data-page="login"] .features {
 
     body[data-page="scholar"] .app-layout {
         grid-template-columns: minmax(0, 1fr) !important;
+        padding: 0;
     }
 
     body[data-page="scholar"] .sidebar {
         position: fixed;
         inset: 0 auto 0 0;
         z-index: 100;
-        width: min(86vw, 280px);
+        width: min(86vw, 290px);
+        border-radius: 0 18px 18px 0 !important;
+    }
+
+    body[data-page="webdev"] .hero {
+        padding-top: 3.5rem;
     }
 
     body[data-page="webdev"] .template-grid {
@@ -1113,7 +1241,8 @@ body[data-page="login"] .features {
     }
 
     body[data-page="webdev"] .preview-section,
-    body[data-page="webdev"] .prompt-card {
+    body[data-page="webdev"] .prompt-card,
+    body[data-page="webdev"] .template-grid {
         width: calc(100% - 1.5rem);
     }
 
