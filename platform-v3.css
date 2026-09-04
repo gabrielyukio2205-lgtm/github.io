@@ -848,6 +848,22 @@ body[data-page="scholar"] .tool-card {
     border-radius: 16px !important;
 }
 
+body[data-page="scholar"] .tool-card .tool-icon {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+body[data-page="scholar"] .tool-card .tool-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+}
+
 body[data-page="scholar"] .block-item {
     border-color: transparent !important;
     background: transparent !important;

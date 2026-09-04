@@ -183,22 +183,36 @@ const elements = {
 };
 
 // ========== Theme Management ==========
-function initTheme() {
-    const savedTheme = localStorage.getItem('scholar_theme') || 'dark';
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-        elements.sunIcon.classList.add('hidden');
-        elements.moonIcon.classList.remove('hidden');
-    }
-}
+function applyScholarTheme(theme, persist = false) {
+    const normalizedTheme = theme === 'light' ? 'light' : 'dark';
+    const isLight = normalizedTheme === 'light';
 
-function toggleTheme() {
-    document.body.classList.toggle('light-theme');
-    const isLight = document.body.classList.contains('light-theme');
-    localStorage.setItem('scholar_theme', isLight ? 'light' : 'dark');
+    // Keep the legacy Scholar class and the shared platform theme in sync.
+    document.body.classList.toggle('light-theme', isLight);
+    document.body.setAttribute('data-theme', normalizedTheme);
+    document.documentElement.setAttribute('data-theme', normalizedTheme);
 
     elements.sunIcon.classList.toggle('hidden', isLight);
     elements.moonIcon.classList.toggle('hidden', !isLight);
+    elements.themeToggle.setAttribute('aria-label', isLight ? 'Ativar tema escuro' : 'Ativar tema claro');
+    elements.themeToggle.title = isLight ? 'Ativar tema escuro' : 'Ativar tema claro';
+
+    if (persist) {
+        localStorage.setItem('scholar_theme', normalizedTheme);
+        localStorage.setItem('jade_theme', normalizedTheme);
+    }
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('scholar_theme')
+        || localStorage.getItem('jade_theme')
+        || 'dark';
+    applyScholarTheme(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+    applyScholarTheme(currentTheme === 'light' ? 'dark' : 'light', true);
 }
 
 // ========== UI Helpers ==========
