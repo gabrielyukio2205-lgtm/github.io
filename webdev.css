@@ -151,12 +151,20 @@ body {
 
 /* Mode Toggle */
 .mode-toggle {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     gap: 4px;
     background: var(--surface-color);
     padding: 4px;
     border-radius: 10px;
     border: 1px solid var(--border-color);
+    z-index: 5;
+}
+
+#reactModeBtn {
+    display: none !important;
 }
 
 .mode-btn {
@@ -1073,6 +1081,10 @@ body {
 @media (max-width: 768px) {
     .header {
         padding: 1rem;
+    }
+
+    .header-text {
+        display: none;
     }
 
     .hero {
