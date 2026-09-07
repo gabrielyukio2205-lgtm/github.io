@@ -91,10 +91,35 @@
     transition: opacity 0.3s ease;
 }
 
+.app-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        350px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+        rgba(50, 205, 170, 0.16),
+        transparent 70%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.app-card > * {
+    position: relative;
+    z-index: 2;
+}
+
 .app-card:hover {
     transform: translateY(-4px);
     border-color: var(--border-highlight);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 0 20px rgba(50, 205, 170, 0.12);
+}
+
+.app-card:hover::after {
+    opacity: 1;
 }
 
 .app-card:focus-visible {
@@ -104,6 +129,32 @@
 
 .app-card:hover::before {
     opacity: 1;
+}
+
+/* Live Pulse Indicator */
+.live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ui-jade, #32cdaa);
+    box-shadow: 0 0 8px rgba(50, 205, 170, 0.9);
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: livePulse 2.2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(50, 205, 170, 0.9);
+    }
+    50% {
+        opacity: 0.35;
+        transform: scale(0.8);
+        box-shadow: 0 0 2px rgba(50, 205, 170, 0.3);
+    }
 }
 
 .app-card.featured {
