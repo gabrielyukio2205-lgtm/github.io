@@ -139,17 +139,44 @@
         leading.forEach(replaceLeadingIcon);
     }
 
+    let isRendering = false;
+
     function renderIcons(root = document) {
-        process(root);
-        window.lucide?.createIcons({
-            attrs: {
-                'aria-hidden': 'true',
-                'stroke-width': 1.8
-            }
-        });
+        if (isRendering) return;
+        isRendering = true;
+        try {
+            process(root);
+            window.lucide?.createIcons({
+                attrs: {
+                    'aria-hidden': 'true',
+                    'stroke-width': 1.8
+                }
+            });
+        } finally {
+            requestAnimationFrame(() => {
+                isRendering = false;
+            });
+        }
     }
 
-    function queueRefresh() {
+    function queueRefresh(mutations) {
+        if (isRendering) return;
+        if (mutations && mutations.length > 0) {
+            const onlyInternalIcons = mutations.every(m => {
+                if (m.type === 'childList' && m.addedNodes.length > 0) {
+                    let hasExternal = false;
+                    for (const node of m.addedNodes) {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            const isIcon = node.classList?.contains('ui-icon') || node.classList?.contains('lucide') || node.tagName === 'SVG' || node.tagName === 'I';
+                            if (!isIcon) hasExternal = true;
+                        }
+                    }
+                    return !hasExternal;
+                }
+                return false;
+            });
+            if (onlyInternalIcons) return;
+        }
         if (refreshQueued) return;
         refreshQueued = true;
         requestAnimationFrame(() => {
